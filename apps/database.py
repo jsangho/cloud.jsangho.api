@@ -28,6 +28,18 @@ class Base(DeclarativeBase):
     """ORM 모델 베이스."""
 
 
+async def init_db() -> None:
+    """등록된 SQLAlchemy 모델 기준으로 테이블을 생성합니다."""
+    if engine is None:
+        return
+
+    # 모델 import가 되어야 Base.metadata에 테이블이 등록됩니다.
+    import secom.app.models.user_model  # noqa: F401
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """FastAPI Depends용 비동기 DB 세션."""
     if AsyncSessionLocal is None:

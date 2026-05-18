@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -8,12 +9,16 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from adapters.db_health_adapter import DbHealthAdapter
-from database import dispose_engine, get_db
+from database import dispose_engine, get_db, init_db
 from doro.app.doro_director import DoroDirector
 from matrix.app.keymaker import get_keymaker
+from secom.app.models.role import UserRole
+from secom.app.schemas.user_schema import UserSchema
+from secom.app.controllers.user_controller import UserController
 from titanic.app.james_controller import JamesController
 
 keymaker = get_keymaker()
+logger = logging.getLogger("uvicorn.error")
 
 
 class ChatRequest(BaseModel):
@@ -33,9 +38,31 @@ class SeoulWeatherResponse(BaseModel):
     condition_id: int
 
 
+class SignupRequest(BaseModel):
+    nickname: str = Field(..., min_length=1, description="회원가입 닉네임")
+    email: str = Field(..., min_length=1, description="회원가입 이메일")
+    password: str = Field(..., min_length=1, description="회원가입 비밀번호")
+    password_confirm: str = Field(
+        ...,
+        alias="passwordConfirm",
+        min_length=1,
+        description="회원가입 비밀번호 확인",
+    )
+
+
+class SignupResponse(BaseModel):
+    message: str
+    nickname: str
+    email: str
+    password: str
+    password_confirm: str
+    role: UserRole
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
+        await init_db()
         yield
     finally:
         await dispose_engine()
@@ -51,11 +78,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 @app.get("/")
 def read_root():
     return {"message": "FAST API 메인 페이지 ", "docs": "/docs"}
-
 
 @app.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest) -> ChatResponse:
@@ -160,7 +185,6 @@ def read_titanic_count():
 
     return {"count": count}
 
-
 @app.get("/titanic/tree")
 def read_titanic_tree():
     james = JamesController()
@@ -182,6 +206,43 @@ def read_doro_data():
     df = doro_director.get_data()
 
     return df.to_dict(orient="records")
+
+#회원가입
+@app.post("/signup")
+def signup(req: SignupRequest):
+    logger.info(
+        "\n"
+        "========== 회원가입 요청 ==========\n"
+        "nickname=%s\n"
+        "email=%s\n"
+        "password=%s\n"
+        "passwordConfirm=%s\n"
+        "================================",
+        req.nickname,
+        req.email,
+        req.password,
+        req.password_confirm,
+    )
+
+    user_schema = UserSchema(
+        nickname=req.nickname,
+        email=req.email,
+        password=req.password,
+        password_confirm=req.password_confirm,
+        role=UserRole.USER,
+    )
+
+    user_controller = UserController()
+    user_controller.save_user(user_schema)
+
+    return SignupResponse(
+        message="회원가입 값이 서버로 전달되었습니다.",
+        nickname=req.nickname,
+        email=req.email,
+        password=req.password,
+        password_confirm=req.password_confirm,
+        role=UserRole.USER,
+    )
 
 
 if __name__ == "__main__":
