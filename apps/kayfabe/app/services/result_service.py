@@ -1,10 +1,18 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 from database import LAYER_LOG
 from kayfabe.app.repositories.result_repository import ResultRepository
 from kayfabe.app.schemas.result_schema import PleResultsResponse, PleResultRow
 
 logger = LAYER_LOG
+
+
+def _status_from_event(event_at: datetime | None) -> str:
+    if event_at is None:
+        return "upcoming"
+    return "finished" if datetime.now(timezone.utc) >= event_at else "upcoming"
 
 
 class ResultService:
@@ -15,9 +23,8 @@ class ResultService:
         pairs = await self.repo.list_results(year)
         rows: list[PleResultRow] = []
         for ple, result in pairs:
-            # 결과는 자동 추론하지 않고(DB 직접 기입), ple_results가 없으면 upcoming으로 둡니다.
-            status = result.status if result else "upcoming"
-            finished_at = result.finished_at if result else None
+            status = result.status if result else _status_from_event(ple.event_at)
+            finished_at = result.finished_at if result else (ple.event_at if status == "finished" else None)
             rows.append(
                 PleResultRow(
                     slug=ple.slug,

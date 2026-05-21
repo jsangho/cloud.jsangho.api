@@ -1,236 +1,321 @@
+"""
+PLE(프리미엄 라이브 이벤트) — 경기 목록·예측·결과 비즈니스 로직.
+
+프론트 `wwe-ple-matches.ts` 카드 → sync 후 Neon에 저장, 예측은 ple_predictions에 기록.
+"""
+
 from __future__ import annotations
 
-import asyncio
 import json
 from datetime import datetime, timezone
+from typing import Any
+
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import LAYER_LOG
+from kayfabe.app.models.ple_model import PleEventStatus, PleMatchStatus
 from kayfabe.app.repositories.ple_repository import PleRepository
 from kayfabe.app.schemas.ple_schema import (
-    PleBoard,
-    PleBoardMatch,
-    PleMatchResult,
-    SetResultRequest,
-    SyncFromClientRequest,
+    CompetitorSchema,
+    MatchBoardSchema,
+    MatchResultSchema,
+    MatchResultUpdateSchema,
+    PleBoardSchema,
+    PleEventSummarySchema,
+    PleEventSyncSchema,
+    PredictionRequestSchema,
+    VoteTotalsSchema,
 )
 
 logger = LAYER_LOG
 
+PLE_EVENT_META: dict[str, dict[str, Any]] = {
+    "royal-rumble": {"label": "Royal Rumble", "month": 1},
+    "elimination-chamber": {"label": "Elimination Chamber", "month": 2},
+    "stand-and-deliver": {"label": "Stand & Deliver", "month": 3},
+    "wrestlemania": {"label": "WrestleMania", "month": 4},
+    "backlash": {"label": "Backlash", "month": 5},
+    "money-in-the-bank": {"label": "Money in the Bank", "month": 6},
+    "king-queen-of-the-ring": {"label": "King & Queen of the Ring", "month": 7},
+    "summerslam": {"label": "SummerSlam", "month": 8},
+    "bash-in-berlin": {"label": "Bash in Berlin", "month": 9},
+    "bad-blood": {"label": "Bad Blood", "month": 10},
+    "survivor-series": {"label": "Survivor Series", "month": 11},
+}
 
-def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
+FINISHED_2026_RESULTS: dict[str, dict[str, MatchResultSchema]] = {
+    "royal-rumble": {
+        "rr26-gunther-styles": MatchResultSchema(winner_side="left", winner_name="Gunther"),
+        "rr26-undisputed": MatchResultSchema(winner_side="left", winner_name="Drew McIntyre"),
+        "rr26-women-rumble": MatchResultSchema(winner_index=1, winner_name="Liv Morgan"),
+        "rr26-men-rumble": MatchResultSchema(winner_index=0, winner_name="Roman Reigns"),
+    },
+    "elimination-chamber": {
+        "ec26-women": MatchResultSchema(winner_index=0, winner_name="Rhea Ripley"),
+        "ec26-women-ic": MatchResultSchema(winner_side="left", winner_name="AJ Lee"),
+        "ec26-whc": MatchResultSchema(winner_side="left", winner_name="CM Punk"),
+        "ec26-men": MatchResultSchema(winner_index=0, winner_name="Randy Orton"),
+    },
+    "stand-and-deliver": {
+        "sad26-preshow": MatchResultSchema(winner_side="left"),
+        "sad26-sol-zaria": MatchResultSchema(winner_side="left", winner_name="Sol Ruca"),
+        "sad26-women-na": MatchResultSchema(winner_side="left", winner_name="Tatum Paxley"),
+        "sad26-na": MatchResultSchema(winner_side="left", winner_name="Myles Borne"),
+        "sad26-tag": MatchResultSchema(winner_side="left", winner_name="The Vanity Project"),
+        "sad26-women": MatchResultSchema(winner_index=0, winner_name="Lola Vice"),
+        "sad26-nxt": MatchResultSchema(winner_index=0, winner_name="Tony D'Angelo"),
+    },
+    "wrestlemania": {
+        "wm42-n1-six": MatchResultSchema(winner_side="left"),
+        "wm42-n1-unsanctioned": MatchResultSchema(winner_side="left", winner_name="Jacob Fatu"),
+        "wm42-n1-women-tag": MatchResultSchema(winner_index=0),
+        "wm42-n1-women-ic": MatchResultSchema(winner_side="left", winner_name="Becky Lynch"),
+        "wm42-n1-gunther-rollins": MatchResultSchema(winner_side="left", winner_name="Gunther"),
+        "wm42-n1-women-world": MatchResultSchema(winner_side="left", winner_name="Liv Morgan"),
+        "wm42-n1-undisputed": MatchResultSchema(winner_side="left", winner_name="Cody Rhodes"),
+        "wm42-n2-femi-lesnar": MatchResultSchema(winner_side="left", winner_name="Oba Femi"),
+        "wm42-n2-ic-ladder": MatchResultSchema(winner_index=0, winner_name="Penta"),
+        "wm42-n2-us": MatchResultSchema(winner_side="left", winner_name="Trick Williams"),
+        "wm42-n2-street": MatchResultSchema(winner_side="left", winner_name="Finn Bálor"),
+        "wm42-n2-women": MatchResultSchema(winner_side="left", winner_name="Rhea Ripley"),
+        "wm42-n2-whc": MatchResultSchema(winner_side="left", winner_name="Roman Reigns"),
+    },
+    "backlash": {
+        "bl26-danhausen": MatchResultSchema(winner_side="left"),
+        "bl26-iyo-asuka": MatchResultSchema(winner_side="left", winner_name="IYO SKY"),
+        "bl26-us": MatchResultSchema(winner_side="left", winner_name="Trick Williams"),
+        "bl26-breakker-rollins": MatchResultSchema(winner_side="left", winner_name="Bron Breakker"),
+        "bl26-whc": MatchResultSchema(winner_side="left", winner_name="Roman Reigns"),
+    },
+}
 
-
-def _stable_hash(text: str) -> int:
-    h = 2166136261
-    for ch in text:
-        h ^= ord(ch)
-        h = (h * 16777619) & 0xFFFFFFFF
-    return h
-
-
-def _is_past_ple(event_at: datetime | None) -> bool:
-    if event_at is None:
-        return False
-    return datetime.now(timezone.utc) >= event_at
-
-
-def _auto_pick_for_match(match_key: str, fmt: str, competitor_count: int) -> str:
-    h = _stable_hash(match_key)
-    if fmt == "multi":
-        if competitor_count <= 0:
-            return "0"
-        return str(h % competitor_count)
-    return "left" if (h % 2 == 0) else "right"
+FINISHED_2026_SLUGS = frozenset(FINISHED_2026_RESULTS.keys())
 
 
 class PleService:
-    def __init__(self, repo: PleRepository) -> None:
-        self.repo = repo
+    def __init__(self, db: AsyncSession) -> None:
+        self.ple_repository = PleRepository(db)
 
-    async def sync_from_client(self, req: SyncFromClientRequest) -> PleBoard:
-        # description은 클라이언트 payload에 없을 수 있어 label로만 채움(필요 시 프론트에서 추가)
-        ple = await self.repo.upsert_ple(
-            slug=req.slug,
-            label=req.label,
-            month=req.month,
-            year=req.year,
-            description=req.label,
+    @staticmethod
+    def build_sync_payload(
+        slug: str,
+        matches: list[dict[str, Any]],
+        *,
+        year: int = 2026,
+        status: str | None = None,
+    ) -> PleEventSyncSchema:
+        meta = PLE_EVENT_META.get(slug)
+        if meta is None:
+            raise ValueError(f"Unknown PLE slug: {slug}")
+
+        enriched: list[dict[str, Any]] = []
+        results = FINISHED_2026_RESULTS.get(slug, {})
+        for card in matches:
+            item = dict(card)
+            if slug in FINISHED_2026_SLUGS and card["id"] in results and "result" not in item:
+                item["result"] = results[card["id"]].model_dump(by_alias=True)
+            enriched.append(item)
+
+        event_status = status
+        if event_status is None and slug in FINISHED_2026_SLUGS:
+            event_status = PleEventStatus.FINISHED
+
+        return PleEventSyncSchema(
+            slug=slug,
+            label=meta["label"],
+            month=meta["month"],
+            year=year,
+            status=event_status,
+            matches=enriched,
         )
 
-        for m in req.matches:
-            left = m.left.model_dump() if m.left else None
-            right = m.right.model_dump() if m.right else None
-            competitors = [c.model_dump() for c in (m.competitors or [])] or None
-            await self.repo.upsert_match(
-                ple_id=ple.id or 0,
-                match_key=m.id,
-                title=m.title,
-                card_variant=m.cardVariant,
-                fmt=m.format,
-                left=left,
-                right=right,
-                competitors=competitors,
-                bookmaker_decimal=m.bookmakerDecimal,
+    async def sync_event(self, payload: PleEventSyncSchema) -> PleBoardSchema:
+        logger.info(
+            "[PleService] sync_event -> Repository — slug=%s matches=%d",
+            payload.slug,
+            len(payload.matches),
+        )
+        event = await self.ple_repository.upsert_event_from_sync(payload)
+        if payload.slug in FINISHED_2026_SLUGS and event.status != PleEventStatus.FINISHED:
+            event.status = PleEventStatus.FINISHED
+            event.finished_at = datetime.now(timezone.utc)
+            await self.ple_repository.db.flush()
+        board = await self.get_board(payload.slug)
+        logger.info("[PleService] sync_event <- Repository — slug=%s", payload.slug)
+        return board
+
+    async def sync_event_from_cards(
+        self,
+        slug: str,
+        matches: list[dict[str, Any]],
+        *,
+        year: int = 2026,
+        status: str | None = None,
+    ) -> PleBoardSchema:
+        payload = self.build_sync_payload(slug, matches, year=year, status=status)
+        return await self.sync_event(payload)
+
+    async def sync_all_from_cards(
+        self, catalog: dict[str, list[dict[str, Any]]], *, year: int = 2026
+    ) -> list[PleEventSummarySchema]:
+        summaries: list[PleEventSummarySchema] = []
+        for slug in PLE_EVENT_META:
+            if slug not in catalog:
+                continue
+            await self.sync_event_from_cards(slug, catalog[slug], year=year)
+            board = await self.get_board(slug)
+            summaries.append(
+                PleEventSummarySchema(
+                    slug=board.slug,
+                    label=board.label,
+                    month=board.month,
+                    year=board.year,
+                    status=board.status,
+                    match_count=len(board.matches),
+                )
             )
+        return summaries
 
-        return await self.get_board(req.slug, client_id=None)
+    async def get_board(self, slug: str, *, client_id: str | None = None) -> PleBoardSchema:
+        event = await self.ple_repository.get_event_by_slug(slug)
+        if event is None:
+            raise LookupError(slug)
 
-    async def get_board(self, slug: str, client_id: str | None) -> PleBoard:
-        ple = await self.repo.get_ple_by_slug(slug)
-        if ple is None:
-            raise KeyError("PLE not found")
-
-        ple_id = int(ple.id or 0)
-        if ple_id <= 0:
-            raise KeyError("PLE not found")
-
-        ple_result = await self.repo.get_ple_result(ple_id)
-
-        matches = await self.repo.list_matches(ple_id)
-        board_matches: list[PleBoardMatch] = []
-        status = ple_result.status if ple_result else "upcoming"
-        for m in matches:
-            if m.status == "finished":
-                status = "finished"
-            elif m.status == "live" and status != "finished":
-                status = "live"
-
-            # PLE이 이미 열린 이벤트면, 매치 결과도 자동 생성(실제 결과가 없을 때만)
-            if status == "finished" and not m.result_pick:
-                competitor_count = len(m.competitors or []) if m.format == "multi" else 0
-                correct_pick = _auto_pick_for_match(m.match_key, m.format, competitor_count)
-                if m.format == "multi":
-                    winner_name = None
-                    try:
-                        idx = int(correct_pick)
-                        winner_name = (
-                            (m.competitors or [])[idx].get("name") if m.competitors else None
-                        )
-                    except Exception:
-                        winner_name = None
-                else:
-                    winner_name = (
-                        (m.left or {}).get("name")
-                        if correct_pick == "left"
-                        else (m.right or {}).get("name")
-                    )
-                await self.repo.set_match_result(int(m.id or 0), correct_pick, winner_name)
-                await self.repo.mark_predictions_correctness(int(m.id or 0), correct_pick)
-                m.result_pick = correct_pick
-                m.result_winner = winner_name
-                m.status = "finished"
-
-            locked = False
-            my_pick = None
+        matches_out: list[MatchBoardSchema] = []
+        for row in sorted(event.matches, key=lambda m: m.sort_order):
+            card = json.loads(row.card_json)
+            vote_raw, _ = self.ple_repository.aggregate_votes(row)
+            my_pick: str | None = None
             if client_id:
-                pred = await self.repo.get_prediction(m.id or 0, client_id)
-                if pred is not None:
-                    locked = True
+                pred = await self.ple_repository.get_prediction(row.id, client_id)
+                if pred:
                     my_pick = pred.pick
 
-            if m.format == "multi":
-                competitor_count = len(m.competitors or [])
-                site_votes_multi = await self.repo.count_votes_multi(m.id or 0, competitor_count)
-                site_votes = {"left": 0, "right": 0, "multi": site_votes_multi}
-            else:
-                counts = await self.repo.count_votes_singles(m.id or 0)
-                site_votes = {"left": counts["left"], "right": counts["right"], "multi": []}
-
             result = None
-            if m.result_pick or m.result_winner:
-                result = PleMatchResult(
-                    winnerSide=m.result_pick if m.result_pick in ("left", "right") else None,
-                    winnerIndex=int(m.result_pick) if (m.result_pick and m.result_pick.isdigit()) else None,
-                    winnerName=m.result_winner,
-                )
+            if row.winner_pick or row.winner_name:
+                if row.format == "multi":
+                    try:
+                        result = MatchResultSchema(
+                            winner_index=int(row.winner_pick) if row.winner_pick else None,
+                            winner_name=row.winner_name,
+                        )
+                    except ValueError:
+                        result = MatchResultSchema(winner_name=row.winner_name)
+                else:
+                    result = MatchResultSchema(
+                        winner_side=row.winner_pick
+                        if row.winner_pick in ("left", "right")
+                        else None,
+                        winner_name=row.winner_name,
+                    )
 
-            board_matches.append(
-                PleBoardMatch(
-                    id=m.match_key,
-                    dbId=int(m.id or 0),
-                    title=m.title,
-                    cardVariant=m.card_variant,  # type: ignore[arg-type]
-                    format=m.format,  # type: ignore[arg-type]
-                    left=m.left,
-                    right=m.right,
-                    competitors=m.competitors,
-                    bookmakerDecimal=m.bookmaker_decimal,
-                    status=m.status,
+            matches_out.append(
+                MatchBoardSchema(
+                    id=row.match_key,
+                    db_id=row.id,
+                    title=row.title,
+                    card_variant=row.card_variant,
+                    format=row.format,
+                    left=CompetitorSchema.model_validate(card["left"])
+                    if card.get("left")
+                    else None,
+                    right=CompetitorSchema.model_validate(card["right"])
+                    if card.get("right")
+                    else None,
+                    competitors=[
+                        CompetitorSchema.model_validate(c)
+                        for c in card.get("competitors") or []
+                    ]
+                    or None,
+                    bookmaker_decimal=card.get("bookmakerDecimal"),
+                    status=row.status,
                     result=result,
-                    siteVotes=site_votes,
-                    locked=locked,
-                    myPick=my_pick,
+                    site_votes=VoteTotalsSchema(
+                        left=int(vote_raw.get("left", 0)),
+                        right=int(vote_raw.get("right", 0)),
+                        multi=list(vote_raw.get("multi") or []),
+                    ),
+                    locked=my_pick is not None,
+                    my_pick=my_pick,
                 )
             )
 
-        return PleBoard(
-            slug=ple.slug,
-            label=ple.label,
-            month=ple.month,
-            year=ple.year,
-            status=status,  # type: ignore[arg-type]
-            finishedAt=(
-                ple_result.finished_at.isoformat()
-                if (ple_result and ple_result.finished_at)
-                else None
-            ),
-            matches=board_matches,
-            updatedAt=_now_iso(),
+        return PleBoardSchema(
+            slug=event.slug,
+            label=event.label,
+            month=event.month,
+            year=event.year,
+            status=event.status,
+            finished_at=event.finished_at,
+            matches=matches_out,
+            updated_at=event.updated_at,
         )
 
-    async def predict(self, slug: str, match_key: str, client_id: str, pick: str) -> PleBoard:
-        ple = await self.repo.get_ple_by_slug(slug)
-        if ple is None:
-            raise KeyError("PLE not found")
-        match = await self.repo.get_match(ple.id or 0, match_key)
+    async def list_events(self) -> list[PleEventSummarySchema]:
+        events = await self.ple_repository.list_events()
+        return [
+            PleEventSummarySchema(
+                slug=e.slug,
+                label=e.label,
+                month=e.month,
+                year=e.year,
+                status=e.status,
+                match_count=len(e.matches),
+            )
+            for e in events
+        ]
+
+    async def record_prediction(
+        self,
+        slug: str,
+        match_key: str,
+        body: PredictionRequestSchema,
+        user_id: int | None = None,
+    ) -> PleBoardSchema:
+        event = await self.ple_repository.get_event_by_slug(slug)
+        if event is None:
+            raise LookupError(slug)
+        match = next((m for m in event.matches if m.match_key == match_key), None)
         if match is None:
-            raise KeyError("Match not found")
+            raise LookupError(match_key)
+        if match.status == PleMatchStatus.FINISHED:
+            raise ValueError("종료된 경기에는 예측할 수 없습니다.")
+        existing = await self.ple_repository.get_prediction(match.id, body.client_id)
+        if existing:
+            return await self.get_board(slug, client_id=body.client_id)
 
-        existing = await self.repo.get_prediction(match.id or 0, client_id)
-        if existing is None:
-            await self.repo.create_prediction(match.id or 0, client_id, pick)
-
-        return await self.get_board(slug, client_id=client_id)
-
-    async def set_result(self, slug: str, match_key: str, req: SetResultRequest) -> PleBoard:
-        ple = await self.repo.get_ple_by_slug(slug)
-        if ple is None:
-            raise KeyError("PLE not found")
-        match = await self.repo.get_match(ple.id or 0, match_key)
-        if match is None:
-            raise KeyError("Match not found")
-
-        correct_pick: str | None = None
-        if match.format == "multi":
-            if req.winnerIndex is None:
-                raise ValueError("winnerIndex required for multi match")
-            correct_pick = str(req.winnerIndex)
-        else:
-            if req.winnerSide not in ("left", "right"):
-                raise ValueError("winnerSide must be left/right for singles match")
-            correct_pick = req.winnerSide
-
-        await self.repo.set_match_result(
-            ple_match_id=int(match.id or 0),
-            result_pick=correct_pick,
-            winner_name=req.winnerName,
+        logger.info(
+            "[PleService] record_prediction -> Repository — slug=%s match=%s client=%s pick=%s",
+            slug,
+            match_key,
+            body.client_id,
+            body.pick,
         )
-        await self.repo.mark_predictions_correctness(
-            ple_match_id=int(match.id or 0),
-            correct_pick=correct_pick,
+        await self.ple_repository.add_prediction(
+            match.id, body.client_id, body.pick, user_id
         )
+        return await self.get_board(slug, client_id=body.client_id)
 
-        return await self.get_board(slug, client_id=None)
+    async def set_match_result(
+        self,
+        slug: str,
+        match_key: str,
+        body: MatchResultUpdateSchema,
+    ) -> PleBoardSchema:
+        result = MatchResultSchema(
+            winner_side=body.winner_side,
+            winner_index=body.winner_index,
+            winner_name=body.winner_name,
+        )
+        row = await self.ple_repository.set_match_result(
+            slug, match_key, result, status=body.status
+        )
+        if row is None:
+            raise LookupError(match_key)
+        return await self.get_board(slug)
 
-    async def live_stream(self, slug: str, client_id: str | None):
-        """
-        SSE 스트림용: 일정 주기로 보드를 다시 계산해 push.
-        (현재는 DB polling 기반)
-        """
-
-        while True:
-            board = await self.get_board(slug, client_id=client_id)
-            payload = json.dumps(board.model_dump(), ensure_ascii=False)
-            yield f"data: {payload}\n\n"
-            await asyncio.sleep(2.5)
+    async def finalize_event(self, slug: str) -> PleBoardSchema:
+        event = await self.ple_repository.finalize_event(slug)
+        if event is None:
+            raise LookupError(slug)
+        return await self.get_board(slug)

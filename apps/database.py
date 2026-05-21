@@ -173,8 +173,8 @@ async def init_db() -> None:
         return
 
     import secom.app.models.user_model  # noqa: F401
+    import titanic.app.models.passenger_model  # noqa: F401
     import kayfabe.app.models.ple_model  # noqa: F401
-    import kayfabe.app.models.result_model  # noqa: F401
 
     await warmup_db_pool()
 
@@ -356,6 +356,8 @@ async def main() -> None:
         raise RuntimeError("DATABASE_URL이 .env 에 설정되지 않았습니다.")
 
     import secom.app.models.user_model  # noqa: F401
+    import titanic.app.models.passenger_model  # noqa: F401
+    import kayfabe.app.models.ple_model  # noqa: F401
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

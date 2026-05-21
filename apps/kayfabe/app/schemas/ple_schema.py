@@ -1,86 +1,111 @@
-from __future__ import annotations
-
+from datetime import datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class ClientPleCompetitor(BaseModel):
+class CompetitorSchema(BaseModel):
     name: str
-    isChampion: bool | None = None
+    is_champion: bool | None = Field(default=None, alias="isChampion")
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
-class ClientPleMatchCard(BaseModel):
-    """프론트가 보내는 매치 카드(최소 필드만)"""
+class MatchResultSchema(BaseModel):
+    winner_side: Literal["left", "right"] | None = Field(default=None, alias="winnerSide")
+    winner_index: int | None = Field(default=None, alias="winnerIndex")
+    winner_name: str | None = Field(default=None, alias="winnerName")
 
-    id: str = Field(..., description="클라이언트 match_key")
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class MatchCardSyncSchema(BaseModel):
+    id: str
     title: str
-    cardVariant: Literal["sideA", "sideB"] = "sideA"
-    format: Literal["singles", "multi"] = "singles"
-    left: ClientPleCompetitor | None = None
-    right: ClientPleCompetitor | None = None
-    competitors: list[ClientPleCompetitor] | None = None
-    bookmakerDecimal: Any | None = None
+    card_variant: Literal["sideA", "sideB"] = Field(alias="cardVariant")
+    format: Literal["singles", "multi"]
+    left: CompetitorSchema | None = None
+    right: CompetitorSchema | None = None
+    competitors: list[CompetitorSchema] | None = None
+    bookmaker_decimal: dict[str, Any] | list[float] | None = Field(
+        default=None, alias="bookmakerDecimal"
+    )
+    result: MatchResultSchema | None = None
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
-class SyncFromClientRequest(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-
+class PleEventSyncSchema(BaseModel):
     slug: str
     label: str
     month: int
     year: int = 2026
-    matches: list[ClientPleMatchCard]
+    status: Literal["upcoming", "live", "finished"] | None = None
+    matches: list[MatchCardSyncSchema]
 
 
-class PleMatchResult(BaseModel):
-    winnerSide: Literal["left", "right"] | None = None
-    winnerIndex: int | None = None
-    winnerName: str | None = None
+class PredictionRequestSchema(BaseModel):
+    pick: str = Field(..., description="left | right | multi index as string")
+    client_id: str = Field(..., alias="clientId", min_length=8, max_length=64)
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
-class PleBoardMatch(BaseModel):
+class MatchResultUpdateSchema(BaseModel):
+    winner_side: Literal["left", "right"] | None = Field(default=None, alias="winnerSide")
+    winner_index: int | None = Field(default=None, alias="winnerIndex")
+    winner_name: str | None = Field(default=None, alias="winnerName")
+    status: Literal["scheduled", "live", "finished"] | None = None
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class VoteTotalsSchema(BaseModel):
+    left: int = 0
+    right: int = 0
+    multi: list[int] = Field(default_factory=list)
+
+
+class MatchBoardSchema(BaseModel):
     id: str
-    dbId: int
+    db_id: int
     title: str
-    cardVariant: Literal["sideA", "sideB"]
+    card_variant: str = Field(alias="cardVariant")
     format: Literal["singles", "multi"]
-    left: dict | None = None
-    right: dict | None = None
-    competitors: list[dict] | None = None
-    bookmakerDecimal: Any | None = None
+    left: CompetitorSchema | None = None
+    right: CompetitorSchema | None = None
+    competitors: list[CompetitorSchema] | None = None
+    bookmaker_decimal: dict[str, Any] | list[float] | None = Field(
+        default=None, alias="bookmakerDecimal"
+    )
     status: str
-    result: PleMatchResult | None = None
-    siteVotes: dict
-    locked: bool
-    myPick: str | None = None
+    result: MatchResultSchema | None = None
+    site_votes: VoteTotalsSchema = Field(alias="siteVotes")
+    locked: bool = False
+    my_pick: str | None = Field(default=None, alias="myPick")
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
-class PleBoard(BaseModel):
+class PleBoardSchema(BaseModel):
     slug: str
     label: str
     month: int
     year: int
-    status: Literal["upcoming", "live", "finished"]
-    finishedAt: str | None = None
-    matches: list[PleBoardMatch]
-    updatedAt: str
+    status: str
+    finished_at: datetime | None = Field(default=None, alias="finishedAt")
+    matches: list[MatchBoardSchema]
+    updated_at: datetime = Field(alias="updatedAt")
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
-class PredictRequest(BaseModel):
-    pick: str
-    clientId: str
+class PleEventSummarySchema(BaseModel):
+    slug: str
+    label: str
+    month: int
+    year: int
+    status: str
+    match_count: int = Field(alias="matchCount")
 
-
-class SetResultRequest(BaseModel):
-    """
-    실제 결과를 확정하고 예측의 정답/오답을 계산하기 위한 요청.
-
-    - singles: winnerSide=("left"|"right") 사용
-    - multi: winnerIndex(0-based) 사용
-    - winnerName은 표시용(선택)
-    """
-
-    winnerSide: Literal["left", "right"] | None = None
-    winnerIndex: int | None = None
-    winnerName: str | None = None
+    model_config = ConfigDict(populate_by_name=True)
