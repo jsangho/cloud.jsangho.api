@@ -2,7 +2,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from database import LAYER_LOG
 from kayfabe.app.schemas.ple_schema import (
+    BatchPredictionRequestSchema,
+    BatchResultsRequestSchema,
+    LinkPredictionsSchema,
     MatchResultUpdateSchema,
+    PleAiStatsSchema,
     PleBoardSchema,
     PleEventSummarySchema,
     PleEventSyncSchema,
@@ -22,7 +26,7 @@ class PleController:
         return await self.ple_service.list_events()
 
     async def get_board(self, slug: str, client_id: str | None = None) -> PleBoardSchema:
-        logger.info("[PleController] get_board -> Service — slug=%s", slug)
+        logger.debug("[PleController] get_board -> Service — slug=%s", slug)
         return await self.ple_service.get_board(slug, client_id=client_id)
 
     async def sync_event(self, payload: PleEventSyncSchema) -> PleBoardSchema:
@@ -54,6 +58,26 @@ class PleController:
             slug, match_key, body, user_id=user_id
         )
 
+    async def predict_batch(
+        self, slug: str, body: BatchPredictionRequestSchema
+    ) -> PleBoardSchema:
+        logger.info(
+            "[PleController] predict_batch -> Service — slug=%s count=%d",
+            slug,
+            len(body.predictions),
+        )
+        return await self.ple_service.record_predictions_batch(slug, body)
+
+    async def set_results_batch(
+        self, slug: str, body: BatchResultsRequestSchema
+    ) -> PleBoardSchema:
+        logger.info(
+            "[PleController] set_results_batch -> Service — slug=%s count=%d",
+            slug,
+            len(body.results),
+        )
+        return await self.ple_service.set_match_results_batch(slug, body)
+
     async def set_result(
         self, slug: str, match_key: str, body: MatchResultUpdateSchema
     ) -> PleBoardSchema:
@@ -61,3 +85,12 @@ class PleController:
 
     async def finalize(self, slug: str) -> PleBoardSchema:
         return await self.ple_service.finalize_event(slug)
+
+    async def get_ai_stats(self) -> PleAiStatsSchema:
+        return await self.ple_service.get_ai_stats()
+
+    async def link_predictions(self, body: LinkPredictionsSchema) -> dict[str, int]:
+        linked = await self.ple_service.link_client_predictions(
+            body.client_id, body.user_id
+        )
+        return {"linked": linked}

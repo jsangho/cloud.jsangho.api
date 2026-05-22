@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import StrEnum
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
@@ -65,6 +65,10 @@ class PleMatchModel(Base):
     )
     winner_pick: Mapped[str | None] = mapped_column(String(20), nullable=True)
     winner_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    ai_pick: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    ai_pick_name: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    ai_correct: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    point_value: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

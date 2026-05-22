@@ -26,12 +26,35 @@ load_dotenv()
 # uvicorn 터미널과 동일 스트림에 출력 (별도 stderr 로거는 reload 시 안 보일 수 있음)
 APP_LOG = logging.getLogger("uvicorn.error")
 LAYER_LOG = APP_LOG
-NEON_DB_LOG = APP_LOG
+
+
+def _neon_sql_log_enabled() -> bool:
+    """터미널 SQL 로그. 기본 끔 — .env에 NEON_SQL_LOG=1 이면 attach_neon_sql_logging 출력."""
+    return os.getenv("NEON_SQL_LOG", "").strip().lower() in (
+        "1",
+        "true",
+        "yes",
+        "on",
+    )
+
+
+class _SuppressPoolTerminateOnCancel(logging.Filter):
+    """클라이언트 disconnect 시 풀 terminate CancelledError 로그를 숨깁니다."""
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        msg = record.getMessage()
+        if not msg.startswith("Exception terminating connection"):
+            return True
+        exc = record.exc_info[1] if record.exc_info else None
+        return not isinstance(exc, asyncio.CancelledError)
 
 
 def configure_db_logging() -> None:
     """Neon DB·레이어 로그가 uvicorn 터미널에 보이도록 레벨만 맞춥니다."""
     APP_LOG.setLevel(logging.INFO)
+
+    pool_log = logging.getLogger("sqlalchemy.pool")
+    pool_log.addFilter(_SuppressPoolTerminateOnCancel())
 
     for name in (
         "sqlalchemy.engine",
@@ -47,31 +70,34 @@ def configure_db_logging() -> None:
 
 def attach_neon_sql_logging(async_engine) -> None:
     """SQLAlchemy echo 대신 이벤트로 Neon SQL 로그를 남깁니다 (reload 후에도 동작)."""
+    if not _neon_sql_log_enabled():
+        return
     sync_engine = async_engine.sync_engine
     if getattr(sync_engine, "_neon_sql_logging", False):
         return
     sync_engine._neon_sql_logging = True
+    log = APP_LOG
 
     @event.listens_for(sync_engine, "begin")
     def _on_begin(conn) -> None:
-        NEON_DB_LOG.info("\n[Neon] -------- transaction start --------")
+        log.info("\n[Neon] -------- transaction start --------")
 
     @event.listens_for(sync_engine, "commit")
     def _on_commit(conn) -> None:
-        NEON_DB_LOG.info("[Neon] -------- COMMIT ok ----------------\n")
+        log.info("[Neon] -------- COMMIT ok ----------------\n")
 
     @event.listens_for(sync_engine, "rollback")
     def _on_rollback(conn) -> None:
-        NEON_DB_LOG.info("[Neon] -------- ROLLBACK -----------------")
+        log.info("[Neon] -------- ROLLBACK -----------------")
 
     @event.listens_for(sync_engine, "before_cursor_execute")
     def _on_before(
         conn, cursor, statement, parameters, context, executemany
     ) -> None:
         sql = " ".join(str(statement).split())
-        NEON_DB_LOG.info("[Neon]   SQL  %s", sql)
+        log.info("[Neon]   SQL  %s", sql)
         if parameters:
-            NEON_DB_LOG.info("[Neon]   params %s", parameters)
+            log.info("[Neon]   params %s", parameters)
 
 
 def _async_driver() -> str:
@@ -260,6 +286,21 @@ async def init_db() -> None:
             text("ALTER TABLE ple_matches ADD COLUMN IF NOT EXISTS result_pick VARCHAR(32)")
         )
         await conn.execute(
+            text("ALTER TABLE ple_matches ADD COLUMN IF NOT EXISTS ai_pick VARCHAR(20)")
+        )
+        await conn.execute(
+            text("ALTER TABLE ple_matches ADD COLUMN IF NOT EXISTS ai_pick_name VARCHAR(200)")
+        )
+        await conn.execute(
+            text("ALTER TABLE ple_matches ADD COLUMN IF NOT EXISTS ai_correct BOOLEAN")
+        )
+        await conn.execute(
+            text(
+                "ALTER TABLE ple_matches ADD COLUMN IF NOT EXISTS point_value "
+                "INTEGER NOT NULL DEFAULT 1"
+            )
+        )
+        await conn.execute(
             text("CREATE INDEX IF NOT EXISTS ix_ple_matches_ple_id ON ple_matches (ple_id)")
         )
         await conn.execute(
@@ -321,8 +362,15 @@ async def init_db() -> None:
         # 운영자/API가 직접 status/finished_at을 기입하는 것을 원칙으로 합니다.
 
 
+async def rollback_readonly(session: AsyncSession) -> None:
+    """조회 전용 요청 후 트랜잭션 정리. 요청 취소 시에도 연결을 풀에 안전히 반환."""
+    if not session.in_transaction():
+        return
+    await asyncio.shield(session.rollback())
+
+
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    """FastAPI Depends용 비동기 DB 세션 (쓰기만 commit, 읽기는 rollback)."""
+    """FastAPI Depends용 비동기 DB 세션. 요청 성공 시 commit (flush 후에도 반영)."""
     if AsyncSessionLocal is None:
         raise HTTPException(
             status_code=503,
@@ -331,10 +379,11 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
     async with AsyncSessionLocal() as session:
         try:
             yield session
-            if session.new or session.dirty or session.deleted:
-                await session.commit()
-            elif session.in_transaction():
-                await session.rollback()
+            await session.commit()
+        except asyncio.CancelledError:
+            if session.in_transaction():
+                await asyncio.shield(session.rollback())
+            raise
         except Exception:
             if session.in_transaction():
                 await session.rollback()

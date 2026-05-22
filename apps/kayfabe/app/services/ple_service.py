@@ -21,8 +21,11 @@ from kayfabe.app.schemas.ple_schema import (
     MatchResultSchema,
     MatchResultUpdateSchema,
     PleBoardSchema,
+    PleAiStatsSchema,
     PleEventSummarySchema,
     PleEventSyncSchema,
+    BatchPredictionRequestSchema,
+    BatchResultsRequestSchema,
     PredictionRequestSchema,
     VoteTotalsSchema,
 )
@@ -237,6 +240,9 @@ class PleService:
                     ),
                     locked=my_pick is not None,
                     my_pick=my_pick,
+                    ai_pick=row.ai_pick,
+                    ai_pick_name=row.ai_pick_name,
+                    ai_correct=row.ai_correct,
                 )
             )
 
@@ -280,8 +286,17 @@ class PleService:
             raise LookupError(match_key)
         if match.status == PleMatchStatus.FINISHED:
             raise ValueError("종료된 경기에는 예측할 수 없습니다.")
+        effective_user_id = user_id if user_id is not None else body.user_id
+        if effective_user_id:
+            await self.ple_repository.attach_user_id_by_client(
+                body.client_id, effective_user_id
+            )
+
         existing = await self.ple_repository.get_prediction(match.id, body.client_id)
         if existing:
+            if effective_user_id and existing.user_id is None:
+                existing.user_id = effective_user_id
+                await self.ple_repository.db.flush()
             return await self.get_board(slug, client_id=body.client_id)
 
         logger.info(
@@ -291,10 +306,70 @@ class PleService:
             body.client_id,
             body.pick,
         )
-        await self.ple_repository.add_prediction(
-            match.id, body.client_id, body.pick, user_id
+        await self.ple_repository.upsert_prediction(
+            match.id, body.client_id, body.pick, effective_user_id
         )
         return await self.get_board(slug, client_id=body.client_id)
+
+    async def record_predictions_batch(
+        self,
+        slug: str,
+        body: BatchPredictionRequestSchema,
+    ) -> PleBoardSchema:
+        event = await self.ple_repository.get_event_by_slug(slug)
+        if event is None:
+            raise LookupError(slug)
+
+        effective_user_id = body.user_id
+        if effective_user_id:
+            await self.ple_repository.attach_user_id_by_client(
+                body.client_id, effective_user_id
+            )
+
+        match_by_key = {m.match_key: m for m in event.matches}
+        for item in body.predictions:
+            row = match_by_key.get(item.match_key)
+            if row is None:
+                raise LookupError(item.match_key)
+            if row.status == PleMatchStatus.FINISHED:
+                raise ValueError(
+                    f"종료된 경기({item.match_key})에는 예측할 수 없습니다."
+                )
+            await self.ple_repository.upsert_prediction(
+                row.id, body.client_id, item.pick, effective_user_id
+            )
+
+        logger.info(
+            "[PleService] record_predictions_batch <- Repository — slug=%s count=%d",
+            slug,
+            len(body.predictions),
+        )
+        return await self.get_board(slug, client_id=body.client_id)
+
+    async def set_match_results_batch(
+        self,
+        slug: str,
+        body: BatchResultsRequestSchema,
+    ) -> PleBoardSchema:
+        for item in body.results:
+            result = MatchResultSchema(
+                winner_side=item.winner_side,
+                winner_index=item.winner_index,
+                winner_name=item.winner_name,
+            )
+            row = await self.ple_repository.set_match_result(
+                slug, item.match_key, result, status=item.status
+            )
+            if row is None:
+                raise LookupError(
+                    f"경기 '{item.match_key}'를 찾을 수 없습니다. PLE 카드 동기화 후 다시 시도해 주세요."
+                )
+        logger.info(
+            "[PleService] set_match_results_batch <- Repository — slug=%s count=%d",
+            slug,
+            len(body.results),
+        )
+        return await self.get_board(slug)
 
     async def set_match_result(
         self,
@@ -307,12 +382,28 @@ class PleService:
             winner_index=body.winner_index,
             winner_name=body.winner_name,
         )
+        event = await self.ple_repository.get_event_by_slug(slug)
+        if event is None:
+            raise LookupError(f"PLE '{slug}'를 찾을 수 없습니다. 먼저 카드를 동기화해 주세요.")
         row = await self.ple_repository.set_match_result(
             slug, match_key, result, status=body.status
         )
         if row is None:
-            raise LookupError(match_key)
+            raise LookupError(
+                f"경기 '{match_key}'를 찾을 수 없습니다. PLE 카드 동기화 후 다시 시도해 주세요."
+            )
         return await self.get_board(slug)
+
+    async def get_ai_stats(self) -> PleAiStatsSchema:
+        return await self.ple_repository.get_ai_stats()
+
+    async def link_client_predictions(self, client_id: str, user_id: int) -> int:
+        logger.info(
+            "[PleService] link_client_predictions -> Repository — client=%s userId=%s",
+            client_id,
+            user_id,
+        )
+        return await self.ple_repository.attach_user_id_by_client(client_id, user_id)
 
     async def finalize_event(self, slug: str) -> PleBoardSchema:
         event = await self.ple_repository.finalize_event(slug)

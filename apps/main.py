@@ -26,6 +26,7 @@ from database import (
     engine,
     get_db,
     init_db,
+    rollback_readonly,
 )
 from doro.app.doro_director import DoroDirector
 from matrix.app.keymaker import get_keymaker
@@ -34,13 +35,21 @@ from secom.app.schemas.user_schema import UserSchema
 from secom.app.controllers.user_controller import UserController
 from titanic.app.controllers.passenger_controller import PassengerController
 from kayfabe.app.controllers.ple_controller import PleController
+from kayfabe.app.controllers.ranking_controller import RankingController
+from kayfabe.app.controllers.result_controller import ResultController
 from kayfabe.app.schemas.ple_schema import (
+    BatchPredictionRequestSchema,
+    BatchResultsRequestSchema,
+    LinkPredictionsSchema,
     MatchResultUpdateSchema,
+    PleAiStatsSchema,
     PleBoardSchema,
     PleEventSummarySchema,
     PleEventSyncSchema,
     PredictionRequestSchema,
 )
+from kayfabe.app.schemas.ranking_schema import RankingsResponseSchema
+from kayfabe.app.schemas.result_schema import PleResultsResponse
 
 keymaker = get_keymaker()
 logger = logging.getLogger("uvicorn.error")
@@ -93,7 +102,10 @@ class LoginRequest(BaseModel):
 
 
 class LoginResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     message: str
+    id: int = Field(alias="userId", description="회원 DB id (예측·순위 연동)")
     nickname: str
     email: str
     role: UserRole
@@ -275,6 +287,34 @@ async def list_ple_events(db: AsyncSession = Depends(get_db)):
 
 
 @app.get(
+    "/ple/ai-stats",
+    response_model=PleAiStatsSchema,
+    response_model_by_alias=True,
+)
+async def get_ple_ai_stats(db: AsyncSession = Depends(get_db)):
+    """AI 예측 누적 적중률·최근 채점 기록."""
+    return await PleController(db).get_ai_stats()
+
+
+@app.get(
+    "/rankings",
+    response_model=RankingsResponseSchema,
+    response_model_by_alias=True,
+)
+async def list_rankings(
+    limit: int = 120,
+    nickname: str | None = None,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    PLE 승부예측 순위 (점수·적중률).
+    경기 결과(ple_matches.winner_pick) 확정 시 pick 일치분이 자동 집계됩니다.
+    nickname 쿼리로 내 순위(myRank)를 함께 조회할 수 있습니다.
+    """
+    return await RankingController(db).list_rankings(limit=limit, nickname=nickname)
+
+
+@app.get(
     "/ple/{slug}",
     response_model=PleBoardSchema,
     response_model_by_alias=True,
@@ -307,6 +347,52 @@ async def sync_ple_from_client(
     try:
         return await PleController(db).sync_event(payload)
     except ValueError as e:
+        raise _ple_http_error(e) from e
+
+
+@app.post(
+    "/ple/link-predictions",
+    response_model_by_alias=True,
+)
+async def link_ple_predictions(
+    body: LinkPredictionsSchema,
+    db: AsyncSession = Depends(get_db),
+):
+    """브라우저 clientId로 저장된 예측을 로그인 회원(userId)에 연결."""
+    return await PleController(db).link_predictions(body)
+
+
+@app.post(
+    "/ple/{slug}/predictions/batch",
+    response_model=PleBoardSchema,
+    response_model_by_alias=True,
+)
+async def predict_ple_batch(
+    slug: str,
+    body: BatchPredictionRequestSchema,
+    db: AsyncSession = Depends(get_db),
+):
+    """경기 예측 일괄 저장."""
+    try:
+        return await PleController(db).predict_batch(slug, body)
+    except (LookupError, ValueError) as e:
+        raise _ple_http_error(e) from e
+
+
+@app.post(
+    "/ple/{slug}/results/batch",
+    response_model=PleBoardSchema,
+    response_model_by_alias=True,
+)
+async def set_ple_results_batch(
+    slug: str,
+    body: BatchResultsRequestSchema,
+    db: AsyncSession = Depends(get_db),
+):
+    """경기 결과 일괄 등록."""
+    try:
+        return await PleController(db).set_results_batch(slug, body)
+    except (LookupError, ValueError) as e:
         raise _ple_http_error(e) from e
 
 
@@ -347,29 +433,36 @@ async def set_ple_match_result(
 
 
 @app.get("/ple/{slug}/live")
-async def ple_live_board(slug: str, client_id: str):
+async def ple_live_board(slug: str, client_id: str, request: Request):
     """보드 스냅샷 SSE (예측·결과 반영)."""
 
     async def event_stream():
-        while True:
-            if AsyncSessionLocal is None:
-                yield f"data: {json.dumps({'error': 'DATABASE_URL not configured'})}\n\n"
-                break
-            try:
-                async with AsyncSessionLocal() as session:
-                    board = await PleController(session).get_board(
-                        slug, client_id=client_id
-                    )
-                    if session.new or session.dirty or session.deleted:
-                        await session.commit()
-                    elif session.in_transaction():
-                        await session.rollback()
+        if AsyncSessionLocal is None:
+            yield f"data: {json.dumps({'error': 'DATABASE_URL not configured'})}\n\n"
+            return
+        try:
+            while True:
+                if await request.is_disconnected():
+                    return
+                try:
+                    async with AsyncSessionLocal() as session:
+                        board = await PleController(session).get_board(
+                            slug, client_id=client_id
+                        )
+                        await rollback_readonly(session)
+                except LookupError as e:
+                    yield f"data: {json.dumps({'error': str(e)})}\n\n"
+                    return
+                except asyncio.CancelledError:
+                    return
                 payload = board.model_dump(mode="json", by_alias=True)
                 yield f"data: {json.dumps(payload, default=str)}\n\n"
-            except LookupError as e:
-                yield f"data: {json.dumps({'error': str(e)})}\n\n"
-                break
-            await asyncio.sleep(3)
+                try:
+                    await asyncio.sleep(3)
+                except asyncio.CancelledError:
+                    return
+        except asyncio.CancelledError:
+            return
 
     return StreamingResponse(
         event_stream(),
@@ -384,84 +477,6 @@ def read_doro_data():
     df = doro_director.get_data()
 
     return df.to_dict(orient="records")
-
-
-@app.get("/ple/{slug}", response_model=PleBoard)
-async def get_ple_board(
-    slug: str,
-    client_id: str | None = None,
-    db: AsyncSession = Depends(get_db),
-):
-    controller = PleController(db)
-    try:
-        return await controller.get_board(slug, client_id=client_id)
-    except KeyError:
-        raise HTTPException(status_code=404, detail="PLE not found")
-
-
-@app.post("/ple/{slug}/sync-from-client", response_model=PleBoard)
-async def sync_ple_from_client(
-    slug: str,
-    req: SyncFromClientRequest,
-    db: AsyncSession = Depends(get_db),
-):
-    payload = req.model_copy(update={"slug": slug})
-    controller = PleController(db)
-    return await controller.sync_from_client(payload)
-
-
-@app.post("/ple/{slug}/matches/{match_key}/predict", response_model=PleBoard)
-async def predict_ple_match(
-    slug: str,
-    match_key: str,
-    req: PredictRequest,
-    db: AsyncSession = Depends(get_db),
-):
-    controller = PleController(db)
-    try:
-        return await controller.predict(
-            slug=slug,
-            match_key=match_key,
-            client_id=req.clientId,
-            pick=req.pick,
-        )
-    except KeyError:
-        raise HTTPException(status_code=404, detail="PLE not found")
-
-
-@app.post("/ple/{slug}/matches/{match_key}/result", response_model=PleBoard)
-async def set_ple_match_result(
-    slug: str,
-    match_key: str,
-    req: SetResultRequest,
-    db: AsyncSession = Depends(get_db),
-):
-    controller = PleController(db)
-    try:
-        return await controller.set_result(slug, match_key, req)
-    except KeyError:
-        raise HTTPException(status_code=404, detail="PLE not found")
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@app.get("/ple/{slug}/live")
-async def ple_live(
-    slug: str,
-    client_id: str | None = None,
-    db: AsyncSession = Depends(get_db),
-):
-    controller = PleController(db)
-
-    async def gen():
-        try:
-            async for chunk in controller.live_stream(slug, client_id):
-                yield chunk
-        except Exception as e:
-            payload = json.dumps({"error": str(e)}, ensure_ascii=False)
-            yield f"data: {payload}\n\n"
-
-    return StreamingResponse(gen(), media_type="text/event-stream")
 
 
 @app.get("/results", response_model=PleResultsResponse)
@@ -506,6 +521,7 @@ async def login(req: LoginRequest, db: AsyncSession = Depends(get_db)):
 
     return LoginResponse(
         message="로그인되었습니다.",
+        id=user.id,
         nickname=user.nickname,
         email=user.email,
         role=UserRole(user.role),
