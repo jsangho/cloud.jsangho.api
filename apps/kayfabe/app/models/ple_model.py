@@ -91,6 +91,7 @@ class PlePredictionModel(Base):
     __tablename__ = "ple_predictions"
     __table_args__ = (
         UniqueConstraint("match_id", "client_id", name="uq_ple_prediction_match_client"),
+        UniqueConstraint("match_id", "user_id", name="uq_predictions_match_user"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)

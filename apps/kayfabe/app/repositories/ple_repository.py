@@ -287,7 +287,7 @@ class PleRepository:
         right = sum(1 for p in match.predictions if p.pick == "right")
         return {"left": left, "right": right, "multi": []}, None
 
-    async def get_ai_stats(self, recent_limit: int = 12) -> PleAiStatsSchema:
+    async def get_ai_stats(self) -> PleAiStatsSchema:
         agg = await self.db.execute(
             select(
                 func.count(PleMatchModel.id),
@@ -304,12 +304,18 @@ class PleRepository:
             round(correct / total_graded * 100, 1) if total_graded > 0 else None
         )
 
+        # PLE·카드 순서대로 전체 채점 기록 (최근 N건 제한 없음)
         recent_rows = await self.db.execute(
             select(PleMatchModel, PleEventModel)
             .join(PleEventModel, PleMatchModel.event_id == PleEventModel.id)
             .where(PleMatchModel.ai_correct.isnot(None))
-            .order_by(PleMatchModel.finished_at.desc().nullslast(), PleMatchModel.id.desc())
-            .limit(recent_limit)
+            .order_by(
+                PleEventModel.year.asc(),
+                PleEventModel.month.asc().nulls_last(),
+                PleEventModel.slug.asc(),
+                PleMatchModel.sort_order.asc(),
+                PleMatchModel.id.asc(),
+            )
         )
         recent = [
             PleAiRecordSchema(

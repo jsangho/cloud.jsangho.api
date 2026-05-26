@@ -163,7 +163,10 @@ class PleAiStatsSchema(BaseModel):
     correct: int
     incorrect: int
     accuracy_percent: float | None = Field(default=None, alias="accuracyPercent")
-    recent: list[PleAiRecordSchema] = Field(default_factory=list)
+    recent: list[PleAiRecordSchema] = Field(
+        default_factory=list,
+        description="채점된 경기 전체 (PLE·카드 순)",
+    )
 
     model_config = ConfigDict(populate_by_name=True)
 

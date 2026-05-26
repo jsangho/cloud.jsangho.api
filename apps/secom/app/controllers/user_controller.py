@@ -36,3 +36,13 @@ class UserController(object):
             user.to_log_dict(),
         )
         return user
+
+    async def get_user_by_id(self, user_id: int) -> UserModel:
+        logger.info("[UserController] get_user_by_id -> Service — db_id=%s", user_id)
+        user = await self.user_service.get_user_by_id(user_id)
+        logger.info(
+            "[UserController] get_user_by_id <- Service — db_id=%s, user=%s",
+            user_id,
+            user.to_log_dict(),
+        )
+        return user

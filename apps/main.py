@@ -106,6 +106,17 @@ class LoginResponse(BaseModel):
 
     message: str
     id: int = Field(alias="userId", description="회원 DB id (예측·순위 연동)")
+    login_id: str = Field(alias="loginId", description="로그인 ID")
+    nickname: str
+    email: str
+    role: UserRole
+
+
+class UserProfileResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    id: int = Field(alias="userId")
+    login_id: str = Field(alias="loginId")
     nickname: str
     email: str
     role: UserRole
@@ -511,7 +522,7 @@ async def signup(req: SignupRequest, db: AsyncSession = Depends(get_db)):
     )
 
 
-@app.post("/login", response_model=LoginResponse)
+@app.post("/login", response_model=LoginResponse, response_model_by_alias=True)
 async def login(req: LoginRequest, db: AsyncSession = Depends(get_db)):
     login_id = req.user_id.strip()
     logger.info("[API] POST /login — userId=%s", login_id)
@@ -522,6 +533,21 @@ async def login(req: LoginRequest, db: AsyncSession = Depends(get_db)):
     return LoginResponse(
         message="로그인되었습니다.",
         id=user.id,
+        login_id=user.login_id or login_id,
+        nickname=user.nickname,
+        email=user.email,
+        role=UserRole(user.role),
+    )
+
+
+@app.get("/users/{user_id}", response_model=UserProfileResponse, response_model_by_alias=True)
+async def get_user_profile(user_id: int, db: AsyncSession = Depends(get_db)):
+    logger.info("[API] GET /users/%s", user_id)
+    user_controller = UserController(db)
+    user = await user_controller.get_user_by_id(user_id)
+    return UserProfileResponse(
+        id=user.id,
+        login_id=user.login_id or "",
         nickname=user.nickname,
         email=user.email,
         role=UserRole(user.role),

@@ -38,6 +38,8 @@ PLE_EVENT_META: dict[str, dict[str, Any]] = {
     "stand-and-deliver": {"label": "Stand & Deliver", "month": 3},
     "wrestlemania": {"label": "WrestleMania", "month": 4},
     "backlash": {"label": "Backlash", "month": 5},
+    "clash-in-italy": {"label": "Clash in Italy", "month": 5},
+    "night-of-champions": {"label": "Night of Champions", "month": 6},
     "money-in-the-bank": {"label": "Money in the Bank", "month": 6},
     "king-queen-of-the-ring": {"label": "King & Queen of the Ring", "month": 7},
     "summerslam": {"label": "SummerSlam", "month": 8},

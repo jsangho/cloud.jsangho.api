@@ -65,3 +65,15 @@ class UserService(object):
             user.to_log_dict(),
         )
         return user
+
+    async def get_user_by_id(self, user_id: int):
+        logger.info("[UserService] get_user_by_id -> Repository — db_id=%s", user_id)
+        user = await self.user_repository.find_by_id(user_id)
+        if user is None:
+            raise HTTPException(status_code=404, detail="회원을 찾을 수 없습니다.")
+        logger.info(
+            "[UserService] get_user_by_id <- Repository — db_id=%s, user=%s",
+            user_id,
+            user.to_log_dict(),
+        )
+        return user

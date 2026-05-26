@@ -307,6 +307,24 @@ async def init_db() -> None:
             text("CREATE INDEX IF NOT EXISTS ix_ple_matches_match_key ON ple_matches (match_key)")
         )
 
+        await conn.execute(
+            text(
+                """
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM pg_constraint
+                        WHERE conname = 'uq_predictions_match_user'
+                    ) THEN
+                        ALTER TABLE ple_predictions
+                            ADD CONSTRAINT uq_predictions_match_user
+                            UNIQUE (match_id, user_id);
+                    END IF;
+                END $$
+                """
+            )
+        )
+
         # 개최일(event_at)은 UTC 기준 datetime으로 저장합니다.
         # 확정되지 않은 일정은 None으로 두어 자동 finished가 발생하지 않게 합니다.
         event_at_by_slug: dict[str, datetime | None] = {

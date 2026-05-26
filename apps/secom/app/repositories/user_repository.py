@@ -38,6 +38,23 @@ class UserRepository(object):
             )
         return user
 
+    async def find_by_id(self, user_id: int) -> UserModel | None:
+        logger.info("[UserRepository] find_by_id -> Neon — db_id=%s", user_id)
+        result = await self.db.execute(select(UserModel).where(UserModel.id == user_id))
+        user = result.scalar_one_or_none()
+        if user is None:
+            logger.info(
+                "[UserRepository] find_by_id <- Neon — db_id=%s, user=없음",
+                user_id,
+            )
+        else:
+            logger.info(
+                "[UserRepository] find_by_id <- Neon — db_id=%s, user=%s",
+                user_id,
+                user.to_log_dict(),
+            )
+        return user
+
     async def find_by_login_id(self, login_id: str) -> UserModel | None:
         logger.info(
             "[UserRepository] find_by_login_id -> Neon — userId=%s",
