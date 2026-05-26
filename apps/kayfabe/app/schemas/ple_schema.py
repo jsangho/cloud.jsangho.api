@@ -47,10 +47,11 @@ class PleEventSyncSchema(BaseModel):
 class PredictionRequestSchema(BaseModel):
     pick: str = Field(..., description="left | right | multi index as string")
     client_id: str = Field(..., alias="clientId", min_length=8, max_length=64)
-    user_id: int | None = Field(
-        default=None,
+    user_id: int = Field(
+        ...,
         alias="userId",
-        description="로그인 회원 id (순위표 집계용, 선택)",
+        ge=1,
+        description="로그인 회원 id (필수)",
     )
 
     model_config = ConfigDict(populate_by_name=True)
@@ -72,7 +73,7 @@ class PredictionItemSchema(BaseModel):
 
 class BatchPredictionRequestSchema(BaseModel):
     client_id: str = Field(..., alias="clientId", min_length=8, max_length=64)
-    user_id: int | None = Field(default=None, alias="userId")
+    user_id: int = Field(..., alias="userId", ge=1)
     predictions: list[PredictionItemSchema] = Field(..., min_length=1)
 
     model_config = ConfigDict(populate_by_name=True)

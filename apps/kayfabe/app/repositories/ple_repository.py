@@ -212,18 +212,28 @@ class PleRepository:
         )
         return count
 
+    async def get_prediction_by_user(
+        self, match_id: int, user_id: int
+    ) -> PlePredictionModel | None:
+        result = await self.db.execute(
+            select(PlePredictionModel).where(
+                PlePredictionModel.match_id == match_id,
+                PlePredictionModel.user_id == user_id,
+            )
+        )
+        return result.scalar_one_or_none()
+
     async def upsert_prediction(
         self,
         match_id: int,
         client_id: str,
         pick: str,
-        user_id: int | None = None,
+        user_id: int,
     ) -> PlePredictionModel:
-        existing = await self.get_prediction(match_id, client_id)
+        existing = await self.get_prediction_by_user(match_id, user_id)
         if existing is not None:
             existing.pick = pick
-            if user_id is not None:
-                existing.user_id = user_id
+            existing.client_id = client_id
             await self.db.flush()
             return existing
         return await self.add_prediction(match_id, client_id, pick, user_id)

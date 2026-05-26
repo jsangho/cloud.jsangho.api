@@ -35,6 +35,7 @@ from secom.app.schemas.user_schema import UserSchema
 from secom.app.controllers.user_controller import UserController
 from titanic.app.controllers.passenger_controller import PassengerController
 from kayfabe.app.controllers.ple_controller import PleController
+from kayfabe.app.exceptions import PleAuthRequiredError
 from kayfabe.app.controllers.ranking_controller import RankingController
 from kayfabe.app.controllers.result_controller import ResultController
 from kayfabe.app.schemas.ple_schema import (
@@ -282,6 +283,8 @@ def read_titanic_model():
 def _ple_http_error(exc: Exception) -> HTTPException:
     if isinstance(exc, LookupError):
         return HTTPException(status_code=404, detail=str(exc) or "Not found")
+    if isinstance(exc, PleAuthRequiredError):
+        return HTTPException(status_code=401, detail=str(exc) or "로그인이 필요합니다.")
     if isinstance(exc, ValueError):
         return HTTPException(status_code=400, detail=str(exc))
     raise exc
@@ -333,11 +336,14 @@ async def list_rankings(
 async def get_ple_board(
     slug: str,
     client_id: str | None = None,
+    user_id: int | None = None,
     db: AsyncSession = Depends(get_db),
 ):
     """PLE 경기 보드(카드·사이트 투표·내 예측)."""
     try:
-        return await PleController(db).get_board(slug, client_id=client_id)
+        return await PleController(db).get_board(
+            slug, client_id=client_id, user_id=user_id
+        )
     except LookupError as e:
         raise _ple_http_error(e) from e
 
@@ -369,8 +375,11 @@ async def link_ple_predictions(
     body: LinkPredictionsSchema,
     db: AsyncSession = Depends(get_db),
 ):
-    """브라우저 clientId로 저장된 예측을 로그인 회원(userId)에 연결."""
-    return await PleController(db).link_predictions(body)
+    """(레거시) 로그인 필수 정책 이후 신규 예측에는 사용하지 않습니다."""
+    raise HTTPException(
+        status_code=410,
+        detail="예측은 로그인 후 저장됩니다. link-predictions API는 더 이상 사용하지 않습니다.",
+    )
 
 
 @app.post(
@@ -444,7 +453,12 @@ async def set_ple_match_result(
 
 
 @app.get("/ple/{slug}/live")
-async def ple_live_board(slug: str, client_id: str, request: Request):
+async def ple_live_board(
+    slug: str,
+    client_id: str,
+    request: Request,
+    user_id: int | None = None,
+):
     """보드 스냅샷 SSE (예측·결과 반영)."""
 
     async def event_stream():
@@ -458,7 +472,7 @@ async def ple_live_board(slug: str, client_id: str, request: Request):
                 try:
                     async with AsyncSessionLocal() as session:
                         board = await PleController(session).get_board(
-                            slug, client_id=client_id
+                            slug, client_id=client_id, user_id=user_id
                         )
                         await rollback_readonly(session)
                 except LookupError as e:

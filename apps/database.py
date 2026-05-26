@@ -376,8 +376,7 @@ async def init_db() -> None:
                 },
             )
 
-        # PLE 결과(ple_results)는 자동 생성하지 않습니다.
-        # 운영자/API가 직접 status/finished_at을 기입하는 것을 원칙으로 합니다.
+        # PLE 이벤트·경기 결과는 ple_events / ple_matches status·finished_at 으로 관리합니다.
 
 
 async def rollback_readonly(session: AsyncSession) -> None:

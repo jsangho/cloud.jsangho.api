@@ -12,8 +12,12 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from sqlalchemy import select
+
 from database import LAYER_LOG
+from kayfabe.app.exceptions import PleAuthRequiredError
 from kayfabe.app.models.ple_model import PleEventStatus, PleMatchStatus
+from secom.app.models.user_model import UserModel
 from kayfabe.app.repositories.ple_repository import PleRepository
 from kayfabe.app.schemas.ple_schema import (
     CompetitorSchema,
@@ -101,6 +105,13 @@ class PleService:
     def __init__(self, db: AsyncSession) -> None:
         self.ple_repository = PleRepository(db)
 
+    async def _require_user(self, user_id: int) -> None:
+        result = await self.ple_repository.db.execute(
+            select(UserModel.id).where(UserModel.id == user_id)
+        )
+        if result.scalar_one_or_none() is None:
+            raise PleAuthRequiredError("유효한 로그인 회원이 아닙니다.")
+
     @staticmethod
     def build_sync_payload(
         slug: str,
@@ -181,7 +192,13 @@ class PleService:
             )
         return summaries
 
-    async def get_board(self, slug: str, *, client_id: str | None = None) -> PleBoardSchema:
+    async def get_board(
+        self,
+        slug: str,
+        *,
+        client_id: str | None = None,
+        user_id: int | None = None,
+    ) -> PleBoardSchema:
         event = await self.ple_repository.get_event_by_slug(slug)
         if event is None:
             raise LookupError(slug)
@@ -191,7 +208,11 @@ class PleService:
             card = json.loads(row.card_json)
             vote_raw, _ = self.ple_repository.aggregate_votes(row)
             my_pick: str | None = None
-            if client_id:
+            if user_id is not None:
+                pred = await self.ple_repository.get_prediction_by_user(row.id, user_id)
+                if pred:
+                    my_pick = pred.pick
+            elif client_id:
                 pred = await self.ple_repository.get_prediction(row.id, client_id)
                 if pred:
                     my_pick = pred.pick
@@ -278,8 +299,8 @@ class PleService:
         slug: str,
         match_key: str,
         body: PredictionRequestSchema,
-        user_id: int | None = None,
     ) -> PleBoardSchema:
+        await self._require_user(body.user_id)
         event = await self.ple_repository.get_event_by_slug(slug)
         if event is None:
             raise LookupError(slug)
@@ -288,45 +309,30 @@ class PleService:
             raise LookupError(match_key)
         if match.status == PleMatchStatus.FINISHED:
             raise ValueError("종료된 경기에는 예측할 수 없습니다.")
-        effective_user_id = user_id if user_id is not None else body.user_id
-        if effective_user_id:
-            await self.ple_repository.attach_user_id_by_client(
-                body.client_id, effective_user_id
-            )
-
-        existing = await self.ple_repository.get_prediction(match.id, body.client_id)
-        if existing:
-            if effective_user_id and existing.user_id is None:
-                existing.user_id = effective_user_id
-                await self.ple_repository.db.flush()
-            return await self.get_board(slug, client_id=body.client_id)
 
         logger.info(
-            "[PleService] record_prediction -> Repository — slug=%s match=%s client=%s pick=%s",
+            "[PleService] record_prediction -> Repository — slug=%s match=%s userId=%s pick=%s",
             slug,
             match_key,
-            body.client_id,
+            body.user_id,
             body.pick,
         )
         await self.ple_repository.upsert_prediction(
-            match.id, body.client_id, body.pick, effective_user_id
+            match.id, body.client_id, body.pick, body.user_id
         )
-        return await self.get_board(slug, client_id=body.client_id)
+        return await self.get_board(
+            slug, client_id=body.client_id, user_id=body.user_id
+        )
 
     async def record_predictions_batch(
         self,
         slug: str,
         body: BatchPredictionRequestSchema,
     ) -> PleBoardSchema:
+        await self._require_user(body.user_id)
         event = await self.ple_repository.get_event_by_slug(slug)
         if event is None:
             raise LookupError(slug)
-
-        effective_user_id = body.user_id
-        if effective_user_id:
-            await self.ple_repository.attach_user_id_by_client(
-                body.client_id, effective_user_id
-            )
 
         match_by_key = {m.match_key: m for m in event.matches}
         for item in body.predictions:
@@ -338,7 +344,7 @@ class PleService:
                     f"종료된 경기({item.match_key})에는 예측할 수 없습니다."
                 )
             await self.ple_repository.upsert_prediction(
-                row.id, body.client_id, item.pick, effective_user_id
+                row.id, body.client_id, item.pick, body.user_id
             )
 
         logger.info(
@@ -346,7 +352,9 @@ class PleService:
             slug,
             len(body.predictions),
         )
-        return await self.get_board(slug, client_id=body.client_id)
+        return await self.get_board(
+            slug, client_id=body.client_id, user_id=body.user_id
+        )
 
     async def set_match_results_batch(
         self,

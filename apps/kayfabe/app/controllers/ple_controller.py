@@ -25,9 +25,16 @@ class PleController:
         logger.info("[PleController] list_events -> Service")
         return await self.ple_service.list_events()
 
-    async def get_board(self, slug: str, client_id: str | None = None) -> PleBoardSchema:
+    async def get_board(
+        self,
+        slug: str,
+        client_id: str | None = None,
+        user_id: int | None = None,
+    ) -> PleBoardSchema:
         logger.debug("[PleController] get_board -> Service — slug=%s", slug)
-        return await self.ple_service.get_board(slug, client_id=client_id)
+        return await self.ple_service.get_board(
+            slug, client_id=client_id, user_id=user_id
+        )
 
     async def sync_event(self, payload: PleEventSyncSchema) -> PleBoardSchema:
         logger.info(
@@ -47,16 +54,13 @@ class PleController:
         slug: str,
         match_key: str,
         body: PredictionRequestSchema,
-        user_id: int | None = None,
     ) -> PleBoardSchema:
         logger.info(
             "[PleController] predict -> Service — slug=%s match=%s",
             slug,
             match_key,
         )
-        return await self.ple_service.record_prediction(
-            slug, match_key, body, user_id=user_id
-        )
+        return await self.ple_service.record_prediction(slug, match_key, body)
 
     async def predict_batch(
         self, slug: str, body: BatchPredictionRequestSchema

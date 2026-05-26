@@ -12,20 +12,18 @@ class ResultService:
         self.repo = repo
 
     async def list_results(self, year: int) -> PleResultsResponse:
-        pairs = await self.repo.list_results(year)
+        events = await self.repo.list_events_by_year(year)
         rows: list[PleResultRow] = []
-        for ple, result in pairs:
-            status = result.status if result else ple.status
-            finished_at = result.finished_at if result else ple.finished_at
+        for ple in events:
             rows.append(
                 PleResultRow(
                     slug=ple.slug,
                     label=ple.label,
                     month=ple.month,
                     year=ple.year,
-                    eventAt=finished_at,
-                    status=status,  # type: ignore[arg-type]
-                    finishedAt=finished_at,
+                    eventAt=ple.finished_at,
+                    status=ple.status,  # type: ignore[arg-type]
+                    finishedAt=ple.finished_at,
                 )
             )
         return PleResultsResponse(year=year, results=rows)
