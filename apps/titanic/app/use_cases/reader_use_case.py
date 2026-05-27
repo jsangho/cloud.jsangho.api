@@ -1,6 +1,3 @@
-from pathlib import Path
-
-import pandas as pd
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -10,37 +7,36 @@ from titanic.app.schemas.passenger_schema import PassengerSchema
 
 logger = LAYER_LOG
 
-_DATA_DIR = Path(__file__).resolve().parent.parent / "data"
-_CSV_PATH = _DATA_DIR / "Titanic-Dataset.csv"
-
 
 class PassengerRepository:
-    """CSV 데이터 접근 및 Neon Postgres 적재."""
+    """Neon Postgres 접근 및 적재."""
 
     def __init__(self, db: AsyncSession | None = None) -> None:
         self.db = db
 
-    def _read_csv(self) -> pd.DataFrame:
-        return pd.read_csv(_CSV_PATH)
-
-    def get_sample_row(self) -> pd.DataFrame:
-        df = self._read_csv()
-        return df.iloc[[0]].astype(object).where(df.iloc[[0]].notna(), None)
-
-    def get_count(self) -> int:
-        return int(self._read_csv().shape[0])
-
-    def get_survived_count(self) -> int:
-        df = self._read_csv()
-        return int((df["Survived"] == 1).sum())
-
-    def get_dead_count(self) -> int:
-        df = self._read_csv()
-        return int((df["Survived"] == 0).sum())
-
-    def get_dataframe(self) -> pd.DataFrame:
-        """학습·검증·Neon 적재용 전체 데이터프레임."""
-        return self._read_csv()
+    async def get_sample_row_in_neon(self) -> dict | None:
+        if self.db is None:
+            return None
+        result = await self.db.execute(
+            select(PassengerModel).order_by(PassengerModel.passenger_id.asc()).limit(1)
+        )
+        row = result.scalar_one_or_none()
+        if row is None:
+            return None
+        return {
+            "PassengerId": row.passenger_id,
+            "Survived": row.survived,
+            "Pclass": row.pclass,
+            "Name": row.name,
+            "Sex": row.sex,
+            "Age": row.age,
+            "SibSp": row.sibsp,
+            "Parch": row.parch,
+            "Ticket": row.ticket,
+            "Fare": row.fare,
+            "Cabin": row.cabin,
+            "Embarked": row.embarked,
+        }
 
     @staticmethod
     def schema_to_orm(passenger: PassengerSchema) -> PassengerModel:
@@ -68,6 +64,22 @@ class PassengerRepository:
         if self.db is None:
             return 0
         result = await self.db.execute(select(func.count()).select_from(PassengerModel))
+        return int(result.scalar_one())
+
+    async def survived_count_in_neon(self) -> int:
+        if self.db is None:
+            return 0
+        result = await self.db.execute(
+            select(func.count()).select_from(PassengerModel).where(PassengerModel.survived == 1)
+        )
+        return int(result.scalar_one())
+
+    async def dead_count_in_neon(self) -> int:
+        if self.db is None:
+            return 0
+        result = await self.db.execute(
+            select(func.count()).select_from(PassengerModel).where(PassengerModel.survived == 0)
+        )
         return int(result.scalar_one())
 
     async def save_passenger(self, passenger: PassengerSchema) -> PassengerModel:

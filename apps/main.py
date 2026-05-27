@@ -11,9 +11,8 @@ if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -33,8 +32,13 @@ from matrix.app.keymaker import get_keymaker
 from secom.app.models.role import UserRole
 from secom.app.schemas.user_schema import UserSchema
 from secom.app.controllers.user_controller import UserController
-from titanic.app.controllers.passenger_controller import PassengerController
 from kayfabe.app.controllers.ple_controller import PleController
+from titanic.adapter.inbound.api.v1.titanic_command_router import (
+    router as titanic_command_router,
+)
+from titanic.adapter.inbound.api.v1.titanic_query_router import (
+    router as titanic_query_router,
+)
 from kayfabe.app.exceptions import PleAuthRequiredError
 from kayfabe.app.controllers.ranking_controller import RankingController
 from kayfabe.app.controllers.result_controller import ResultController
@@ -145,6 +149,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(titanic_query_router)
+app.include_router(titanic_command_router)
+
 
 @app.middleware("http")
 async def log_auth_requests(request: Request, call_next):
@@ -244,40 +251,6 @@ def read_seoul_weather() -> SeoulWeatherResponse:
 @app.get("/db-check")
 async def check_db(db: AsyncSession = Depends(get_db)):
     return await DbHealthAdapter.neon_time_check(db)
-
-
-@app.get("/titanic/data")
-def read_titanic_data():
-    controller = PassengerController()
-    df = controller.get_data()
-    return df.to_dict(orient="records")
-
-
-@app.get("/titanic/count")
-def read_titanic_count():
-    controller = PassengerController()
-    count = controller.get_count()
-    return {"count": count}
-
-
-@app.get("/titanic/problem")
-def read_titanic_problem():
-    controller = PassengerController()
-    return {"summary": controller.get_problem_summary()}
-
-
-@app.get("/titanic/tree")
-def read_titanic_tree():
-    controller = PassengerController()
-    tree = controller.has_decision_tree_model()
-    return {"tree": tree}
-
-
-@app.get("/titanic/model")
-def read_titanic_model():
-    controller = PassengerController()
-    model_name = controller.get_model_name_and_accuracy()
-    return JSONResponse(content=jsonable_encoder(model_name))
 
 
 def _ple_http_error(exc: Exception) -> HTTPException:
@@ -498,10 +471,10 @@ async def ple_live_board(
 
 @app.get("/doro/data")
 def read_doro_data():
-    doro_director = DoroDirector()
-    df = doro_director.get_data()
-
-    return df.to_dict(orient="records")
+    raise HTTPException(
+        status_code=410,
+        detail="프로젝트 내부 파일(CSV) 읽기 기반 엔드포인트는 제거되었습니다.",
+    )
 
 
 @app.get("/results", response_model=PleResultsResponse)
