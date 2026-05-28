@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database import LAYER_LOG
+from core.database import LAYER_LOG
 from kayfabe.app.models.ple_model import PleEventModel
 
 logger = LAYER_LOG

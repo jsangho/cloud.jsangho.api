@@ -4,7 +4,7 @@ from enum import StrEnum
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from database import Base
+from core.database import Base
 
 
 class PleEventStatus(StrEnum):

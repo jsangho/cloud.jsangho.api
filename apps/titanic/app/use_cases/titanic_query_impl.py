@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database import LAYER_LOG
-from titanic.app.use_cases.passenger_service import PassengerService
+from core.database import LAYER_LOG
+from titanic.app.use_cases.train_use_case import PassengerService
 
 logger = LAYER_LOG
 

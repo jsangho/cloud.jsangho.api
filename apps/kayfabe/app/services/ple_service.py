@@ -14,10 +14,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from sqlalchemy import select
 
-from database import LAYER_LOG
+from core.database import LAYER_LOG
 from kayfabe.app.exceptions import PleAuthRequiredError
 from kayfabe.app.models.ple_model import PleEventStatus, PleMatchStatus
-from secom.app.models.user_model import UserModel
+from friday13th.app.models.user_model import UserModel
 from kayfabe.app.repositories.ple_repository import PleRepository
 from kayfabe.app.schemas.ple_schema import (
     CompetitorSchema,

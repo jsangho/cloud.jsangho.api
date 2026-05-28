@@ -3,9 +3,9 @@ from dataclasses import dataclass
 from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database import LAYER_LOG
+from core.database import LAYER_LOG
 from kayfabe.app.models.ple_model import PleMatchModel, PleMatchStatus, PlePredictionModel
-from secom.app.models.user_model import UserModel
+from friday13th.app.models.user_model import UserModel
 
 logger = LAYER_LOG
 

@@ -1,12 +1,12 @@
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database import LAYER_LOG
-from titanic.app.models.survival_model import SurvivalModel
+from core.database import LAYER_LOG
 from titanic.app.schemas.passenger_schema import PassengerSchema
 from titanic.app.schemas.problem_definition import PROBLEM_SUMMARY
-from titanic.app.use_cases.passenger_repository import PassengerRepository
-from titanic.app.use_cases.passenger_validation import (
+from titanic.app.use_cases.reader_use_case import PassengerRepository
+from titanic.app.use_cases.titanic_models import SurvivalModel
+from titanic.app.use_cases.validation_use_case import (
     validate_feature_columns,
     validate_passenger_schema,
 )

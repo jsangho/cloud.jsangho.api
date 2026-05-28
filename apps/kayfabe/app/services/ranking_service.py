@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database import LAYER_LOG
+from core.database import LAYER_LOG
 from kayfabe.app.repositories.ple_repository import PleRepository
 from kayfabe.app.repositories.ranking_repository import LeaderboardRow, RankingRepository
 from kayfabe.app.schemas.ranking_schema import RankingRowSchema, RankingsResponseSchema

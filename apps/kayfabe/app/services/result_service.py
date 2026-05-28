@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from database import LAYER_LOG
+from core.database import LAYER_LOG
 from kayfabe.app.repositories.result_repository import ResultRepository
 from kayfabe.app.schemas.result_schema import PleResultsResponse, PleResultRow
 

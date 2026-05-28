@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from database import LAYER_LOG
+from core.database import LAYER_LOG
 from kayfabe.app.models.ple_model import (
     PleEventModel,
     PleEventStatus,
