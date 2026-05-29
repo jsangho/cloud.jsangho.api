@@ -1,30 +1,25 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from core.database import LAYER_LOG
-from titanic.app.ports.output.james_repository import JamesRepositoryPort
+from core.database import james_upload_info
+from titanic.app.ports.input.james_use_case import JamesUseCase
+from titanic.app.ports.output.james_repository import JamesRepository
 
-logger = LAYER_LOG
 _SRC = Path(__file__).name
 
 
-@dataclass(slots=True)
-class JamesCommandResult:
-    count: int
+class JamesCommand(JamesUseCase):
+    """James CSV 업로드: router 데이터 → repository 영속화."""
 
-
-class JamesCommand:
-    """James CSV 업로드 커맨드 유스케이스."""
-
-    def __init__(self, repository: JamesRepositoryPort) -> None:
-        self._repository = repository
-
-    async def handle_fileupload(
-        self, *, filename: str, rows: list[dict[str, Any]]
-    ) -> JamesCommandResult:
-        logger.info("[JamesUpload][%s] file=%s -> command", _SRC, filename)
-        inserted = await self._repository.save_fileupload_rows(filename=filename, rows=rows)
-        return JamesCommandResult(count=inserted)
+    async def fileupload(
+        self,
+        *,
+        repository: JamesRepository,
+        filename: str,
+        rows: list[dict[str, Any]],
+    ) -> dict[str, int]:
+        james_upload_info(_SRC, "file=%s -> use_case", filename)
+        inserted = await repository.save_fileupload_rows(filename=filename, rows=rows)
+        return {"count": inserted}

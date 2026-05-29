@@ -549,10 +549,18 @@ if __name__ == "__main__":
     # Windows: --reload 시 WatchFiles가 프로세스를 끊을 때 forrtl/libifcoremd 충돌 발생
     use_reload = sys.platform != "win32"
 
-    uvicorn.run(
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+    config = uvicorn.Config(
         "main:app",
         host="127.0.0.1",
         port=8000,
         reload=use_reload,
         loop="asyncio",
     )
+    server = uvicorn.Server(config)
+    try:
+        asyncio.run(server.serve())
+    except KeyboardInterrupt:
+        logger.info("서버를 종료했습니다.")

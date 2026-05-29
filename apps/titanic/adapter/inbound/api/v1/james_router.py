@@ -7,11 +7,10 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import LAYER_LOG
-from core.database import get_db
-from titanic.app.ports.input.james_use_case import JamesUseCaseImpl, JamesUseCasePort
+from core.database import get_db, james_upload_info
+from titanic.app.ports.input.james_use_case import JamesUseCase
+from titanic.app.ports.output.james_repository import JamesRepository
 
-logger = LAYER_LOG
 _SRC = Path(__file__).name
 
 router = APIRouter(prefix="/titanic/james", tags=["james"])
@@ -40,18 +39,26 @@ def _decode_csv_bytes(raw: bytes) -> str:
             continue
     raise HTTPException(status_code=400, detail="CSV 인코딩을 해석할 수 없습니다. UTF-8로 저장해 주세요.")
 
-# /titanic/james/fileupload 엔드포인트: Titanic
-def get_james_use_case(db: AsyncSession = Depends(get_db)) -> JamesUseCasePort:
-    return JamesUseCaseImpl(db=db)
+
+def get_james_use_case() -> JamesUseCase:
+    from titanic.app.use_cases.james_command import JamesCommand
+
+    return JamesCommand()
+
+
+def get_james_repository(db: AsyncSession = Depends(get_db)) -> JamesRepository:
+    from titanic.adapter.outbound.pg.james_pg_repository import JamesPgRepository
+
+    return JamesPgRepository(db)
 
 
 @router.post("/fileupload")
 async def upload_titanic_csv(
     file: UploadFile = File(...),
-    use_case: JamesUseCasePort = Depends(get_james_use_case),
+    use_case: JamesUseCase = Depends(get_james_use_case),
+    repository: JamesRepository = Depends(get_james_repository),
 ):
     filename = (file.filename or "").strip() or "<unknown>"
-    logger.info("[JamesUpload][%s] file=%s -> inbound(router)", _SRC, filename)
     if not (file.filename or "").lower().endswith(".csv"):
         raise HTTPException(status_code=400, detail="CSV 파일(.csv)만 업로드할 수 있습니다.")
 
@@ -76,10 +83,8 @@ async def upload_titanic_csv(
         out["gender"] = gender
         rows.append(out)
 
-    logger.info("[JamesUpload][%s] file=%s -> parsed rows=%s (Sex->gender)", _SRC, filename, len(rows))
-    result = await use_case.fileupload(filename=filename, rows=rows)
-    logger.info("[JamesUpload][%s] file=%s -> completed inserted=%s", _SRC, filename, result.get("count"))
-    return {"count": result.get("count", len(rows)), "inserted": result.get("count", len(rows))}
-
-
-
+    james_upload_info(_SRC, "file=%s rows=%s -> inbound", filename, len(rows))
+    result = await use_case.fileupload(
+        repository=repository, filename=filename, rows=rows
+    )
+    return {"count": result["count"], "inserted": result["count"]}

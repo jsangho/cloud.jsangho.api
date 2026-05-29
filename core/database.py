@@ -28,6 +28,14 @@ APP_LOG = logging.getLogger("uvicorn.error")
 LAYER_LOG = APP_LOG
 
 
+def james_upload_info(src: str, msg: str, *args: object) -> None:
+    """James 업로드 계층 로그 (현재 시각 + 파일명)."""
+    from datetime import datetime
+
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    LAYER_LOG.info("[JamesUpload][%s][%s] " + msg, ts, src, *args)
+
+
 class Base(DeclarativeBase):
     pass
 
@@ -69,6 +77,8 @@ def configure_db_logging() -> None:
 def _async_database_url(url: str) -> str:
     if url.startswith("postgresql+asyncpg://"):
         return url
+    if url.startswith("postgresql+psycopg://"):
+        return url.replace("postgresql+psycopg://", "postgresql+asyncpg://", 1)
     if url.startswith("postgresql://"):
         return url.replace("postgresql://", "postgresql+asyncpg://", 1)
     if url.startswith("postgres://"):

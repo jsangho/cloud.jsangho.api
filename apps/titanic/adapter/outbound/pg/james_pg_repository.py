@@ -5,10 +5,10 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import LAYER_LOG
+from core.database import james_upload_info
+from titanic.app.ports.output.james_repository import JamesRepository
 from titanic.app.use_cases.titanic_models import PassengerModel
 
-logger = LAYER_LOG
 _SRC = Path(__file__).name
 
 
@@ -48,7 +48,7 @@ def _row_to_passenger(row: dict[str, Any]) -> PassengerModel:
     )
 
 
-class JamesPgRepository:
+class JamesPgRepository(JamesRepository):
     """Postgres(Neon) 저장 어댑터."""
 
     def __init__(self, db: AsyncSession) -> None:
@@ -60,14 +60,10 @@ class JamesPgRepository:
         if not rows:
             return 0
 
-        logger.info("[JamesUpload][%s] file=%s -> pg_adapter(neon) flush(start)", _SRC, filename)
         for row in rows:
             self.db.add(_row_to_passenger(row))
         await self.db.flush()
-        logger.info(
-            "[JamesUpload][%s] file=%s -> pg_adapter(neon) flush(done) inserted=%s",
-            _SRC,
-            filename,
-            len(rows),
+        james_upload_info(
+            _SRC, "file=%s inserted=%s -> outbound", filename, len(rows)
         )
         return len(rows)
