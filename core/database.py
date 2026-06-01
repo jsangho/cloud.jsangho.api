@@ -28,12 +28,20 @@ APP_LOG = logging.getLogger("uvicorn.error")
 LAYER_LOG = APP_LOG
 
 
-def james_upload_info(src: str, msg: str, *args: object) -> None:
-    """James 업로드 계층 로그 (현재 시각 + 파일명)."""
+def james_director_upload_info(src: str, msg: str, *args: object) -> None:
+    """James Director 업로드 계층 로그 (현재 시각 + 파일명)."""
     from datetime import datetime
 
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    LAYER_LOG.info("[JamesUpload][%s][%s] " + msg, ts, src, *args)
+    LAYER_LOG.info("[JamesDirectorUpload][%s][%s] " + msg, ts, src, *args)
+
+
+def walter_roaster_open_info(src: str, msg: str, *args: object) -> None:
+    """Walter Roaster 조회 계층 로그 (현재 시각)."""
+    from datetime import datetime
+
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    LAYER_LOG.info("[WalterRoasterOpen][%s][%s] " + msg, ts, src, *args)
 
 
 class Base(DeclarativeBase):
@@ -102,7 +110,11 @@ def _strip_unsupported_asyncpg_query_params(url: str) -> str:
 _raw_url = os.getenv("DATABASE_URL", "").strip()
 DATABASE_URL = _strip_unsupported_asyncpg_query_params(_async_database_url(_raw_url)) if _raw_url else ""
 
-engine = create_async_engine(DATABASE_URL, echo=_neon_sql_log_enabled()) if DATABASE_URL else None
+engine = (
+    create_async_engine(DATABASE_URL, echo=_neon_sql_log_enabled(), pool_pre_ping=True)
+    if DATABASE_URL
+    else None
+)
 AsyncSessionLocal = (
     async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
     if engine is not None
@@ -145,7 +157,7 @@ async def init_db() -> None:
     if engine is None:
         return
 
-    import titanic.app.use_cases.titanic_models  # noqa: F401
+    import titanic.domain.entities.passenger_model  # noqa: F401
 
     try:
         import secom.app.models.user_model  # noqa: F401
@@ -153,7 +165,12 @@ async def init_db() -> None:
         pass
 
     try:
-        import kayfabe.app.models.ple_model  # noqa: F401
+        import kayfabe.domain.entities.ple_model  # noqa: F401
+    except ImportError:
+        pass
+
+    try:
+        import friday13th.domain.entities.user_model  # noqa: F401
     except ImportError:
         pass
 
@@ -182,6 +199,10 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             # 트랜잭션이 열려 있으면 commit 하고, 아니면 아무 것도 하지 않습니다.
             if session.in_transaction():
                 await session.commit()
+        except asyncio.CancelledError:
+            if session.in_transaction():
+                await session.rollback()
+            raise
         except Exception:
             if session.in_transaction():
                 await session.rollback()
