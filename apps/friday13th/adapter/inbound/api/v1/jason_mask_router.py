@@ -7,13 +7,16 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
+from friday13th.adapter.inbound.api.schemas.friday13th_preview import (
+    format_preview_signup,
+)
 from friday13th.app.ports.input.jason_mask_schema import JasonMaskSchema
 from friday13th.app.ports.input.jason_mask_use_case import JasonMaskUseCase
 from friday13th.domain.value_objects.role import UserRole
 
 logger = logging.getLogger("uvicorn.error")
 
-jason_mask_router = APIRouter(prefix="/friday13th/jason-mask",tags=["jason-mask"])
+jason_mask_router = APIRouter(prefix="/jason-mask", tags=["jason-mask"])
 
 
 class SignupRequest(BaseModel):
@@ -50,7 +53,20 @@ async def signup(
     req: SignupRequest,
     use_case: JasonMaskUseCase = Depends(get_jason_mask_use_case),
 ):
-    logger.info("[API] POST /signup — userId=%s", req.user_id)
+    logger.info(
+        "[Friday13th JasonMask 라우터] 회원가입 요청 미리보기 (상위 %s건)",
+        1,
+    )
+    preview_blocks = [
+        format_preview_signup(
+            1,
+            login_id=req.user_id.strip(),
+            nickname=req.nickname,
+            email=req.email,
+            role=UserRole.USER,
+        )
+    ]
+    logger.info("\n%s", "\n".join(preview_blocks))
     user_schema = JasonMaskSchema(
         login_id=req.user_id.strip(),
         nickname=req.nickname,

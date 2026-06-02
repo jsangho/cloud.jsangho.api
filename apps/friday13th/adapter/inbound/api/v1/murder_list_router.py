@@ -7,12 +7,15 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
+from friday13th.adapter.inbound.api.schemas.friday13th_preview import (
+    format_preview_profile_request,
+)
 from friday13th.app.ports.input.murder_list_use_case import MurderListUseCase
 from friday13th.domain.value_objects.role import UserRole
 
 logger = logging.getLogger("uvicorn.error")
 
-murder_list_router = APIRouter(prefix="/friday13th/murder-list", tags=["murder-list"])
+murder_list_router = APIRouter(prefix="/murder-list", tags=["murder-list"])
 
 
 class UserProfileResponse(BaseModel):
@@ -41,7 +44,12 @@ async def get_user_profile(
     user_id: int,
     use_case: MurderListUseCase = Depends(get_murder_list_use_case),
 ):
-    logger.info("[API] GET /users/%s", user_id)
+    logger.info(
+        "[Friday13th MurderList 라우터] 프로필 조회 요청 미리보기 (상위 %s건)",
+        1,
+    )
+    preview_blocks = [format_preview_profile_request(1, user_id=user_id)]
+    logger.info("\n%s", "\n".join(preview_blocks))
     user = await use_case.get_user_by_id(user_id=user_id)
     return UserProfileResponse(
         id=user.id,

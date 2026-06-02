@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from titanic.app.ports.input.andrews_blueprint_use_case import AndrewsBlueprintUseCase
 
-andrews_blueprint_router = APIRouter(prefix="/titanic/andrews", tags=["andrews"])
+andrews_blueprint_router = APIRouter(prefix="/andrews", tags=["andrews"])
 
 
 def get_andrews_blueprint_use_case(

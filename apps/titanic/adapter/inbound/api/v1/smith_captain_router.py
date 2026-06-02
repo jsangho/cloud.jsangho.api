@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from titanic.app.ports.input.smith_captain_use_case import SmithCaptainUseCase
 
-smith_captain_router = APIRouter(prefix="/titanic/smith", tags=["smith"])
+smith_captain_router = APIRouter(prefix="/smith", tags=["smith"])
 
 
 def get_smith_captain_use_case(

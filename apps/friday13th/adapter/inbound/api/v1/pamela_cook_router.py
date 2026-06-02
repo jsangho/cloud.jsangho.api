@@ -7,12 +7,13 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import get_db
+from friday13th.adapter.inbound.api.schemas.friday13th_preview import format_preview_login
 from friday13th.app.ports.input.pamela_cook_use_case import PamelaCookUseCase
 from friday13th.domain.value_objects.role import UserRole
 
 logger = logging.getLogger("uvicorn.error")
 
-pamela_cook_router = APIRouter(prefix="/friday13th/pamela-cook", tags=["pamela-cook"])
+pamela_cook_router = APIRouter(prefix="/pamela-cook", tags=["pamela-cook"])
 
 
 class LoginRequest(BaseModel):
@@ -46,7 +47,12 @@ async def login(
     use_case: PamelaCookUseCase = Depends(get_pamela_cook_use_case),
 ):
     login_id = req.user_id.strip()
-    logger.info("[API] POST /login — userId=%s", login_id)
+    logger.info(
+        "[Friday13th PamelaCook 라우터] 로그인 요청 미리보기 (상위 %s건)",
+        1,
+    )
+    preview_blocks = [format_preview_login(1, login_id=login_id)]
+    logger.info("\n%s", "\n".join(preview_blocks))
     user = await use_case.login_user(login_id=login_id, password=req.password)
     return LoginResponse(
         message="로그인되었습니다.",

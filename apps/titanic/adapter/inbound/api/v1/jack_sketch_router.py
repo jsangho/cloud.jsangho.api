@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from titanic.app.ports.input.jack_sketch_use_case import JackSketchUseCase
 
-jack_sketch_router = APIRouter(prefix="/titanic/jack", tags=["jack"])
+jack_sketch_router = APIRouter(prefix="/jack", tags=["jack"])
 
 
 def get_jack_sketch_use_case(db: AsyncSession = Depends(get_db)) -> JackSketchUseCase:

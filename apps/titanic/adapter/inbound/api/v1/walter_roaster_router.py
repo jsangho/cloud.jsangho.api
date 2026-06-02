@@ -14,7 +14,7 @@ from titanic.app.ports.input.walter_roaster_use_case import WalterRoasterUseCase
 _SRC = Path(__file__).name
 
 walter_roaster_router = APIRouter(
-    prefix="/titanic/walter-roaster", tags=["walter-roaster"]
+    prefix="/walter-roaster", tags=["walter-roaster"]
 )
 
 

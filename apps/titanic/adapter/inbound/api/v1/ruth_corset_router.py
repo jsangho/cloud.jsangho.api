@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from titanic.app.ports.input.ruth_corset_use_case import RuthCorsetUseCase
 
-ruth_corset_router = APIRouter(prefix="/titanic/ruth", tags=["ruth"])
+ruth_corset_router = APIRouter(prefix="/ruth", tags=["ruth"])
 
 
 def get_ruth_corset_use_case(db: AsyncSession = Depends(get_db)) -> RuthCorsetUseCase:

@@ -4,6 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import LAYER_LOG
+from friday13th.adapter.inbound.api.schemas.friday13th_preview import format_preview_signup
 from friday13th.app.ports.input.jason_mask_schema import JasonMaskSchema
 from friday13th.app.ports.output.jason_mask_repository import JasonMaskRepository
 from friday13th.domain.entities.user_model import UserModel
@@ -58,6 +59,20 @@ class JasonMaskPgRepository(JasonMaskRepository):
     async def save_user(
         self, user_schema: JasonMaskSchema, password_hash: str
     ) -> UserModel:
+        logger.info(
+            "[JasonMaskPgRepository] Repository에서 받은 회원가입 스키마 미리보기 (상위 %s건)",
+            1,
+        )
+        preview_blocks = [
+            format_preview_signup(
+                1,
+                login_id=user_schema.login_id,
+                nickname=user_schema.nickname,
+                email=user_schema.email,
+                role=user_schema.role,
+            )
+        ]
+        logger.info("\n%s", "\n".join(preview_blocks))
         logger.info(
             "[JasonMaskPgRepository] save_user -> Neon — userId=%s, email=%s",
             user_schema.login_id,

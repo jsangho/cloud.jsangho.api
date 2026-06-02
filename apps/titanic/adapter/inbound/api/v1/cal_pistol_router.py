@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from titanic.app.ports.input.cal_pistol_use_case import CalPistolUseCase
 
-cal_pistol_router = APIRouter(prefix="/titanic/cal", tags=["cal"])
+cal_pistol_router = APIRouter(prefix="/cal", tags=["cal"])
 
 
 def get_cal_pistol_use_case(db: AsyncSession = Depends(get_db)) -> CalPistolUseCase:

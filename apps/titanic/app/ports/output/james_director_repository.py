@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
+
+from titanic.app.dtos.james_director_dto import BookingCommand, PersonCommand
 
 
 class JamesDirectorRepository(ABC):
@@ -9,6 +10,12 @@ class JamesDirectorRepository(ABC):
 
     @abstractmethod
     async def save_fileupload_rows(
-        self, *, filename: str, rows: list[dict[str, Any]]
+        self,
+        *,
+        person_commands: list[PersonCommand],
+        booking_commands: list[BookingCommand]
+        ,
+        filename: str,
+        rows: list[dict[str, object]],
     ) -> int:
         ...

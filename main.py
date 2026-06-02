@@ -35,14 +35,13 @@ from core.database import (
 )
 from social_network.app.doro_director import DoroDirector
 from matrix.app.keymaker import get_keymaker
-from friday13th.adapter.inbound.api.v1.jason_mask_router import jason_mask_router
-from friday13th.adapter.inbound.api.v1.murder_list_router import murder_list_router
-from friday13th.adapter.inbound.api.v1.pamela_cook_router import pamela_cook_router
+from friday13th.adapter.inbound.api import friday13th_router
 from kayfabe.adapter.inbound.api.v1.ple_router import router as ple_router
 from kayfabe.adapter.inbound.api.v1.pleinfo_router import router as pleinfo_router
 from titanic.adapter.inbound.api import titanic_router
 from kayfabe.adapter.inbound.api.v1.ranking_router import router as ple_ranking_router
 from kayfabe.adapter.inbound.api.v1.result_router import router as ple_result_router
+from titanic.app.ports.input.james_director_use_case import get_james_director_use_case
 
 keymaker = get_keymaker()
 logger = logging.getLogger("uvicorn.error")
@@ -79,18 +78,30 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Jsangho Main Page", lifespan=lifespan)
 
+
+def _provide_james_director_use_case(session: AsyncSession = Depends(get_db)):
+    from titanic.app.use_cases.james_director_interactor import JamesDirectorInteractor
+
+    # JamesDirectorInteractor가 내부에서 `JamesDirectorPgRepository(None)`로 세션을 생성/사용합니다.
+    # (세션은 FastAPI DI로도 받을 수 있지만, 현재 유스케이스 설계에 맞춰 인자 없이 생성합니다.)
+    return JamesDirectorInteractor()
+
+
+app.dependency_overrides[get_james_director_use_case] = _provide_james_director_use_case
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(titanic_router)
-app.include_router(jason_mask_router)
-app.include_router(pamela_cook_router)
-app.include_router(murder_list_router)
+app.include_router(friday13th_router)
 app.include_router(ple_router)
 app.include_router(pleinfo_router)
 app.include_router(ple_ranking_router)

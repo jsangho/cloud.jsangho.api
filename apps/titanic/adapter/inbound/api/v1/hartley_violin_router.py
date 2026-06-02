@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from titanic.app.ports.input.hartley_violin_use_case import HartleyViolinUseCase
 
-hartley_violin_router = APIRouter(prefix="/titanic/hartley", tags=["hartley"])
+hartley_violin_router = APIRouter(prefix="/hartley", tags=["hartley"])
 
 
 def get_hartley_violin_use_case(

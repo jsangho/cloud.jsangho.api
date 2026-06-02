@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from titanic.app.ports.input.rose_diamond_use_case import RoseDiamondUseCase
 
-rose_diamond_router = APIRouter(prefix="/titanic/rose", tags=["rose"])
+rose_diamond_router = APIRouter(prefix="/rose", tags=["rose"])
 
 
 def get_rose_diamond_use_case(db: AsyncSession = Depends(get_db)) -> RoseDiamondUseCase:

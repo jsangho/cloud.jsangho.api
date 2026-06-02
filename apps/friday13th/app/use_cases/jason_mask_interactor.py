@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import HTTPException
 
 from core.database import LAYER_LOG
+from friday13th.adapter.inbound.api.schemas.friday13th_preview import format_preview_signup
 from friday13th.app.ports.input.jason_mask_schema import JasonMaskSchema
 from friday13th.app.ports.input.jason_mask_use_case import JasonMaskUseCase
 from friday13th.app.ports.output.jason_mask_repository import JasonMaskRepository
@@ -18,6 +19,20 @@ class JasonMaskInteractor(JasonMaskUseCase):
         self._repository = repository
 
     async def save_user(self, *, user_schema: JasonMaskSchema) -> None:
+        logger.info(
+            "[JasonMaskInteractor] 라우터에서 유스케이스로 옮겨진 회원가입 스키마 미리보기 (상위 %s건)",
+            1,
+        )
+        preview_blocks = [
+            format_preview_signup(
+                1,
+                login_id=user_schema.login_id,
+                nickname=user_schema.nickname,
+                email=user_schema.email,
+                role=user_schema.role,
+            )
+        ]
+        logger.info("\n%s", "\n".join(preview_blocks))
         logger.info(
             "[JasonMaskInteractor] save_user -> Repository — userId=%s, email=%s",
             user_schema.login_id,
