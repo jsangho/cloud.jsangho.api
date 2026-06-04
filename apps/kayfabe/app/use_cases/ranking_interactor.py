@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import LAYER_LOG
+from core.matrix.oracle_database import LAYER_LOG
 from kayfabe.adapter.outbound.pg.ple_pg_repository import PlePgRepository
 from kayfabe.adapter.outbound.pg.ranking_pg_repository import LeaderboardRow, RankingRepository
 from kayfabe.app.ports.input.ranking_schema import RankingRowSchema, RankingsResponseSchema
@@ -31,7 +31,7 @@ class RankingService:
         nickname: str | None = None,
     ) -> RankingsResponseSchema:
         logger.info(
-            "[RankingService] list_rankings -> Repository — limit=%d nickname=%s",
+            "[RankingService] list_rankings -> Repository ??limit=%d nickname=%s",
             limit,
             nickname or "-",
         )
@@ -48,6 +48,6 @@ class RankingService:
                 if mine is not None:
                     my_rank = self._to_schema(mine)
 
-        logger.info("[RankingService] list_rankings <- Repository — rows=%d", len(rows))
+        logger.info("[RankingService] list_rankings <- Repository ??rows=%d", len(rows))
         return RankingsResponseSchema(rows=rows, my_rank=my_rank)
 

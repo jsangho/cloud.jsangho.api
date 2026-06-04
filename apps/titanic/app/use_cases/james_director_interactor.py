@@ -7,9 +7,10 @@ from titanic.adapter.inbound.api.schemas.james_director_schema import (
     TitanicRecordSchema,
     format_preview_record,
 )
-from titanic.app.ports.input.james_director_use_case import JamesDirectorUseCase
 from titanic.adapter.outbound.pg.james_director_pg_repository import JamesDirectorPgRepository
-from titanic.app.dtos.james_director_dto import PersonCommand, BookingCommand
+from titanic.app.dtos.james_director_dto import BookingCommand, PersonCommand
+from titanic.app.ports.input.james_director_use_case import JamesDirectorUseCase
+from titanic.app.ports.output.james_director_repository import JamesDirectorRepository
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -25,7 +26,10 @@ class JamesDirectorInteractor(JamesDirectorUseCase):
         return await self.receive_uploaded_records(records)
 
     async def receive_uploaded_records(
-        self, schema: list[TitanicRecordSchema]
+        self,
+        schema: list[TitanicRecordSchema],
+        *,
+        filename: str = "",
     ) -> dict[str, Any]:
         logger.info(
             "[제임스 유스케이스] 라우터에서 유스케이스로 옮겨진 스키마 레코드 미리보기 (상위 %s건)",
@@ -42,7 +46,6 @@ class JamesDirectorInteractor(JamesDirectorUseCase):
 
         person_commands: list[PersonCommand] = []
         booking_commands: list[BookingCommand] = []
-        rows: list[dict[str, object]] = []
 
         for record in schema:
             person_commands.append(
@@ -65,14 +68,12 @@ class JamesDirectorInteractor(JamesDirectorUseCase):
                     embarked=record.embarked or "",
                 )
             )
-            rows.append(record.to_upload_row())
 
         repository : JamesDirectorRepository = JamesDirectorPgRepository(None)
-        
+
         count = await repository.save_fileupload_rows(
             person_commands=person_commands,
             booking_commands=booking_commands,
-            filename="",
-            rows=rows,
+            filename=filename,
         )
         return {"count": count}

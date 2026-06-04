@@ -16,6 +16,14 @@ from titanic.app.ports.input.james_director_use_case import (
 )
 from titanic.app.use_cases.james_director_interactor import JamesDirectorInteractor
 
+'''
+ james_director_router.py
+ 전설적인 흥행작 <타이타닉>을 연출하여
+ "내가 세상의 왕이다!"를 외친 제임스 카메론 감독의 라우터
+ 완벽주의 성향으로 타이타닉의 모든 세트와 디테일을
+ 고증한 아키텍처의 총괄 디렉터 역할 수행
+'''
+
 logger = logging.getLogger("uvicorn.error")
 
 
@@ -48,6 +56,14 @@ async def upload_titanic_file(
         for row in reader
         if row
     ]
+    if not schema:
+        raise HTTPException(status_code=400, detail="CSV에 데이터 행이 없습니다.")
+
+    logger.info(
+        "[제임스 라우터] CSV 파싱 완료: 총 %s건 (file=%s)",
+        len(schema),
+        filename,
+    )
 
     # 미리보기 로그 출력
     logger.info(
@@ -62,11 +78,7 @@ async def upload_titanic_file(
     if preview_blocks:
         logger.info("\n%s", "\n".join(preview_blocks))
 
-    # use_case : JamesDirectorUseCase = JamesDirectorInteractor()
-    # (DB 연결이 없어도 동작하도록 Interactor 기본 저장소는 no-op 처리됨)
-    use_case: JamesDirectorUseCase = JamesDirectorInteractor()
-    
-    result = await use_case.receive_uploaded_records(schema)
+    result = await use_case.receive_uploaded_records(schema, filename=filename)
     return JamesDirectorFileuploadResponse(
         count=result["count"],
         inserted=result["count"],

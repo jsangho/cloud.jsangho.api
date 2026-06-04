@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
+from core.matrix.oracle_database import get_db
 from kayfabe.app.ports.input.ple_schema import (
     BatchPredictionRequestSchema,
     BatchResultsRequestSchema,
@@ -24,7 +24,7 @@ def _ple_http_error(exc: Exception) -> HTTPException:
     if isinstance(exc, LookupError):
         return HTTPException(status_code=404, detail=str(exc) or "Not found")
     if isinstance(exc, PleAuthRequiredError):
-        return HTTPException(status_code=401, detail=str(exc) or "로그인이 필요합니다.")
+        return HTTPException(status_code=401, detail=str(exc) or "ë¡ê·¸?¸ì´ ?ì?©ë??")
     if isinstance(exc, ValueError):
         return HTTPException(status_code=400, detail=str(exc))
     raise exc
@@ -48,9 +48,9 @@ async def sync_ple_from_client(
     payload: PleEventSyncSchema,
     use_case: PleUseCase = Depends(get_ple_use_case),
 ):
-    """프론트 매치 카드를 Neon에 upsert."""
+    """?ë¡ ??ë§¤ì¹ ì¹´ëë¥?Neon??upsert."""
     if payload.slug != slug:
-        raise HTTPException(status_code=400, detail="URL slug와 본문 slug가 일치하지 않습니다.")
+        raise HTTPException(status_code=400, detail="URL slug? ë³¸ë¬¸ slugê° ?¼ì¹?ì? ?ìµ?ë¤.")
     try:
         return await use_case.sync_event(payload=payload)
     except ValueError as e:
@@ -64,10 +64,11 @@ async def sync_ple_from_client(
 async def link_ple_predictions(
     body: LinkPredictionsSchema,
 ):
-    """(레거시) 로그인 필수 정책 이후 신규 예측에는 사용하지 않습니다."""
+    """(?ê±°?? ë¡ê·¸???ì ?ì±
+ ?´í ? ê· ?ì¸¡?ë ?¬ì©?ì? ?ìµ?ë¤."""
     raise HTTPException(
         status_code=410,
-        detail="예측은 로그인 후 저장됩니다. link-predictions API는 더 이상 사용하지 않습니다.",
+        detail="?ì¸¡? ë¡ê·¸??????¥ë©?ë¤. link-predictions API?????´ì ?¬ì©?ì? ?ìµ?ë¤.",
     )
 
 
@@ -81,7 +82,7 @@ async def predict_ple_batch(
     body: BatchPredictionRequestSchema,
     use_case: PleUseCase = Depends(get_ple_use_case),
 ):
-    """경기 예측 일괄 저장."""
+    """ê²½ê¸° ?ì¸¡ ?¼ê´ ???"""
     try:
         return await use_case.record_predictions_batch(slug=slug, body=body)
     except (LookupError, ValueError) as e:
@@ -98,7 +99,7 @@ async def set_ple_results_batch(
     body: BatchResultsRequestSchema,
     use_case: PleUseCase = Depends(get_ple_use_case),
 ):
-    """경기 결과 일괄 등록."""
+    """ê²½ê¸° ê²°ê³¼ ?¼ê´ ?±ë¡."""
     try:
         return await use_case.set_match_results_batch(slug=slug, body=body)
     except (LookupError, ValueError) as e:
@@ -116,7 +117,7 @@ async def predict_ple_match(
     body: PredictionRequestSchema,
     use_case: PleUseCase = Depends(get_ple_use_case),
 ):
-    """경기 예측 1회 저장 (Neon ple_predictions)."""
+    """ê²½ê¸° ?ì¸¡ 1?????(Neon ple_predictions)."""
     try:
         return await use_case.record_prediction(slug=slug, match_key=match_key, body=body)
     except (LookupError, ValueError) as e:
@@ -134,7 +135,7 @@ async def set_ple_match_result(
     body: MatchResultUpdateSchema,
     use_case: PleUseCase = Depends(get_ple_use_case),
 ):
-    """경기 결과 등록·갱신 (Neon ple_matches)."""
+    """ê²½ê¸° ê²°ê³¼ ?±ë¡Â·ê°±ì  (Neon ple_matches)."""
     try:
         return await use_case.set_match_result(slug=slug, match_key=match_key, body=body)
     except (LookupError, ValueError) as e:

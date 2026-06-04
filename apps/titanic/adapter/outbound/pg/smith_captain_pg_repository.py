@@ -5,7 +5,7 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import LAYER_LOG
+from core.matrix.oracle_database import LAYER_LOG
 from titanic.app.ports.output.smith_captain_repository import SmithCaptainRepository
 
 logger = LAYER_LOG
@@ -13,7 +13,7 @@ _SRC = Path(__file__).name
 
 
 class SmithCaptainPgRepository(SmithCaptainRepository):
-    """Neon(Postgres) Smith 선장 조회 어댑터."""
+    """Neon(Postgres) Smith ? ì¥ ì¡°í ?´ë??"""
 
     def __init__(self, db: AsyncSession) -> None:
         self._db = db

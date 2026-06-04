@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import LAYER_LOG
+from core.matrix.oracle_database import LAYER_LOG
 from friday13th.domain.entities.user_model import UserModel
 from kayfabe.domain.entities.ple_model import PleMatchModel, PleMatchStatus, PlePredictionModel
 
@@ -90,7 +90,7 @@ class RankingRepository:
             )
             for rank, nickname, score, correct, graded in result.all()
         ]
-        logger.info("[RankingRepository] list_ranked <- Neon — count=%d", len(rows))
+        logger.info("[RankingRepository] list_ranked <- Neon ??count=%d", len(rows))
         return rows
 
     async def get_ranked_by_nickname(self, nickname: str) -> LeaderboardRow | None:

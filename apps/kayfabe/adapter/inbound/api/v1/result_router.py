@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
+from core.matrix.oracle_database import get_db
 from kayfabe.adapter.outbound.pg.result_pg_repository import ResultRepository
 from kayfabe.app.ports.input.result_schema import PleResultsResponse
 from kayfabe.app.use_cases.result_interactor import ResultService

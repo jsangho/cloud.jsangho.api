@@ -4,7 +4,7 @@ from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from core.database import LAYER_LOG
+from core.matrix.oracle_database import LAYER_LOG
 from kayfabe.app.ports.input.ple_schema import PleAiRecordSchema, PleAiStatsSchema
 from kayfabe.app.ports.output.pleinfo_repository import PleInfoRepository
 from kayfabe.domain.entities.ple_model import PleEventModel, PleMatchModel, PlePredictionModel
@@ -13,7 +13,7 @@ logger = LAYER_LOG
 
 
 class PleInfoPgRepository(PleInfoRepository):
-    """Neon(Postgres) PLE 조회 어댑터."""
+    """Neon(Postgres) PLE ì¡°í ?´ë??"""
 
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
@@ -26,11 +26,11 @@ class PleInfoPgRepository(PleInfoRepository):
             .order_by(PleEventModel.month)
         )
         rows = list(result.scalars().all())
-        logger.info("[PleInfoPgRepository] list_events <- Neon — count=%d", len(rows))
+        logger.info("[PleInfoPgRepository] list_events <- Neon ??count=%d", len(rows))
         return rows
 
     async def get_event_by_slug(self, slug: str) -> PleEventModel | None:
-        logger.info("[PleInfoPgRepository] get_event_by_slug -> Neon — slug=%s", slug)
+        logger.info("[PleInfoPgRepository] get_event_by_slug -> Neon ??slug=%s", slug)
         result = await self.db.execute(
             select(PleEventModel)
             .where(PleEventModel.slug == slug)
@@ -133,5 +133,5 @@ class PleInfoPgRepository(PleInfoRepository):
             accuracy_percent=accuracy,
             recent=recent,
         )
-        logger.info("[PleInfoPgRepository] get_ai_stats <- Neon — graded=%d", total_graded)
+        logger.info("[PleInfoPgRepository] get_ai_stats <- Neon ??graded=%d", total_graded)
         return stats

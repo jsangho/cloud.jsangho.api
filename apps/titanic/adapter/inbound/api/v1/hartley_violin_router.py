@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
+from core.matrix.oracle_database import get_db
 from titanic.app.ports.input.hartley_violin_use_case import HartleyViolinUseCase
 
 hartley_violin_router = APIRouter(prefix="/hartley", tags=["hartley"])

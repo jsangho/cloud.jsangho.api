@@ -13,9 +13,7 @@ class JamesDirectorRepository(ABC):
         self,
         *,
         person_commands: list[PersonCommand],
-        booking_commands: list[BookingCommand]
-        ,
+        booking_commands: list[BookingCommand],
         filename: str,
-        rows: list[dict[str, object]],
     ) -> int:
         ...

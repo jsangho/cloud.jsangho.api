@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
+from core.matrix.oracle_database import get_db
 from friday13th.adapter.inbound.api.schemas.friday13th_preview import (
     format_preview_signup,
 )
@@ -22,15 +22,15 @@ jason_mask_router = APIRouter(prefix="/jason-mask", tags=["jason-mask"])
 class SignupRequest(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
-    user_id: str = Field(..., alias="userId", min_length=1, description="회원가입 ID")
-    nickname: str = Field(..., min_length=1, description="회원가입 닉네임")
-    email: str = Field(..., min_length=1, description="회원가입 이메일")
-    password: str = Field(..., min_length=1, description="회원가입 비밀번호")
+    user_id: str = Field(..., alias="userId", min_length=1, description="???? ID")
+    nickname: str = Field(..., min_length=1, description="???? ???")
+    email: str = Field(..., min_length=1, description="???? ???")
+    password: str = Field(..., min_length=1, description="???? ????")
     password_confirm: str = Field(
         ...,
         alias="passwordConfirm",
         min_length=1,
-        description="회원가입 비밀번호 확인",
+        description="???? ???? ??",
     )
 
 
@@ -54,7 +54,7 @@ async def signup(
     use_case: JasonMaskUseCase = Depends(get_jason_mask_use_case),
 ):
     logger.info(
-        "[Friday13th JasonMask 라우터] 회원가입 요청 미리보기 (상위 %s건)",
+        "[Friday13th JasonMask ???] ???? ?? ???? (?? %s?)",
         1,
     )
     preview_blocks = [
@@ -77,7 +77,7 @@ async def signup(
     )
     await use_case.save_user(user_schema=user_schema)
     return SignupResponse(
-        message="회원가입이 완료되었습니다.",
+        message="????? ???????.",
         nickname=req.nickname,
         email=req.email,
         role=UserRole.USER,

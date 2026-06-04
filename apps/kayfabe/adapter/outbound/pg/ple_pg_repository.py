@@ -5,7 +5,7 @@ from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import LAYER_LOG
+from core.matrix.oracle_database import LAYER_LOG
 from friday13th.domain.entities.user_model import UserModel
 from kayfabe.adapter.outbound.pg.pleinfo_pg_repository import PleInfoPgRepository
 from kayfabe.app.ports.input.ple_schema import (
@@ -202,7 +202,7 @@ class PlePgRepository(PleRepository):
         await self.db.flush()
         count = result.rowcount if result.rowcount is not None else 0
         logger.info(
-            "[PleRepository] attach_user_id_by_client — clientId=%s userId=%s linked=%s",
+            "[PleRepository] attach_user_id_by_client ??clientId=%s userId=%s linked=%s",
             client_id,
             user_id,
             count,
@@ -237,7 +237,7 @@ class PlePgRepository(PleRepository):
         user_id: int | None = None,
     ) -> PlePredictionModel:
         logger.info(
-            "[PleRepository] add_prediction -> Neon — matchId=%s clientId=%s pick=%s",
+            "[PleRepository] add_prediction -> Neon ??matchId=%s clientId=%s pick=%s",
             match_id,
             client_id,
             pick,
@@ -251,7 +251,7 @@ class PlePgRepository(PleRepository):
         self.db.add(prediction)
         await self.db.flush()
         logger.info(
-            "[PleRepository] add_prediction <- Neon — predictionId=%s",
+            "[PleRepository] add_prediction <- Neon ??predictionId=%s",
             prediction.id,
         )
         return prediction

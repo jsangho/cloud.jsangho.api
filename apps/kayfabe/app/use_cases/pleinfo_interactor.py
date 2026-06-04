@@ -1,14 +1,14 @@
 """
-PLE 조회 유스케이스(interactor).
+PLE ì¡°í ? ì¤ì¼?´ì¤(interactor).
 
-pleinfo_router → PleInfoUseCase → PleInfoInteractor → PleInfoRepository(output port)
+pleinfo_router ??PleInfoUseCase ??PleInfoInteractor ??PleInfoRepository(output port)
 """
 
 from __future__ import annotations
 
 import json
 
-from core.database import LAYER_LOG
+from core.matrix.oracle_database import LAYER_LOG
 from kayfabe.app.ports.input.ple_schema import (
     CompetitorSchema,
     MatchBoardSchema,
@@ -25,7 +25,7 @@ logger = LAYER_LOG
 
 
 class PleInfoInteractor(PleInfoUseCase):
-    """PLE 조회 유스케이스 구현체."""
+    """PLE ì¡°í ? ì¤ì¼?´ì¤ êµ¬íì²?"""
 
     def __init__(self, repository: PleInfoRepository) -> None:
         self._repo = repository
@@ -44,7 +44,7 @@ class PleInfoInteractor(PleInfoUseCase):
             )
             for e in events
         ]
-        logger.info("[PleInfoInteractor] list_events <- Repository — count=%d", len(rows))
+        logger.info("[PleInfoInteractor] list_events <- Repository ??count=%d", len(rows))
         return rows
 
     async def get_ai_stats(self) -> PleAiStatsSchema:
@@ -61,7 +61,7 @@ class PleInfoInteractor(PleInfoUseCase):
         user_id: int | None = None,
     ) -> PleBoardSchema:
         logger.info(
-            "[PleInfoInteractor] get_board -> Repository — slug=%s clientId=%s userId=%s",
+            "[PleInfoInteractor] get_board -> Repository ??slug=%s clientId=%s userId=%s",
             slug,
             client_id or "-",
             user_id if user_id is not None else "-",
@@ -138,7 +138,7 @@ class PleInfoInteractor(PleInfoUseCase):
             updated_at=event.updated_at,
         )
         logger.info(
-            "[PleInfoInteractor] get_board <- Repository — slug=%s matches=%d",
+            "[PleInfoInteractor] get_board <- Repository ??slug=%s matches=%d",
             slug,
             len(matches_out),
         )

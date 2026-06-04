@@ -3,7 +3,13 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class WalterRoasterPassegerRowRequest(BaseModel):
+class WalterRoasterSchema(BaseModel):
+    id: int = 1
+    name: str = "Walter"
+    memo: str = "월터는 타이타닉의 승무원이다"
+
+
+class WalterRoasterPassengerItem(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     passenger_id: int | None = Field(default=None, alias="PassengerId")
@@ -20,14 +26,10 @@ class WalterRoasterPassegerRowRequest(BaseModel):
     embarked: str | None = Field(default=None, alias="Embarked")
 
 
-class WalterRoasterPassegersUpsertRequest(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
+class WalterRoasterOpenFileResponse(WalterRoasterSchema):
+    """`GET /openfile` — 월터 정보 + 승객 목록 페이징."""
 
     page: int
-    page_size: int = Field(alias="pageSize")
+    pageSize: int
     total: int
-    items: list[WalterRoasterPassegerRowRequest]
-
-
-# 라우터 `response_model` 호환 이름
-WalterRoasterPageResponse = WalterRoasterPassegersUpsertRequest
+    items: list[WalterRoasterPassengerItem]

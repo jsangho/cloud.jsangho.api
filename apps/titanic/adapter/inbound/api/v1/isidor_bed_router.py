@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
+from core.matrix.oracle_database import get_db
 from titanic.app.ports.input.isidor_bed_use_case import IsidorBedUseCase
 
 isidor_bed_router = APIRouter(prefix="/isidor", tags=["isidor"])

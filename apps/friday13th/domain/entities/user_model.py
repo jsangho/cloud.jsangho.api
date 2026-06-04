@@ -4,11 +4,11 @@ from typing import Optional
 from sqlalchemy import Column, DateTime, String, func
 from sqlmodel import Field, SQLModel
 
-from core.database import Base
+from core.matrix.oracle_database import Base
 
 
 class UserModel(SQLModel, table=True):
-    """users 테이블. PK 규칙: docs/DevOps/Backend/ENTITY_RULE.md"""
+    """users ?ì´ë¸? PK ê·ì¹: docs/DevOps/Backend/ENTITY_RULE.md"""
 
     __tablename__ = "users"
     metadata = Base.metadata

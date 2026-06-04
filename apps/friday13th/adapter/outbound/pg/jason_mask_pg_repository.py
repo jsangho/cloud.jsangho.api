@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import LAYER_LOG
+from core.matrix.oracle_database import LAYER_LOG
 from friday13th.adapter.inbound.api.schemas.friday13th_preview import format_preview_signup
 from friday13th.app.ports.input.jason_mask_schema import JasonMaskSchema
 from friday13th.app.ports.output.jason_mask_repository import JasonMaskRepository
@@ -13,23 +13,23 @@ logger = LAYER_LOG
 
 
 class JasonMaskPgRepository(JasonMaskRepository):
-    """Neon(Postgres) 회원가입 어댑터."""
+    """Neon(Postgres) ?ìê°???´ë??"""
 
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
 
     async def find_by_email(self, email: str) -> UserModel | None:
-        logger.info("[JasonMaskPgRepository] find_by_email -> Neon — email=%s", email)
+        logger.info("[JasonMaskPgRepository] find_by_email -> Neon ??email=%s", email)
         result = await self.db.execute(select(UserModel).where(UserModel.email == email))
         user = result.scalar_one_or_none()
         if user is None:
             logger.info(
-                "[JasonMaskPgRepository] find_by_email <- Neon — email=%s, user=없음",
+                "[JasonMaskPgRepository] find_by_email <- Neon ??email=%s, user=?ì",
                 email,
             )
         else:
             logger.info(
-                "[JasonMaskPgRepository] find_by_email <- Neon — email=%s, user=%s",
+                "[JasonMaskPgRepository] find_by_email <- Neon ??email=%s, user=%s",
                 email,
                 user.to_log_dict(),
             )
@@ -37,7 +37,7 @@ class JasonMaskPgRepository(JasonMaskRepository):
 
     async def find_by_login_id(self, login_id: str) -> UserModel | None:
         logger.info(
-            "[JasonMaskPgRepository] find_by_login_id -> Neon — userId=%s", login_id
+            "[JasonMaskPgRepository] find_by_login_id -> Neon ??userId=%s", login_id
         )
         result = await self.db.execute(
             select(UserModel).where(UserModel.login_id == login_id)
@@ -45,12 +45,12 @@ class JasonMaskPgRepository(JasonMaskRepository):
         user = result.scalar_one_or_none()
         if user is None:
             logger.info(
-                "[JasonMaskPgRepository] find_by_login_id <- Neon — userId=%s, user=없음",
+                "[JasonMaskPgRepository] find_by_login_id <- Neon ??userId=%s, user=?ì",
                 login_id,
             )
         else:
             logger.info(
-                "[JasonMaskPgRepository] find_by_login_id <- Neon — userId=%s, user=%s",
+                "[JasonMaskPgRepository] find_by_login_id <- Neon ??userId=%s, user=%s",
                 login_id,
                 user.to_log_dict(),
             )
@@ -60,7 +60,7 @@ class JasonMaskPgRepository(JasonMaskRepository):
         self, user_schema: JasonMaskSchema, password_hash: str
     ) -> UserModel:
         logger.info(
-            "[JasonMaskPgRepository] Repository에서 받은 회원가입 스키마 미리보기 (상위 %s건)",
+            "[JasonMaskPgRepository] Repository?ì ë°ì? ?ìê°???¤í¤ë§?ë¯¸ë¦¬ë³´ê¸° (?ì %sê±?",
             1,
         )
         preview_blocks = [
@@ -74,7 +74,7 @@ class JasonMaskPgRepository(JasonMaskRepository):
         ]
         logger.info("\n%s", "\n".join(preview_blocks))
         logger.info(
-            "[JasonMaskPgRepository] save_user -> Neon — userId=%s, email=%s",
+            "[JasonMaskPgRepository] save_user -> Neon ??userId=%s, email=%s",
             user_schema.login_id,
             user_schema.email,
         )
@@ -89,7 +89,7 @@ class JasonMaskPgRepository(JasonMaskRepository):
         await self.db.flush()
         await self.db.refresh(user)
         logger.info(
-            "[JasonMaskPgRepository] save_user <- Neon — userId=%s, db_id=%s",
+            "[JasonMaskPgRepository] save_user <- Neon ??userId=%s, db_id=%s",
             user_schema.login_id,
             user.id,
         )

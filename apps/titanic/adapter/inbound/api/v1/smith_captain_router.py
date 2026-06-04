@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
+from core.matrix.oracle_database import get_db
 from titanic.app.ports.input.smith_captain_use_case import SmithCaptainUseCase
 
 smith_captain_router = APIRouter(prefix="/smith", tags=["smith"])

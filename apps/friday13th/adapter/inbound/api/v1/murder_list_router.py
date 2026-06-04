@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.database import get_db
+from core.matrix.oracle_database import get_db
 from friday13th.adapter.inbound.api.schemas.friday13th_preview import (
     format_preview_profile_request,
 )
@@ -45,7 +45,7 @@ async def get_user_profile(
     use_case: MurderListUseCase = Depends(get_murder_list_use_case),
 ):
     logger.info(
-        "[Friday13th MurderList 라우터] 프로필 조회 요청 미리보기 (상위 %s건)",
+        "[Friday13th MurderList ?¼ì°?? ?ë¡??ì¡°í ?ì²­ ë¯¸ë¦¬ë³´ê¸° (?ì %sê±?",
         1,
     )
     preview_blocks = [format_preview_profile_request(1, user_id=user_id)]
