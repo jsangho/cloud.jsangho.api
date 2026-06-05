@@ -8,21 +8,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.matrix.oracle_database import LAYER_LOG
 from friday13th.domain.entities.user_model import UserModel
 from kayfabe.adapter.outbound.pg.pleinfo_pg_repository import PleInfoPgRepository
-from kayfabe.app.ports.input.ple_schema import (
+from kayfabe.adapter.inbound.api.schemas.ple_schema import (
     MatchResultSchema,
     PleAiStatsSchema,
     PleEventSyncSchema,
 )
 from kayfabe.app.ports.output.ple_repository import PleRepository
-from kayfabe.domain.entities.ple_model import (
+from kayfabe.adapter.outbound.orm.ple_orm import (
     PleEventModel,
     PleEventStatus,
     PleMatchModel,
     PleMatchStatus,
     PlePredictionModel,
 )
-from kayfabe.domain.services.ple_ai import derive_ai_pick_from_card, grade_ai_correct
-from kayfabe.domain.services.ple_scoring import (
+from kayfabe.app.services.ple_ai import derive_ai_pick_from_card, grade_ai_correct
+from kayfabe.app.services.ple_scoring import (
     competitor_count_from_card,
     derive_match_point_value,
 )

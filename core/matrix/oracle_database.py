@@ -36,14 +36,6 @@ def james_director_upload_info(src: str, msg: str, *args: object) -> None:
     LAYER_LOG.info("[JamesDirectorUpload][%s][%s] " + msg, ts, src, *args)
 
 
-def walter_roaster_open_info(src: str, msg: str, *args: object) -> None:
-    """Walter Roaster 조회 계층 로그 (현재 시각)."""
-    from datetime import datetime
-
-    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    LAYER_LOG.info("[WalterRoasterOpen][%s][%s] " + msg, ts, src, *args)
-
-
 class Base(DeclarativeBase):
     pass
 
@@ -166,7 +158,8 @@ async def init_db() -> None:
         pass
 
     try:
-        import kayfabe.domain.entities.ple_model  # noqa: F401
+        import kayfabe.adapter.outbound.orm.ple_orm  # noqa: F401
+        import kayfabe.adapter.outbound.orm.title_history_orm  # noqa: F401
     except ImportError:
         pass
 

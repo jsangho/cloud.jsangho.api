@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from core.matrix.oracle_database import LAYER_LOG
-from kayfabe.app.ports.input.ple_schema import (
+from kayfabe.adapter.inbound.api.schemas.ple_schema import (
     BatchPredictionRequestSchema,
     BatchResultsRequestSchema,
     MatchResultSchema,
@@ -22,8 +22,8 @@ from kayfabe.app.ports.input.ple_use_case import PleUseCase
 from kayfabe.app.ports.output.ple_repository import PleRepository
 from kayfabe.app.ports.output.pleinfo_repository import PleInfoRepository
 from kayfabe.app.use_cases.pleinfo_interactor import PleInfoInteractor
-from kayfabe.domain.entities.ple_model import PleEventStatus, PleMatchStatus
-from kayfabe.domain.exceptions import PleAuthRequiredError
+from kayfabe.adapter.outbound.orm.ple_orm import PleEventStatus, PleMatchStatus
+from kayfabe.app.exceptions import PleAuthRequiredError
 
 logger = LAYER_LOG
 
@@ -128,8 +128,7 @@ class PleInteractor(PleUseCase):
             if row is None:
                 raise LookupError(item.match_key)
             if row.status == PleMatchStatus.FINISHED:
-                raise ValueError(f"ì¢
-ë£??ê²½ê¸°({item.match_key})?ë ?ì¸¡?????ìµ?ë¤.")
+                raise ValueError(f"종료된 경기({item.match_key})에는 예측할 수 없습니다.")
             await self._repo.upsert_prediction(row.id, body.client_id, item.pick, body.user_id)
 
         logger.info(
@@ -151,9 +150,8 @@ class PleInteractor(PleUseCase):
             row = await self._repo.set_match_result(slug, item.match_key, result, status=item.status)
             if row is None:
                 raise LookupError(
-                    f"ê²½ê¸° '{item.match_key}'ë¥?ì°¾ì ???ìµ?ë¤. PLE ì¹´ë ?ê¸°?????¤ì ?ë??ì£¼ì¸??"
+                    f"경기 '{item.match_key}'를 찾을 수 없습니다. PLE 카드 동기화를 다시 시도해 주세요."
                 )
-
         logger.info(
             "[PleInteractor] set_match_results_batch <- Repository ??slug=%s count=%d",
             slug,
@@ -173,8 +171,7 @@ class PleInteractor(PleUseCase):
         if match is None:
             raise LookupError(match_key)
         if match.status == PleMatchStatus.FINISHED:
-            raise ValueError("ì¢
-ë£??ê²½ê¸°?ë ?ì¸¡?????ìµ?ë¤.")
+            raise ValueError("종료된 경기에는 예측할 수 없습니다.")
 
         logger.info(
             "[PleInteractor] record_prediction -> Repository ??slug=%s match=%s userId=%s pick=%s",
@@ -196,14 +193,13 @@ class PleInteractor(PleUseCase):
         )
         event = await self._repo.get_event_by_slug(slug)
         if event is None:
-            raise LookupError(f"PLE '{slug}'ë¥?ì°¾ì ???ìµ?ë¤. ë¨¼ì? ì¹´ëë¥??ê¸°?í´ ì£¼ì¸??")
+            raise LookupError(f"PLE '{slug}'를 찾을 수 없습니다. 먼저 카드를 동기화해 주세요.")
 
         row = await self._repo.set_match_result(slug, match_key, result, status=body.status)
         if row is None:
             raise LookupError(
-                f"ê²½ê¸° '{match_key}'ë¥?ì°¾ì ???ìµ?ë¤. PLE ì¹´ë ?ê¸°?????¤ì ?ë??ì£¼ì¸??"
+                f"경기 '{match_key}'를 찾을 수 없습니다. PLE 카드 동기화를 다시 시도해 주세요."
             )
-
         logger.info(
             "[PleInteractor] set_match_result <- Repository ??slug=%s match=%s",
             slug,

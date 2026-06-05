@@ -5,19 +5,19 @@ import json
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.oracle_database import AsyncSessionLocal, get_db, rollback_readonly
-from kayfabe.app.ports.input.ple_schema import (
+from core.matrix.oracle_database import AsyncSessionLocal, rollback_readonly
+from kayfabe.adapter.inbound.api.schemas.ple_schema import (
     PleAiStatsSchema,
     PleBoardSchema,
     PleEventSummarySchema,
 )
 from kayfabe.app.ports.input.pleinfo_use_case import PleInfoUseCase
-from kayfabe.domain.exceptions import PleAuthRequiredError
+from kayfabe.app.exceptions import PleAuthRequiredError
+from kayfabe.dependencies.pleinfo import get_pleinfo_use_case
 
 
-router = APIRouter(prefix="/ple", tags=["ple-info"])
+pleinfo_router = APIRouter(prefix="/ple", tags=["ple-info"])
 
 
 def _ple_http_error(exc: Exception) -> HTTPException:
@@ -30,14 +30,7 @@ def _ple_http_error(exc: Exception) -> HTTPException:
     raise exc
 
 
-def get_pleinfo_use_case(db: AsyncSession = Depends(get_db)) -> PleInfoUseCase:
-    from kayfabe.adapter.outbound.pg.pleinfo_pg_repository import PleInfoPgRepository
-    from kayfabe.app.use_cases.pleinfo_interactor import PleInfoInteractor
-
-    return PleInfoInteractor(PleInfoPgRepository(db))
-
-
-@router.get(
+@pleinfo_router.get(
     "/events",
     response_model=list[PleEventSummarySchema],
     response_model_by_alias=True,
@@ -47,7 +40,7 @@ async def list_ple_events(use_case: PleInfoUseCase = Depends(get_pleinfo_use_cas
     return await use_case.list_events()
 
 
-@router.get(
+@pleinfo_router.get(
     "/ai-stats",
     response_model=PleAiStatsSchema,
     response_model_by_alias=True,
@@ -57,7 +50,7 @@ async def get_ple_ai_stats(use_case: PleInfoUseCase = Depends(get_pleinfo_use_ca
     return await use_case.get_ai_stats()
 
 
-@router.get(
+@pleinfo_router.get(
     "/{slug}",
     response_model=PleBoardSchema,
     response_model_by_alias=True,
@@ -75,7 +68,7 @@ async def get_ple_board(
         raise _ple_http_error(e) from e
 
 
-@router.get("/{slug}/live")
+@pleinfo_router.get("/{slug}/live")
 async def ple_live_board(
     slug: str,
     client_id: str,

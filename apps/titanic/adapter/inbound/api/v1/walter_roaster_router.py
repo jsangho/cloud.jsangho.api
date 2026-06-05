@@ -1,81 +1,29 @@
-# -*- coding: utf-8 -*-
 import logging
-from pathlib import Path
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from core.matrix.oracle_database import get_db, walter_roaster_open_info
-from titanic.adapter.inbound.api.schemas.walter_roaster_schema import (
-    WalterRoasterOpenFileResponse,
-    WalterRoasterSchema,
-)
-from titanic.app.dtos.walter_roaster_dto import WalterRoasterQuery
+from titanic.adapter.inbound.api.schemas.walter_roaster_schema import WalterRoasterSchema
+from titanic.app.dtos.walter_roaster_dto import WalterRoasterResponse
 from titanic.app.ports.input.walter_roaster_use_case import WalterRoasterUseCase
+from titanic.dependencies.walter_roaster import get_walter_roaster_use_case
 
-logger = logging.getLogger("uvicorn.error")
-_SRC = Path(__file__).name
-walter_roaster_router = APIRouter(prefix="/walter-roaster", tags=["walter-roaster"])
+'''
+영화 <타이타닉>에서 승객 명단을 관리하는 
+일등 항해사 윌터 와일딩(Walter Nichols / 혹은 윌리엄 머독 등 영화 속 관리자 캐릭터) 
+또는 승객 명단(Passenger List)을 다루는 '월터'라는 인물의 상황에 맞추어, 
+직관적이면서도 센스 있는 중간 키워드를 추천해 드립니다.
+'''
+logger = logging.getLogger(__name__)
+walter_roaster_router = APIRouter(prefix="/walter", tags=["walter"])    
 
-
-def get_walter_roaster_use_case(
-    db: AsyncSession = Depends(get_db),
-) -> WalterRoasterUseCase:
-    from titanic.adapter.outbound.pg.walter_roaster_pg_repository import (
-        WalterRoasterPgRepository,
-    )
-    from titanic.app.use_cases.walter_roaster_interactor import WalterRoasterInteractor
-
-    return WalterRoasterInteractor(WalterRoasterPgRepository(db))
-
-
-def _to_query(schema: WalterRoasterSchema) -> WalterRoasterQuery:
-    return WalterRoasterQuery(
-        id=schema.id,
-        name=schema.name,
-        memo=schema.memo,
-    )
-
-
-def _to_schema(query: WalterRoasterQuery) -> WalterRoasterSchema:
-    return WalterRoasterSchema(
-        id=query.id,
-        name=query.name,
-        memo=query.memo,
-    )
-
-
-def _log_walter_router(schema: WalterRoasterSchema) -> None:
-    logger.info("########################################################################################")
-    logger.info("🆗[월터 라우터] 월터의 자기소개 글을 가져오는 API 호출")
-    logger.info("💌ID: %s", schema.id)
-    logger.info("👁‍🗨이름: %s", schema.name)
-    logger.info("📝비고: %s", schema.memo)
-    logger.info("########################################################################################")
-
-
-@walter_roaster_router.get("/myself", response_model=WalterRoasterSchema)
+@walter_roaster_router.get("/myself")
 async def introduce_myself(
-    use_case: WalterRoasterUseCase = Depends(get_walter_roaster_use_case),
-):
-    schema = WalterRoasterSchema()
-    _log_walter_router(schema)
-    query = await use_case.introduce_myself(_to_query(schema))
-    return _to_schema(query)
+    walter: WalterRoasterUseCase = Depends(get_walter_roaster_use_case)
+)->WalterRoasterResponse:
 
-
-@walter_roaster_router.get("/openfile", response_model=WalterRoasterOpenFileResponse)
-async def openfile(
-    page: int = 1,
-    pageSize: int = 50,
-    use_case: WalterRoasterUseCase = Depends(get_walter_roaster_use_case),
-):
-    schema = WalterRoasterSchema()
-    _log_walter_router(schema)
-    walter_roaster_open_info(
-        _SRC,
-        "page=%s pageSize=%s -> inbound",
-        page,
-        pageSize,
-    )
-    return await use_case.openfile(_to_query(schema), page=page, page_size=pageSize)
+    return await walter.introduce_myself(
+        WalterRoasterSchema(
+            id=2,
+            name="Walter Nichols",
+            memo="타이타닉의 일등 항해사, 승객 명단 관리 담당")
+        )
+    

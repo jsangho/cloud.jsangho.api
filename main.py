@@ -36,13 +36,8 @@ from core.matrix.oracle_database import (
 from social_network.app.doro_director import DoroDirector
 from core.matrix.keymaker_api import get_keymaker
 from friday13th.adapter.inbound.api import friday13th_router
-from kayfabe.adapter.inbound.api.v1.ple_router import router as ple_router
-from kayfabe.adapter.inbound.api.v1.pleinfo_router import router as pleinfo_router
+from kayfabe.adapter.inbound.api import kayfabe_router
 from titanic.adapter.inbound.api import titanic_router
-from kayfabe.adapter.inbound.api.v1.ranking_router import router as ple_ranking_router
-from kayfabe.adapter.inbound.api.v1.result_router import router as ple_result_router
-from titanic.app.ports.input.james_director_use_case import get_james_director_use_case
-
 keymaker = get_keymaker()
 logger = logging.getLogger("uvicorn.error")
 
@@ -78,17 +73,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Jsangho Main Page", lifespan=lifespan)
 
-
-def _provide_james_director_use_case(session: AsyncSession = Depends(get_db)):
-    from titanic.app.use_cases.james_director_interactor import JamesDirectorInteractor
-
-    # JamesDirectorInteractor가 내부에서 `JamesDirectorPgRepository(None)`로 세션을 생성/사용합니다.
-    # (세션은 FastAPI DI로도 받을 수 있지만, 현재 유스케이스 설계에 맞춰 인자 없이 생성합니다.)
-    return JamesDirectorInteractor()
-
-
-app.dependency_overrides[get_james_director_use_case] = _provide_james_director_use_case
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -102,10 +86,7 @@ app.add_middleware(
 
 app.include_router(titanic_router)
 app.include_router(friday13th_router)
-app.include_router(ple_router)
-app.include_router(pleinfo_router)
-app.include_router(ple_ranking_router)
-app.include_router(ple_result_router)
+app.include_router(kayfabe_router)
 
 
 @app.middleware("http")

@@ -7,7 +7,6 @@ from titanic.adapter.inbound.api.schemas.james_director_schema import (
     TitanicRecordSchema,
     format_preview_record,
 )
-from titanic.adapter.outbound.pg.james_director_pg_repository import JamesDirectorPgRepository
 from titanic.app.dtos.james_director_dto import BookingCommand, PersonCommand
 from titanic.app.ports.input.james_director_use_case import JamesDirectorUseCase
 from titanic.app.ports.output.james_director_repository import JamesDirectorRepository
@@ -17,10 +16,10 @@ logger = logging.getLogger("uvicorn.error")
 class JamesDirectorInteractor(JamesDirectorUseCase):
     """James Director CSV 업로드 유스케이스."""
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, repository: JamesDirectorRepository) -> None:
+        self._repository = repository
 
-    async def save_fileupload_rows(
+    async def upload_titanic_file(
         self, records: list[TitanicRecordSchema]
     ) -> dict[str, int]:
         return await self.receive_uploaded_records(records)
@@ -69,9 +68,7 @@ class JamesDirectorInteractor(JamesDirectorUseCase):
                 )
             )
 
-        repository : JamesDirectorRepository = JamesDirectorPgRepository(None)
-
-        count = await repository.save_fileupload_rows(
+        count = await self._repository.upload_titanic_file(
             person_commands=person_commands,
             booking_commands=booking_commands,
             filename=filename,

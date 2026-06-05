@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from kayfabe.app.ports.input.ple_schema import PleAiStatsSchema
-from kayfabe.domain.entities.ple_model import PleEventModel, PleMatchModel, PlePredictionModel
+from kayfabe.adapter.inbound.api.schemas.ple_schema import PleAiStatsSchema
+from kayfabe.adapter.outbound.orm.ple_orm import PleEventModel, PleMatchModel, PlePredictionModel
 
 
 class PleInfoRepository(ABC):

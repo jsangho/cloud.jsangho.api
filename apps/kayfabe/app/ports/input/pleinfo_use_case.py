@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from kayfabe.app.ports.input.ple_schema import (
+from kayfabe.adapter.inbound.api.schemas.ple_schema import (
     PleAiStatsSchema,
     PleBoardSchema,
     PleEventSummarySchema,

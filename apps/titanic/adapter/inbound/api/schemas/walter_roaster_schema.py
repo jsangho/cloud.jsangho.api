@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -26,9 +24,10 @@ class WalterRoasterPassengerItem(BaseModel):
     embarked: str | None = Field(default=None, alias="Embarked")
 
 
-class WalterRoasterOpenFileResponse(WalterRoasterSchema):
-    """`GET /openfile` — 월터 정보 + 승객 목록 페이징."""
-
+class WalterRoasterOpenfileResponse(BaseModel):
+    id: int
+    name: str
+    memo: str
     page: int
     pageSize: int
     total: int

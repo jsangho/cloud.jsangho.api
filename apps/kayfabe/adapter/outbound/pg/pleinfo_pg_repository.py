@@ -5,9 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from core.matrix.oracle_database import LAYER_LOG
-from kayfabe.app.ports.input.ple_schema import PleAiRecordSchema, PleAiStatsSchema
+from kayfabe.adapter.inbound.api.schemas.ple_schema import PleAiRecordSchema, PleAiStatsSchema
 from kayfabe.app.ports.output.pleinfo_repository import PleInfoRepository
-from kayfabe.domain.entities.ple_model import PleEventModel, PleMatchModel, PlePredictionModel
+from kayfabe.adapter.outbound.orm.ple_orm import PleEventModel, PleMatchModel, PlePredictionModel
 
 logger = LAYER_LOG
 

@@ -1,21 +1,16 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.oracle_database import get_db
-from kayfabe.app.ports.input.ranking_schema import RankingsResponseSchema
-from kayfabe.app.use_cases.ranking_interactor import RankingService
-
-
-router = APIRouter(prefix="/ple/ranking", tags=["ranking"])
+from kayfabe.adapter.inbound.api.schemas.ranking_schema import RankingsResponseSchema
+from kayfabe.app.ports.input.ranking_use_case import RankingUseCase
+from kayfabe.dependencies.ranking import get_ranking_use_case
 
 
-def get_ranking_service(db: AsyncSession = Depends(get_db)) -> RankingService:
-    return RankingService(db)
+ranking_router = APIRouter(tags=["ranking"])
 
 
-@router.get(
+@ranking_router.get(
     "/rankings",
     response_model=RankingsResponseSchema,
     response_model_by_alias=True,
@@ -23,12 +18,11 @@ def get_ranking_service(db: AsyncSession = Depends(get_db)) -> RankingService:
 async def list_rankings(
     limit: int = 120,
     nickname: str | None = None,
-    service: RankingService = Depends(get_ranking_service),
+    use_case: RankingUseCase = Depends(get_ranking_use_case),
 ):
     """
-    PLE ?¹ë??ì¸¡ ?ì (?ìÂ·?ì¤ë¥?.
-    ê²½ê¸° ê²°ê³¼(ple_matches.winner_pick) ?ì  ??pick ?¼ì¹ë¶ì´ ?ë ì§ê³?©ë??
-    nickname ì¿¼ë¦¬ë¡????ì(myRank)ë¥??¨ê» ì¡°í?????ìµ?ë¤.
+    PLE 예측 순위 (점수·적중률).
+    경기 결과(ple_matches.winner_pick) 확정 시 pick 일치분이 자동 집계됩니다.
+    nickname 쿼리로 내 순위(myRank)를 함께 조회할 수 있습니다.
     """
-    return await service.list_rankings(limit=limit, nickname=nickname)
-
+    return await use_case.list_rankings(limit=limit, nickname=nickname)

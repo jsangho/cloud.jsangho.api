@@ -1,25 +1,16 @@
-from dataclasses import dataclass
-
 from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.matrix.oracle_database import LAYER_LOG
 from friday13th.domain.entities.user_model import UserModel
-from kayfabe.domain.entities.ple_model import PleMatchModel, PleMatchStatus, PlePredictionModel
+from kayfabe.adapter.outbound.orm.ple_orm import PleMatchModel, PleMatchStatus, PlePredictionModel
+from kayfabe.app.dtos.ranking_dto import LeaderboardRow
+from kayfabe.app.ports.output.ranking_repository import RankingRepository
 
 logger = LAYER_LOG
 
 
-@dataclass(frozen=True)
-class LeaderboardRow:
-    rank: int
-    nickname: str
-    score: int
-    correct: int
-    graded: int
-
-
-class RankingRepository:
+class RankingPgRepository(RankingRepository):
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
 
@@ -90,7 +81,7 @@ class RankingRepository:
             )
             for rank, nickname, score, correct, graded in result.all()
         ]
-        logger.info("[RankingRepository] list_ranked <- Neon ??count=%d", len(rows))
+        logger.info("[RankingPgRepository] list_ranked <- Neon count=%d", len(rows))
         return rows
 
     async def get_ranked_by_nickname(self, nickname: str) -> LeaderboardRow | None:

@@ -87,9 +87,8 @@ class JamesDirectorPgRepository(JamesDirectorRepository):
     def __init__(self, session: AsyncSession | None) -> None:
         self._session = session
 
-    async def save_fileupload_rows(
+    async def upload_titanic_file(
         self,
-        *,
         person_commands: list[PersonCommand],
         booking_commands: list[BookingCommand],
         filename: str,

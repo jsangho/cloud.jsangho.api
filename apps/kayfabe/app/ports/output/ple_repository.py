@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from kayfabe.app.ports.input.ple_schema import MatchResultSchema, PleEventSyncSchema
-from kayfabe.domain.entities.ple_model import PleEventModel, PleMatchModel, PlePredictionModel
+from kayfabe.adapter.inbound.api.schemas.ple_schema import MatchResultSchema, PleEventSyncSchema
+from kayfabe.adapter.outbound.orm.ple_orm import PleEventModel, PleMatchModel, PlePredictionModel
 
 
 class PleRepository(ABC):
@@ -45,4 +45,9 @@ class PleRepository(ABC):
         status: str | None = None,
     ) -> PleMatchModel | None:
         """경기 결과 저장 (`set_match_result`, `set_match_results_batch`, `sync_event`)."""
+        ...
+
+    @abstractmethod
+    async def refresh_all_match_point_values(self) -> int:
+        """랭킹 집계 전 전체 매치 점수 재계산."""
         ...

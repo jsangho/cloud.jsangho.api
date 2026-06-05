@@ -4,12 +4,13 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.matrix.oracle_database import LAYER_LOG
-from kayfabe.domain.entities.ple_model import PleEventModel
+from kayfabe.adapter.outbound.orm.ple_orm import PleEventModel
+from kayfabe.app.ports.output.result_repository import ResultRepository
 
 logger = LAYER_LOG
 
 
-class ResultRepository:
+class ResultPgRepository(ResultRepository):
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
 

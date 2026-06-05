@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from kayfabe.domain.services.ple_ai import grade_ai_correct
+from kayfabe.app.services.ple_ai import grade_ai_correct
 
 # 적중 시 부여 점수 (오답·미채점 0)
 POINTS_SINGLE_OR_TAG = 1
@@ -65,6 +65,9 @@ def derive_match_point_value(
         return POINTS_TRIPLE_THREAT
     if fmt == "multi" and n == 3:
         return POINTS_TRIPLE_THREAT
+
+    if "money in the bank" in t and "ladder" in t:
+        return POINTS_SINGLE_OR_TAG
 
     if "championship" in t:
         return POINTS_CHAMPIONSHIP

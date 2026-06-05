@@ -1,10 +1,8 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.oracle_database import get_db
-from kayfabe.app.ports.input.ple_schema import (
+from kayfabe.adapter.inbound.api.schemas.ple_schema import (
     BatchPredictionRequestSchema,
     BatchResultsRequestSchema,
     LinkPredictionsSchema,
@@ -14,10 +12,11 @@ from kayfabe.app.ports.input.ple_schema import (
     PredictionRequestSchema,
 )
 from kayfabe.app.ports.input.ple_use_case import PleUseCase
-from kayfabe.domain.exceptions import PleAuthRequiredError
+from kayfabe.app.exceptions import PleAuthRequiredError
+from kayfabe.dependencies.ple import get_ple_use_case
 
 
-router = APIRouter(prefix="/ple", tags=["ple"])
+ple_router = APIRouter(prefix="/ple", tags=["ple"])
 
 
 def _ple_http_error(exc: Exception) -> HTTPException:
@@ -30,15 +29,7 @@ def _ple_http_error(exc: Exception) -> HTTPException:
     raise exc
 
 
-def get_ple_use_case(db: AsyncSession = Depends(get_db)) -> PleUseCase:
-    from kayfabe.adapter.outbound.pg.ple_pg_repository import PlePgRepository
-    from kayfabe.adapter.outbound.pg.pleinfo_pg_repository import PleInfoPgRepository
-    from kayfabe.app.use_cases.ple_interactor import PleInteractor
-
-    return PleInteractor(PlePgRepository(db), PleInfoPgRepository(db))
-
-
-@router.post(
+@ple_router.post(
     "/{slug}/sync-from-client",
     response_model=PleBoardSchema,
     response_model_by_alias=True,
@@ -57,7 +48,7 @@ async def sync_ple_from_client(
         raise _ple_http_error(e) from e
 
 
-@router.post(
+@ple_router.post(
     "/link-predictions",
     response_model_by_alias=True,
 )
@@ -72,7 +63,7 @@ async def link_ple_predictions(
     )
 
 
-@router.post(
+@ple_router.post(
     "/{slug}/predictions/batch",
     response_model=PleBoardSchema,
     response_model_by_alias=True,
@@ -89,7 +80,7 @@ async def predict_ple_batch(
         raise _ple_http_error(e) from e
 
 
-@router.post(
+@ple_router.post(
     "/{slug}/results/batch",
     response_model=PleBoardSchema,
     response_model_by_alias=True,
@@ -106,7 +97,7 @@ async def set_ple_results_batch(
         raise _ple_http_error(e) from e
 
 
-@router.post(
+@ple_router.post(
     "/{slug}/matches/{match_key}/predict",
     response_model=PleBoardSchema,
     response_model_by_alias=True,
@@ -124,7 +115,7 @@ async def predict_ple_match(
         raise _ple_http_error(e) from e
 
 
-@router.post(
+@ple_router.post(
     "/{slug}/matches/{match_key}/result",
     response_model=PleBoardSchema,
     response_model_by_alias=True,
