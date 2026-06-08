@@ -9,7 +9,7 @@ from titanic.adapter.inbound.api.schemas.crew_james_director_schema import (
     JamesDirectorSchema,
 )
 from titanic.app.ports.input.crew_james_director_use_case import JamesDirectorUseCase
-from titanic.dependencies.crew_james_director import get_james_director_use_case
+from titanic.dependencies.crew_james_director_provider import get_james_director_use_case
 from titanic.app.dtos.crew_james_director_dto import JamesDirectorResponse
 '''
  james_director_router.py

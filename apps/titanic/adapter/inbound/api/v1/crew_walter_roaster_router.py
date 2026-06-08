@@ -12,7 +12,7 @@ from titanic.adapter.inbound.api.schemas.crew_walter_roaster_schema import (
 from titanic.adapter.outbound.pg.crew_walter_roaster_pg_repository import WalterRoasterPgRepository
 from titanic.app.dtos.crew_walter_roaster_dto import WalterRoasterResponse
 from titanic.app.ports.input.crew_walter_roaster_use_case import WalterRoasterUseCase
-from titanic.dependencies.crew_walter_roaster import get_walter_roaster_use_case
+from titanic.dependencies.crew_walter_roaster_provider import get_walter_roaster_use_case
 
 '''
 영화 <타이타닉>에서 승객 명단을 관리하는
