@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.oracle_database import get_db
+from core.matrix.grid_oracle_database_manager import get_db
 from friday13th.adapter.inbound.api.schemas.friday13th_preview import (
     format_preview_signup,
 )

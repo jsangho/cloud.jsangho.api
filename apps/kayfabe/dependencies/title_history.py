@@ -1,7 +1,7 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.oracle_database import get_db
+from core.matrix.grid_oracle_database_manager import get_db
 from kayfabe.adapter.outbound.pg.title_history_pg_repository import TitleHistoryPgRepository
 from kayfabe.app.ports.input.title_history_use_case import TitleHistoryUseCase
 from kayfabe.app.ports.output.title_history_repository import TitleHistoryRepository

@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy import DateTime, ForeignKey, String, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 
-from core.matrix.oracle_database import Base
+from core.matrix.grid_oracle_database_manager import Base
 
 
 class TitleAcquisitionModel(Base):

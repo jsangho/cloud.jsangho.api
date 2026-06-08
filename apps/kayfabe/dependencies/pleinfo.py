@@ -1,7 +1,7 @@
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.oracle_database import get_db
+from core.matrix.grid_oracle_database_manager import get_db
 from kayfabe.adapter.outbound.pg.pleinfo_pg_repository import PleInfoPgRepository
 from kayfabe.app.ports.input.pleinfo_use_case import PleInfoUseCase
 from kayfabe.app.ports.output.pleinfo_repository import PleInfoRepository

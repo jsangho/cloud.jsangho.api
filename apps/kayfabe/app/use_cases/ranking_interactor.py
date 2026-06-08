@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from core.matrix.oracle_database import LAYER_LOG
+from core.matrix.grid_oracle_database_manager import LAYER_LOG
 from kayfabe.adapter.inbound.api.schemas.ranking_schema import RankingRowSchema, RankingsResponseSchema
 from kayfabe.app.dtos.ranking_dto import LeaderboardRow
 from kayfabe.app.ports.input.ranking_use_case import RankingUseCase

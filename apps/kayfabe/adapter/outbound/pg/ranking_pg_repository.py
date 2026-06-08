@@ -1,7 +1,7 @@
 from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.oracle_database import LAYER_LOG
+from core.matrix.grid_oracle_database_manager import LAYER_LOG
 from friday13th.domain.entities.user_model import UserModel
 from kayfabe.adapter.outbound.orm.ple_orm import PleMatchModel, PleMatchStatus, PlePredictionModel
 from kayfabe.app.dtos.ranking_dto import LeaderboardRow

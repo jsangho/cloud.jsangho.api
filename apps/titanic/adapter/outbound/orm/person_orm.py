@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import Float, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from core.matrix.oracle_database import Base
+from core.matrix.grid_oracle_database_manager import Base
 
 
 class PersonOrm(Base):

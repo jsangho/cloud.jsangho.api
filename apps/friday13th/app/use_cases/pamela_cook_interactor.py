@@ -4,7 +4,7 @@ import asyncio
 
 from fastapi import HTTPException
 
-from core.matrix.oracle_database import LAYER_LOG
+from core.matrix.grid_oracle_database_manager import LAYER_LOG
 from friday13th.adapter.inbound.api.schemas.friday13th_preview import format_preview_login
 from friday13th.app.ports.input.pamela_cook_use_case import PamelaCookUseCase
 from friday13th.app.ports.output.pamela_cook_repository import PamelaCookRepository

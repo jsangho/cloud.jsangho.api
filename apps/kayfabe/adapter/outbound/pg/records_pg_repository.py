@@ -5,7 +5,7 @@ import time
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.oracle_database import LAYER_LOG
+from core.matrix.grid_oracle_database_manager import LAYER_LOG
 from kayfabe.adapter.outbound.orm.ple_orm import PleEventModel, PleMatchModel
 from kayfabe.app.ports.output.records_repository import RecordsRepository
 from kayfabe.app.services.records_scoring import names_from_card_json, normalize_name

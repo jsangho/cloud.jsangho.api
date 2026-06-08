@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import HTTPException
 
-from core.matrix.oracle_database import LAYER_LOG
+from core.matrix.grid_oracle_database_manager import LAYER_LOG
 from friday13th.adapter.inbound.api.schemas.friday13th_preview import format_preview_signup
 from friday13th.app.ports.input.jason_mask_schema import JasonMaskSchema
 from friday13th.app.ports.input.jason_mask_use_case import JasonMaskUseCase

@@ -6,7 +6,7 @@ import json
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 
-from core.matrix.oracle_database import AsyncSessionLocal, rollback_readonly
+from core.matrix.grid_oracle_database_manager import AsyncSessionLocal, rollback_readonly
 from kayfabe.adapter.inbound.api.schemas.ple_schema import (
     PleAiStatsSchema,
     PleBoardSchema,

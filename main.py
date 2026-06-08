@@ -23,7 +23,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from imitation_game.adapter.db_health_adapter import DbHealthAdapter
-from core.matrix.oracle_database import (
+from core.matrix.grid_oracle_database_manager import (
     AsyncSessionLocal,
     attach_neon_sql_logging,
     configure_db_logging,
@@ -34,7 +34,7 @@ from core.matrix.oracle_database import (
     rollback_readonly,
 )
 from social_network.app.doro_director import DoroDirector
-from core.matrix.keymaker_api import get_keymaker
+from core.matrix.vault_keymaker_secret_manager import get_keymaker
 from friday13th.adapter.inbound.api import friday13th_router
 from kayfabe.adapter.inbound.api import kayfabe_router
 from titanic.adapter.inbound.api import titanic_router

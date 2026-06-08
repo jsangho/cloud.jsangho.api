@@ -15,7 +15,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from core.matrix.oracle_database import Base
+from core.matrix.grid_oracle_database_manager import Base
 
 
 class PleEventStatus(StrEnum):

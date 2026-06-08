@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 
-from core.matrix.oracle_database import LAYER_LOG
+from core.matrix.grid_oracle_database_manager import LAYER_LOG
 from kayfabe.adapter.inbound.api.schemas.ple_schema import (
     CompetitorSchema,
     MatchBoardSchema,

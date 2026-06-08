@@ -4,7 +4,7 @@ from typing import Optional
 from sqlalchemy import Column, DateTime, String, func
 from sqlmodel import Field, SQLModel
 
-from core.matrix.oracle_database import Base
+from core.matrix.grid_oracle_database_manager import Base
 
 
 class UserModel(SQLModel, table=True):

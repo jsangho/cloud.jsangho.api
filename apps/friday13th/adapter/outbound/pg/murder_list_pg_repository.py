@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.oracle_database import LAYER_LOG
+from core.matrix.grid_oracle_database_manager import LAYER_LOG
 from friday13th.adapter.inbound.api.schemas.friday13th_preview import (
     format_preview_profile_request,
     format_preview_profile_response,

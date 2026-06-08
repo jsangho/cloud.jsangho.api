@@ -3,7 +3,7 @@ from __future__ import annotations
 from sqlalchemy import Float, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from core.matrix.oracle_database import Base
+from core.matrix.grid_oracle_database_manager import Base
 from titanic.adapter.outbound.orm.person_orm import PersonOrm
 
 

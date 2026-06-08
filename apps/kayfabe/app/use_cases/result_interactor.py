@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from core.matrix.oracle_database import LAYER_LOG
+from core.matrix.grid_oracle_database_manager import LAYER_LOG
 from kayfabe.adapter.inbound.api.schemas.result_schema import PleResultsResponse
 from kayfabe.app.dtos.result_dto import PleResultRowDto, PleResultsDto
 from kayfabe.app.ports.input.result_use_case import ResultUseCase
