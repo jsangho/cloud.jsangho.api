@@ -26,7 +26,7 @@ __all__ = [
     "get_jack_trainer_use_case",
     "get_molly_scaler_use_case",
     "get_rose_model_use_case",
-    "get_ruth_survivor_use_case",
+    "get_ruth_validation_use_case",
 ]
 
 _LAZY_IMPORTS: dict[str, str] = {
@@ -41,7 +41,7 @@ _LAZY_IMPORTS: dict[str, str] = {
     "get_jack_trainer_use_case": "titanic.dependencies.passenger_jack_trainer_provider",
     "get_molly_scaler_use_case": "titanic.dependencies.passenger_molly_scaler_provider",
     "get_rose_model_use_case": "titanic.dependencies.passenger_rose_model_provider",
-    "get_ruth_survivor_use_case": "titanic.dependencies.passenger_ruth_survivor_provider",
+    "get_ruth_validation_use_case": "titanic.dependencies.passenger_ruth_validation_provider",
 }
 
 

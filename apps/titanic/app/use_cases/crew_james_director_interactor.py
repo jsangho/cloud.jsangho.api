@@ -4,10 +4,11 @@ import logging
 from typing import Any
 
 from titanic.adapter.inbound.api.schemas.crew_james_director_schema import (
+    JamesDirectorMyselfSchema,
     TitanicRecordSchema,
     format_preview_record,
 )
-from titanic.app.dtos.crew_james_director_dto import BookingCommand, PersonCommand
+from titanic.app.dtos.crew_james_director_dto import BookingCommand, JamesDirectorResponse, PersonCommand
 from titanic.app.ports.input.crew_james_director_use_case import JamesDirectorUseCase
 from titanic.app.ports.output.crew_james_director_repository import JamesDirectorRepository
 
@@ -18,6 +19,10 @@ class JamesDirectorInteractor(JamesDirectorUseCase):
 
     def __init__(self, repository: JamesDirectorRepository) -> None:
         self._repository = repository
+
+    async def introduce_myself(self, schema: JamesDirectorMyselfSchema) -> JamesDirectorResponse:
+        logger.info("[JamesDirectorUseCase] introduce_myself | request_data=%s", schema)
+        return await self._repository.introduce_myself(schema)
 
     async def upload_titanic_file(
         self, records: list[TitanicRecordSchema]

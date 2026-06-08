@@ -1,23 +1,22 @@
-from __future__ import annotations
-
-from pathlib import Path
-from typing import Any
+﻿from __future__ import annotations
+import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.grid_oracle_database_manager import LAYER_LOG
+from titanic.adapter.inbound.api.schemas.passenger_molly_scaler_schema import MollyScalerSchema
+from titanic.app.dtos.passenger_molly_scaler_dto import MollyScalerResponse
 from titanic.app.ports.output.passenger_molly_scaler_repository import MollyScalerRepository
 
-logger = LAYER_LOG
-_SRC = Path(__file__).name
-
+logger = logging.getLogger("uvicorn.error")
 
 class MollyScalerPgRepository(MollyScalerRepository):
-    """Neon(Postgres) Cal ê¶ì´ ì¡°í ?´ë??"""
 
-    def __init__(self, db: AsyncSession) -> None:
-        self._db = db
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
 
-    async def get_scaler(self) -> dict[str, Any]:
-        logger.info("[%s] get_scaler -> Neon", _SRC)
-        return {}
+    async def introduce_myself(self, schema: MollyScalerSchema) -> MollyScalerResponse:
+        logger.info("[MollyScalerPgRepository] introduce_myself 진입 | request_data=%s", schema)
+        return MollyScalerResponse(
+            id=schema.id * 10000,
+            name=f"{schema.name}가 레포지토리에 다녀옴",
+        )

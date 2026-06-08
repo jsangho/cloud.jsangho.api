@@ -1,12 +1,15 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Any
 
+from titanic.adapter.inbound.api.schemas.passenger_molly_scaler_schema import MollyScalerSchema
+from titanic.app.dtos.passenger_molly_scaler_dto import MollyScalerResponse
+
 
 class MollyScalerRepository(ABC):
-    """Cal 권총 조회 데이터 출력 포트."""
 
     @abstractmethod
-    async def get_scaler(self) -> dict[str, Any]:
-        ...
+    async def introduce_myself(self, schema: MollyScalerSchema) -> MollyScalerResponse:
+        '''몰리의 자기소개 메소드'''
+        pass

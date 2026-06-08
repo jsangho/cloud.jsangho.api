@@ -1,16 +1,20 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
-from typing import Any
+import logging
 
+from titanic.adapter.inbound.api.schemas.crew_hartley_violin_schema import HartleyViolinSchema
+from titanic.app.dtos.crew_hartley_violin_dto import HartleyViolinResponse
 from titanic.app.ports.input.crew_hartley_violin_use_case import HartleyViolinUseCase
 from titanic.app.ports.output.crew_hartley_violin_repository import HartleyViolinRepository
 
+logger = logging.getLogger("uvicorn.error")
+
 
 class HartleyViolinInteractor(HartleyViolinUseCase):
-    """Hartley 바이올린 조회 유스케이스."""
 
     def __init__(self, repository: HartleyViolinRepository) -> None:
         self._repository = repository
 
-    async def get_violin(self) -> dict[str, Any]:
-        return await self._repository.get_violin()
+    async def introduce_myself(self, schema: HartleyViolinSchema) -> HartleyViolinResponse:
+        logger.info("[HartleyViolinUseCase] introduce_myself | request_data=%s", schema)
+        return await self._repository.introduce_myself(schema)

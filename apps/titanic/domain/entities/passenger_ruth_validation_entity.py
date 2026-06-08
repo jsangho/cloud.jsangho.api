@@ -1,12 +1,12 @@
-"""passenger_ruth_survivor 값 객체."""
+"""passenger_ruth_validation 도메인 엔티티."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
 
-@dataclass(frozen=True)
-class RuthSurvivorVo:
+@dataclass
+class RuthValidationEntity:
     id: int
     name: str
     memo: str

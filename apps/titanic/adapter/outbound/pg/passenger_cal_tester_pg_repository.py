@@ -1,23 +1,22 @@
-from __future__ import annotations
-
-from pathlib import Path
-from typing import Any
+﻿from __future__ import annotations
+import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.grid_oracle_database_manager import LAYER_LOG
+from titanic.adapter.inbound.api.schemas.passenger_cal_tester_schema import CalTesterSchema
+from titanic.app.dtos.passenger_cal_tester_dto import CalTesterResponse
 from titanic.app.ports.output.passenger_cal_tester_repository import CalTesterRepository
 
-logger = LAYER_LOG
-_SRC = Path(__file__).name
-
+logger = logging.getLogger("uvicorn.error")
 
 class CalTesterPgRepository(CalTesterRepository):
-    """Neon(Postgres) Cal ê¶ì´ ì¡°í ?´ë??"""
 
-    def __init__(self, db: AsyncSession) -> None:
-        self._db = db
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
 
-    async def get_tester(self) -> dict[str, Any]:
-        logger.info("[%s] get_tester -> Neon", _SRC)
-        return {}
+    async def introduce_myself(self, schema: CalTesterSchema) -> CalTesterResponse:
+        logger.info("[CalTesterPgRepository] introduce_myself 진입 | request_data=%s", schema)
+        return CalTesterResponse(
+            id=schema.id * 10000,
+            name=f"{schema.name}가 레포지토리에 다녀옴",
+        )

@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from typing import Any
 
@@ -7,11 +7,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from titanic.adapter.outbound.orm.booking_orm import BookingOrm
 from titanic.adapter.outbound.orm.person_orm import PersonOrm
-from titanic.app.dtos.crew_walter_roaster_dto import WalterRoasterQuery
+from titanic.adapter.inbound.api.schemas.crew_walter_roaster_schema import WalterRoasterSchema
+from titanic.app.dtos.crew_walter_roaster_dto import WalterRoasterResponse
 from titanic.app.ports.output.crew_walter_roaster_repository import WalterRoasterRepository
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("uvicorn.error")
 
 
 def _row_to_dict(person: PersonOrm, booking: BookingOrm | None) -> dict[str, Any]:
@@ -34,21 +35,24 @@ def _row_to_dict(person: PersonOrm, booking: BookingOrm | None) -> dict[str, Any
 
 
 class WalterRoasterPgRepository(WalterRoasterRepository):
-    '''PostgreSQL을 이용한 월터의 승객 명단 관리 저장소'''
+    '''승객 명단 관리 저장소'''
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    def introduce_myself(self, query: WalterRoasterQuery):
-        '''승객 명단을 가져오는 메소드'''
-        logger.info("###############################################")
-        logger.info("💊[월터 레포지토리] 유스케이스에서 가져온 월터 정보")
-        logger.info(f"👍🏻ID: {query.id}")
-        logger.info(f"🐥이름: {query.name}")
-        logger.info(f"🦜메모: {query.memo}")
-        logger.info("###############################################")
+    async def introduce_myself(self, schema: WalterRoasterSchema) -> WalterRoasterResponse:
+        logger.info("[WalterRoasterPgRepository] introduce_myself 진입 | request_data=%s", schema)
+        return WalterRoasterResponse(
+            id=schema.id * 10000,
+            name=f"{schema.name}가 레포지토리에 다녀옴",
+        )
 
     async def list_openfile_page(self, *, page: int, page_size: int) -> dict[str, Any]:
+        logger.info(
+            "[WalterRoasterPgRepository] list_openfile_page 진입 | page=%s page_size=%s",
+            page,
+            page_size,
+        )
         safe_page_size = max(1, min(int(page_size), 200))
         safe_page = max(1, int(page))
         offset = (safe_page - 1) * safe_page_size

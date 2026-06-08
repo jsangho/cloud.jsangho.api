@@ -1,13 +1,15 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
+
+from titanic.adapter.inbound.api.schemas.crew_andrews_architect_schema import AndrewsArchitectSchema
+from titanic.app.dtos.crew_andrews_architect_dto import AndrewsArchitectResponse
 
 
 class AndrewsArchitectUseCase(ABC):
     """`/titanic/andrews/*` inbound(andrews_architect_router) 입력 포트."""
 
     @abstractmethod
-    async def get_architect(self) -> dict[str, Any]:
-        """설계도 조회 (`GET /blueprint`)."""
+    async def introduce_myself(self, schema: AndrewsArchitectSchema) -> AndrewsArchitectResponse:
+        """앤드류스 자기소개 메소드 (`GET /myself`)."""
         ...

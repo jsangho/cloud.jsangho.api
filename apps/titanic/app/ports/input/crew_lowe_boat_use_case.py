@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
+
+from titanic.adapter.inbound.api.schemas.crew_lowe_boat_schema import LoweBoatSchema
+from titanic.app.dtos.crew_lowe_boat_dto import LoweBoatResponse
 
 
 class LoweBoatUseCase(ABC):
-    """`/titanic/andrews/*` inbound(lowe_boat_router) 입력 포트."""
+    """`/titanic/lowe/*` inbound(lowe_boat_router) 입력 포트."""
 
     @abstractmethod
-    async def get_boat(self) -> dict[str, Any]:
-        """설계도 조회 (`GET /blueprint`)."""
+    async def introduce_myself(self, schema: LoweBoatSchema) -> LoweBoatResponse:
+        """로우 자기소개 메소드 (`GET /myself`)."""
         ...

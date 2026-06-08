@@ -1,16 +1,20 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
-from typing import Any
+import logging
 
+from titanic.adapter.inbound.api.schemas.passenger_jack_trainer_schema import JackTrainerSchema
+from titanic.app.dtos.passenger_jack_trainer_dto import JackTrainerResponse
 from titanic.app.ports.input.passenger_jack_trainer_use_case import JackTrainerUseCase
 from titanic.app.ports.output.passenger_jack_trainer_repository import JackTrainerRepository
 
+logger = logging.getLogger("uvicorn.error")
+
 
 class JackTrainerInteractor(JackTrainerUseCase):
-    """Jack 스케치 조회 유스케이스."""
 
     def __init__(self, repository: JackTrainerRepository) -> None:
         self._repository = repository
 
-    async def get_trainer(self) -> dict[str, Any]:
-        return await self._repository.get_trainer()
+    async def introduce_myself(self, schema: JackTrainerSchema) -> JackTrainerResponse:
+        logger.info("[JackTrainerUseCase] introduce_myself | request_data=%s", schema)
+        return await self._repository.introduce_myself(schema)

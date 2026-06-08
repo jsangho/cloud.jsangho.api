@@ -1,16 +1,20 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
-from typing import Any
+import logging
 
+from titanic.adapter.inbound.api.schemas.passenger_cal_tester_schema import CalTesterSchema
+from titanic.app.dtos.passenger_cal_tester_dto import CalTesterResponse
 from titanic.app.ports.input.passenger_cal_tester_use_case import CalTesterUseCase
 from titanic.app.ports.output.passenger_cal_tester_repository import CalTesterRepository
 
+logger = logging.getLogger("uvicorn.error")
+
 
 class CalTesterInteractor(CalTesterUseCase):
-    """Cal 권총 조회 유스케이스."""
 
     def __init__(self, repository: CalTesterRepository) -> None:
         self._repository = repository
 
-    async def get_tester(self) -> dict[str, Any]:
-        return await self._repository.get_tester()
+    async def introduce_myself(self, schema: CalTesterSchema) -> CalTesterResponse:
+        logger.info("[CalTesterUseCase] introduce_myself | request_data=%s", schema)
+        return await self._repository.introduce_myself(schema)

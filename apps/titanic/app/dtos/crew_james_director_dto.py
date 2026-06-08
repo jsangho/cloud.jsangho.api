@@ -1,12 +1,8 @@
-from __future__ import annotations
-
 from dataclasses import dataclass
 
 
 @dataclass
-class PersonCommand:
-    """Person 테이블 업로드용 DTO."""
-
+class PassengerCommand:
     passenger_id: str
     name: str
     gender: str
@@ -18,8 +14,6 @@ class PersonCommand:
 
 @dataclass
 class BookingCommand:
-    """Booking·승선 항구 코드 업로드용 DTO."""
-
     pclass: str
     ticket: str
     fare: str
@@ -28,4 +22,8 @@ class BookingCommand:
 
 @dataclass
 class JamesDirectorResponse:
-    answer: str
+    id: int
+    name: str
+
+
+PersonCommand = PassengerCommand

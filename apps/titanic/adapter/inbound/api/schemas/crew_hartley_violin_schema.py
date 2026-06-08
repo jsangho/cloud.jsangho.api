@@ -1,9 +1,17 @@
-"""{stem} API 스키마."""
-
-from pydantic import BaseModel
-
+from pydantic import BaseModel, Field
 
 class HartleyViolinSchema(BaseModel):
-    id: int = 1
-    name: str = "Wallace Hartley"
-    memo: str = "밴드마스터, 생존 통계"
+    
+    id: int = Field(0, description="Musician ID")
+    name: str = Field("월리스 하틀리", description="Violinist's name")
+    memo: str = ""
+    # 타이타닉 밴드 마스터 , 배가 가라앉는 순간에도 끝까지 바이올린을 연주함
+    
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "id": 3,
+                "name": "Wallace Hartley",
+            }
+        }
+    }

@@ -1,23 +1,22 @@
-from __future__ import annotations
-
-from pathlib import Path
-from typing import Any
-
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from core.matrix.grid_oracle_database_manager import LAYER_LOG
-from titanic.app.ports.output.passenger_isidor_couple_repository import IsidorCoupleRepository
-
-logger = LAYER_LOG
-_SRC = Path(__file__).name
-
-
-class IsidorCouplePgRepository(IsidorCoupleRepository):
-    """Neon(Postgres) Isidor ì¹¨ë? ì¡°í ?´ë??"""
-
-    def __init__(self, db: AsyncSession) -> None:
-        self._db = db
-
-    async def get_couple(self) -> dict[str, Any]:
-        logger.info("[%s] get_couple -> Neon", _SRC)
-        return {}
+﻿from __future__ import annotations
+import logging
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from titanic.adapter.inbound.api.schemas.passenger_isidor_couple_schema import IsidorCoupleSchema
+from titanic.app.dtos.passenger_isidor_couple_dto import IsidorCoupleResponse
+from titanic.app.ports.output.passenger_isidor_couple_repository import IsidorCoupleRepository
+
+logger = logging.getLogger("uvicorn.error")
+
+class IsidorCouplePgRepository(IsidorCoupleRepository):
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def introduce_myself(self, schema: IsidorCoupleSchema) -> IsidorCoupleResponse:
+        logger.info("[IsidorCouplePgRepository] introduce_myself 진입 | request_data=%s", schema)
+        return IsidorCoupleResponse(
+            id=schema.id * 10000,
+            name=f"{schema.name}가 레포지토리에 다녀옴",
+        )

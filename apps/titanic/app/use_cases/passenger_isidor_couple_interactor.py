@@ -1,16 +1,20 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
-from typing import Any
+import logging
 
+from titanic.adapter.inbound.api.schemas.passenger_isidor_couple_schema import IsidorCoupleSchema
+from titanic.app.dtos.passenger_isidor_couple_dto import IsidorCoupleResponse
 from titanic.app.ports.input.passenger_isidor_couple_use_case import IsidorCoupleUseCase
 from titanic.app.ports.output.passenger_isidor_couple_repository import IsidorCoupleRepository
 
+logger = logging.getLogger("uvicorn.error")
+
 
 class IsidorCoupleInteractor(IsidorCoupleUseCase):
-    """Isidor 침대 조회 유스케이스."""
 
     def __init__(self, repository: IsidorCoupleRepository) -> None:
         self._repository = repository
 
-    async def get_couple(self) -> dict[str, Any]:
-        return await self._repository.get_couple()
+    async def introduce_myself(self, schema: IsidorCoupleSchema) -> IsidorCoupleResponse:
+        logger.info("[IsidorCoupleUseCase] introduce_myself | request_data=%s", schema)
+        return await self._repository.introduce_myself(schema)

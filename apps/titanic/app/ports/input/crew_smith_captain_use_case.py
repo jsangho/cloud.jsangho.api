@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any
+
+from titanic.adapter.inbound.api.schemas.crew_smith_captain_schema import SmithCaptainSchema
+from titanic.app.dtos.crew_smith_captain_dto import SmithCaptainResponse
 
 
 class SmithCaptainUseCase(ABC):
     """`/titanic/smith/*` inbound(smith_captain_router) 입력 포트."""
 
     @abstractmethod
-    async def get_captain(self) -> dict[str, Any]:
-        """선장 조회 (`GET /captain`)."""
+    async def introduce_myself(self, schema: SmithCaptainSchema) -> SmithCaptainResponse:
+        """스미스 선장 자기소개 메소드 (`GET /myself`)."""
         ...

@@ -9,12 +9,13 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from titanic.adapter.inbound.api.schemas.crew_james_director_schema import (
+    JamesDirectorMyselfSchema,
     format_preview_booking_command,
     format_preview_person_command,
 )
 from titanic.adapter.outbound.orm.booking_orm import BookingOrm
 from titanic.adapter.outbound.orm.person_orm import PersonOrm
-from titanic.app.dtos.crew_james_director_dto import BookingCommand, PersonCommand
+from titanic.app.dtos.crew_james_director_dto import BookingCommand, JamesDirectorResponse, PersonCommand
 from titanic.app.ports.output.crew_james_director_repository import JamesDirectorRepository
 
 logger = logging.getLogger("uvicorn.error")
@@ -86,6 +87,18 @@ class JamesDirectorPgRepository(JamesDirectorRepository):
 
     def __init__(self, session: AsyncSession | None) -> None:
         self._session = session
+
+    async def introduce_myself(self, schema: JamesDirectorMyselfSchema) -> JamesDirectorResponse:
+        
+        '''제임스 디렉터의 자기 소개 레포지토리 구현 메소드'''
+
+        logger.info("[JamesDirectorPgRepository] introduce_myself 진입 | request_data=%s", schema)
+        
+        response: JamesDirectorResponse = JamesDirectorResponse(
+            id= schema.id * 10000,
+            name= schema.name + "가 레포지토리에 다녀옴"
+        )
+        return response
 
     async def upload_titanic_file(
         self,

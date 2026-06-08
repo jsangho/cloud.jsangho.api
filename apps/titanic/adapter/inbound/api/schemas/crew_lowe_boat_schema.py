@@ -1,9 +1,17 @@
-"""{stem} API 스키마."""
-
-from pydantic import BaseModel
-
+from pydantic import BaseModel, Field
 
 class LoweBoatSchema(BaseModel):
-    id: int = 1
-    name: str = "Harold Lowe"
-    memo: str = "구명보트 배정 분석"
+    
+    id: int = Field(0, description="Officer ID")
+    name: str = Field("해롤드 로우", description="Officer's name")
+    memo: str = ""
+    
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "id": 4,
+                "name": "Harold Lowe",
+                "memo": "구명보트 배정 분석",
+            }
+        }
+    }

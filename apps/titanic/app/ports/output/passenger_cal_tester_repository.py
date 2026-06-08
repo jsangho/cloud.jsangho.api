@@ -1,12 +1,15 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Any
 
+from titanic.adapter.inbound.api.schemas.passenger_cal_tester_schema import CalTesterSchema
+from titanic.app.dtos.passenger_cal_tester_dto import CalTesterResponse
+
 
 class CalTesterRepository(ABC):
-    """Cal 권총 조회 데이터 출력 포트."""
 
     @abstractmethod
-    async def get_tester(self) -> dict[str, Any]:
-        ...
+    async def introduce_myself(self, schema: CalTesterSchema) -> CalTesterResponse:
+        '''칼의 자기소개 메소드'''
+        pass
