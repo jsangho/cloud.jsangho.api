@@ -135,7 +135,6 @@ def format_preview_booking_command(index: int, command: BookingCommand) -> str:
 class JamesDirectorMyselfSchema(BaseModel):
     id: int = 1
     name: str = "James Cameron"
-    memo: str = ""
 
 
 class JamesDirectorSchema(BaseModel):

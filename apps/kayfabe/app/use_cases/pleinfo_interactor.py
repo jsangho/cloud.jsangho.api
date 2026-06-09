@@ -1,40 +1,34 @@
-"""
-PLE ì¡°í ? ì¤ì¼?´ì¤(interactor).
-
-pleinfo_router ??PleInfoUseCase ??PleInfoInteractor ??PleInfoRepository(output port)
-"""
+"""PLE 조회 유스케이스."""
 
 from __future__ import annotations
 
 import json
+import logging
 
-from core.matrix.grid_oracle_database_manager import LAYER_LOG
-from kayfabe.adapter.inbound.api.schemas.ple_schema import (
-    CompetitorSchema,
-    MatchBoardSchema,
-    MatchResultSchema,
-    PleAiStatsSchema,
-    PleBoardSchema,
-    PleEventSummarySchema,
-    VoteTotalsSchema,
+from kayfabe.app.dtos.ple_dto import (
+    CompetitorDto,
+    MatchBoardDto,
+    MatchResultDto,
+    PleAiStatsDto,
+    PleBoardDto,
+    PleEventSummaryDto,
+    VoteTotalsDto,
 )
 from kayfabe.app.ports.input.pleinfo_use_case import PleInfoUseCase
 from kayfabe.app.ports.output.pleinfo_repository import PleInfoRepository
 
-logger = LAYER_LOG
+logger = logging.getLogger("uvicorn.error")
 
 
 class PleInfoInteractor(PleInfoUseCase):
-    """PLE ì¡°í ? ì¤ì¼?´ì¤ êµ¬íì²?"""
-
     def __init__(self, repository: PleInfoRepository) -> None:
         self._repo = repository
 
-    async def list_events(self) -> list[PleEventSummarySchema]:
-        logger.info("[PleInfoInteractor] list_events -> Repository")
+    async def list_events(self) -> list[PleEventSummaryDto]:
+        logger.info("[PleInfoInteractor] list_events")
         events = await self._repo.list_events()
-        rows = [
-            PleEventSummarySchema(
+        return [
+            PleEventSummaryDto(
                 slug=e.slug,
                 label=e.label,
                 month=e.month,
@@ -44,14 +38,10 @@ class PleInfoInteractor(PleInfoUseCase):
             )
             for e in events
         ]
-        logger.info("[PleInfoInteractor] list_events <- Repository ??count=%d", len(rows))
-        return rows
 
-    async def get_ai_stats(self) -> PleAiStatsSchema:
-        logger.info("[PleInfoInteractor] get_ai_stats -> Repository")
-        stats = await self._repo.get_ai_stats()
-        logger.info("[PleInfoInteractor] get_ai_stats <- Repository")
-        return stats
+    async def get_ai_stats(self) -> PleAiStatsDto:
+        logger.info("[PleInfoInteractor] get_ai_stats")
+        return await self._repo.get_ai_stats()
 
     async def get_board(
         self,
@@ -59,9 +49,9 @@ class PleInfoInteractor(PleInfoUseCase):
         slug: str,
         client_id: str | None = None,
         user_id: int | None = None,
-    ) -> PleBoardSchema:
+    ) -> PleBoardDto:
         logger.info(
-            "[PleInfoInteractor] get_board -> Repository ??slug=%s clientId=%s userId=%s",
+            "[PleInfoInteractor] get_board | slug=%s clientId=%s userId=%s",
             slug,
             client_id or "-",
             user_id if user_id is not None else "-",
@@ -70,51 +60,61 @@ class PleInfoInteractor(PleInfoUseCase):
         if event is None:
             raise LookupError(slug)
 
-        matches_out: list[MatchBoardSchema] = []
-        for row in sorted(event.matches, key=lambda m: m.sort_order):
+        matches_out: list[MatchBoardDto] = []
+        for row in event.matches:
             card = json.loads(row.card_json)
-            vote_raw, _ = self._repo.aggregate_votes(row)
+            vote_raw = await self._repo.aggregate_votes_for_match(
+                match_id=row.id,
+                fmt=row.format,
+                card_json=row.card_json,
+            )
 
             my_pick: str | None = None
             if user_id is not None:
-                pred = await self._repo.get_prediction_by_user(row.id, user_id)
-                if pred:
-                    my_pick = pred.pick
+                my_pick = await self._repo.get_prediction_pick_by_user(row.id, user_id)
             elif client_id:
-                pred = await self._repo.get_prediction(row.id, client_id)
-                if pred:
-                    my_pick = pred.pick
+                my_pick = await self._repo.get_prediction_pick(row.id, client_id)
 
             result = None
             if row.winner_pick or row.winner_name:
                 if row.format == "multi":
                     try:
-                        result = MatchResultSchema(
+                        result = MatchResultDto(
                             winner_index=int(row.winner_pick) if row.winner_pick else None,
                             winner_name=row.winner_name,
                         )
                     except ValueError:
-                        result = MatchResultSchema(winner_name=row.winner_name)
+                        result = MatchResultDto(winner_name=row.winner_name)
                 else:
-                    result = MatchResultSchema(
+                    result = MatchResultDto(
                         winner_side=row.winner_pick if row.winner_pick in ("left", "right") else None,
                         winner_name=row.winner_name,
                     )
 
+            def _competitor(raw: dict | None) -> CompetitorDto | None:
+                if not raw:
+                    return None
+                return CompetitorDto(
+                    name=raw.get("name", ""),
+                    is_champion=raw.get("isChampion"),
+                )
+
             matches_out.append(
-                MatchBoardSchema(
+                MatchBoardDto(
                     id=row.match_key,
                     db_id=row.id,
                     title=row.title,
                     card_variant=row.card_variant,
                     format=row.format,
-                    left=CompetitorSchema.model_validate(card["left"]) if card.get("left") else None,
-                    right=CompetitorSchema.model_validate(card["right"]) if card.get("right") else None,
-                    competitors=[CompetitorSchema.model_validate(c) for c in card.get("competitors") or []] or None,
+                    left=_competitor(card.get("left")),
+                    right=_competitor(card.get("right")),
+                    competitors=[
+                        _competitor(c) for c in card.get("competitors") or []
+                    ] or None,
                     bookmaker_decimal=card.get("bookmakerDecimal"),
                     status=row.status,
                     result=result,
-                    site_votes=VoteTotalsSchema(
+                    site_votes=VoteTotalsDto(
                         left=int(vote_raw.get("left", 0)),
                         right=int(vote_raw.get("right", 0)),
                         multi=list(vote_raw.get("multi") or []),
@@ -127,7 +127,7 @@ class PleInfoInteractor(PleInfoUseCase):
                 )
             )
 
-        board = PleBoardSchema(
+        return PleBoardDto(
             slug=event.slug,
             label=event.label,
             month=event.month,
@@ -137,9 +137,3 @@ class PleInfoInteractor(PleInfoUseCase):
             matches=matches_out,
             updated_at=event.updated_at,
         )
-        logger.info(
-            "[PleInfoInteractor] get_board <- Repository ??slug=%s matches=%d",
-            slug,
-            len(matches_out),
-        )
-        return board

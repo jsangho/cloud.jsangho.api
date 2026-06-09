@@ -1,15 +1,13 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Any
 
-from titanic.adapter.inbound.api.schemas.passenger_ruth_validation_schema import RuthValidationSchema
-from titanic.app.dtos.passenger_ruth_validation_dto import RuthValidationResponse
+from titanic.app.dtos.passenger_ruth_validation_dto import RuthValidationQuery, RuthValidationResponse
 
 
 class RuthValidationRepository(ABC):
 
     @abstractmethod
-    async def introduce_myself(self, schema: RuthValidationSchema) -> RuthValidationResponse:
-        '''루스의 자기소개 메소드'''
+    async def introduce_myself(self, query: RuthValidationQuery) -> RuthValidationResponse:
         pass

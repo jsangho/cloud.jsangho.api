@@ -6,7 +6,7 @@ from kayfabe.adapter.inbound.api.schemas.title_history_schema import (
     CompetitorTitleHistoryResponseSchema,
 )
 from kayfabe.app.ports.input.title_history_use_case import TitleHistoryUseCase
-from kayfabe.dependencies.title_history import get_title_history_use_case
+from kayfabe.dependencies.title_history_provider import get_title_history_use_case
 
 
 title_history_router = APIRouter(prefix="/title-history", tags=["title-history"])
@@ -22,7 +22,7 @@ async def get_competitor_title_history(
     use_case: TitleHistoryUseCase = Depends(get_title_history_use_case),
 ):
     """선수/팀의 실제 WWE 챔피언십 벨트 획득 이력 (NeonDB)."""
-    return await use_case.get_competitor_title_history(name)
+    return (await use_case.get_competitor_title_history(name)).to_schema()
 
 
 @title_history_router.post("/sync")

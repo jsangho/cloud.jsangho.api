@@ -1,6 +1,5 @@
-"""crew_james_director — CSV 업로드용 Person / Booking ORM."""
+from core.matrix.grid_neo_theone_base import Base
 
-from titanic.adapter.outbound.orm.booking_orm import BookingOrm
-from titanic.adapter.outbound.orm.person_orm import PersonOrm
+class JamesDirectorOrm(Base):
 
-__all__ = ["PersonOrm", "BookingOrm"]
+    __abstract__ = True

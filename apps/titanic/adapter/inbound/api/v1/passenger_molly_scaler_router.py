@@ -1,8 +1,11 @@
-﻿import logging
+import logging
+
+logger = logging.getLogger("uvicorn.error")
+
 
 from fastapi import APIRouter, Depends
 from titanic.adapter.inbound.api.schemas.passenger_molly_scaler_schema import MollyScalerSchema
-from titanic.app.dtos.passenger_molly_scaler_dto import MollyScalerResponse
+from titanic.app.dtos.passenger_molly_scaler_dto import MollyScalerQuery, MollyScalerResponse
 from titanic.app.ports.input.passenger_molly_scaler_use_case import MollyScalerUseCase
 from titanic.dependencies.passenger_molly_scaler_provider import get_molly_scaler_use_case
 
@@ -18,8 +21,6 @@ from titanic.dependencies.passenger_molly_scaler_provider import get_molly_scale
 이후 구조선 카르파티아호에서도 생존자들을 헌신적으로 돌보며 역사에 남을 영웅적인 면모를 보여줍니다.
 '''
 
-logger = logging.getLogger("uvicorn.error")
-
 molly_scaler_router = APIRouter(prefix="/molly", tags=["molly"])
 
 
@@ -32,5 +33,6 @@ async def introduce_myself(
         name="몰리 브라운 (Molly Brown)",
         memo="생존 예측 모델의 핵심 인터페이스를 담당합니다.",
     )
-    logger.info("[MollyScalerRouter] introduce_myself 진입 | request_data=%s", schema)
-    return await molly.introduce_myself(schema)
+    logger.info("[MollyScalerRouter] introduce_myself 진입 | request_data=%s", f"id={schema.id} name={schema.name!r}")
+    query = MollyScalerQuery(id=schema.id, name=schema.name)
+    return await molly.introduce_myself(query)

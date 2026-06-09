@@ -8,12 +8,6 @@ from kayfabe.app.ports.output.title_history_repository import TitleHistoryReposi
 from kayfabe.app.use_cases.title_history_interactor import TitleHistoryInteractor
 
 
-def get_title_history_repository(
-    db: AsyncSession = Depends(get_db),
-) -> TitleHistoryRepository:
-    return TitleHistoryPgRepository(db)
-
-
 def get_title_history_use_case(
     db: AsyncSession = Depends(get_db),
 ) -> TitleHistoryUseCase:

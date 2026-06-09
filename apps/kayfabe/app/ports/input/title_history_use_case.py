@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from kayfabe.adapter.inbound.api.schemas.title_history_schema import (
-    CompetitorTitleHistoryResponseSchema,
-)
+from kayfabe.app.dtos.title_history_dto import CompetitorTitleHistoryDto
 
 
 class TitleHistoryUseCase(ABC):
+    """`/title-history/*` inbound(title_history_router) 입력 포트."""
+
     @abstractmethod
-    async def get_competitor_title_history(self, name: str) -> CompetitorTitleHistoryResponseSchema:
+    async def get_competitor_title_history(self, name: str) -> CompetitorTitleHistoryDto:
         ...
 
     @abstractmethod

@@ -2,20 +2,24 @@ from __future__ import annotations
 
 import logging
 
+
+
 from core.matrix.grid_oracle_database_manager import AsyncSessionLocal, Base, engine
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import text
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from titanic.adapter.inbound.api.schemas.crew_james_director_schema import (
-    JamesDirectorMyselfSchema,
+from titanic.adapter.outbound.orm.passenger_jack_trainer_orm import JackTrainerOrm, PersonOrm
+from titanic.adapter.outbound.orm.passenger_rose_model_orm import BookingOrm, RoseModelOrm
+from titanic.app.dtos.crew_james_director_dto import (
+    BookingCommand,
+    JamesDirectorQuery,
+    JamesDirectorResponse,
+    PersonCommand,
     format_preview_booking_command,
     format_preview_person_command,
 )
-from titanic.adapter.outbound.orm.booking_orm import BookingOrm
-from titanic.adapter.outbound.orm.person_orm import PersonOrm
-from titanic.app.dtos.crew_james_director_dto import BookingCommand, JamesDirectorResponse, PersonCommand
 from titanic.app.ports.output.crew_james_director_repository import JamesDirectorRepository
 
 logger = logging.getLogger("uvicorn.error")
@@ -23,46 +27,31 @@ logger = logging.getLogger("uvicorn.error")
 _BULK_CHUNK_SIZE = 300
 
 
-def _parse_optional_int(raw: str) -> int | None:
+def _optional_str(raw: str) -> str | None:
     value = (raw or "").strip()
-    if not value:
-        return None
-    return int(float(value))
+    return value or None
 
 
-def _parse_optional_float(raw: str) -> float | None:
-    value = (raw or "").strip()
-    if not value:
-        return None
-    return float(value)
-
-
-def _parse_passenger_id(raw: str) -> int | None:
-    value = (raw or "").strip()
-    if not value:
-        return None
-    return int(float(value))
-
-
-def _person_fields(cmd: PersonCommand, passenger_id: int) -> dict[str, object]:
+def _person_fields(cmd: PersonCommand, passenger_id: str) -> dict[str, object]:
     return {
         "passenger_id": passenger_id,
-        "name": cmd.name.strip() or None,
-        "gender": cmd.gender.strip() or None,
-        "age": _parse_optional_float(cmd.age),
-        "sib_sp": _parse_optional_int(cmd.sib_sp),
-        "parch": _parse_optional_int(cmd.parch),
-        "survived": _parse_optional_int(cmd.survived),
+        "name": _optional_str(cmd.name),
+        "gender": _optional_str(cmd.gender),
+        "age": _optional_str(cmd.age),
+        "sib_sp": _optional_str(cmd.sib_sp),
+        "parch": _optional_str(cmd.parch),
+        "survived": _optional_str(cmd.survived),
     }
 
 
 def _booking_fields(cmd: BookingCommand) -> dict[str, object]:
-    cabin = cmd.cabin.strip() or None
-    embarked = cmd.embarked.strip() or None
+    cabin = _optional_str(cmd.cabin)
+    embarked = _optional_str(cmd.embarked)
+    ticket = _optional_str(cmd.ticket)
     return {
-        "pclass": _parse_optional_int(cmd.pclass),
-        "ticket": (cmd.ticket.strip() or None)[:64] if cmd.ticket.strip() else None,
-        "fare": _parse_optional_float(cmd.fare),
+        "pclass": _optional_str(cmd.pclass),
+        "ticket": ticket[:64] if ticket else None,
+        "fare": _optional_str(cmd.fare),
         "cabin": cabin[:32] if cabin else None,
         "embarked": embarked[:1] if embarked else None,
     }
@@ -75,11 +64,23 @@ async def _ensure_james_director_tables() -> None:
             status_code=503,
             detail="DATABASE_URL이 .env 등에 설정되지 않았습니다.",
         )
-    import titanic.adapter.outbound.orm.booking_orm  # noqa: F401
-    import titanic.adapter.outbound.orm.person_orm  # noqa: F401
+    import titanic.adapter.outbound.orm.passenger_jack_trainer_orm  # noqa: F401
+    import titanic.adapter.outbound.orm.passenger_rose_model_orm  # noqa: F401
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await conn.execute(
+            text(
+                "CREATE UNIQUE INDEX IF NOT EXISTS uq_passengers_passenger_id "
+                "ON passengers (passenger_id)"
+            )
+        )
+        await conn.execute(
+            text(
+                "CREATE UNIQUE INDEX IF NOT EXISTS uq_bookings_person_id "
+                "ON bookings (person_id)"
+            )
+        )
 
 
 class JamesDirectorPgRepository(JamesDirectorRepository):
@@ -88,15 +89,18 @@ class JamesDirectorPgRepository(JamesDirectorRepository):
     def __init__(self, session: AsyncSession | None) -> None:
         self._session = session
 
-    async def introduce_myself(self, schema: JamesDirectorMyselfSchema) -> JamesDirectorResponse:
+    async def introduce_myself(self, query: JamesDirectorQuery) -> JamesDirectorResponse:
         
         '''제임스 디렉터의 자기 소개 레포지토리 구현 메소드'''
 
-        logger.info("[JamesDirectorPgRepository] introduce_myself 진입 | request_data=%s", schema)
+        logger.info(
+            "[JamesDirectorPgRepository] introduce_myself 진입 | request_data=%s",
+            f"id={query.id} name={query.name!r}",
+        )
         
         response: JamesDirectorResponse = JamesDirectorResponse(
-            id= schema.id * 10000,
-            name= schema.name + "가 레포지토리에 다녀옴"
+            id=query.id * 10000,
+            name=query.name + "이 레포지토리에 다녀옴"
         )
         return response
 
@@ -170,10 +174,10 @@ class JamesDirectorPgRepository(JamesDirectorRepository):
         person_commands: list[PersonCommand],
         booking_commands: list[BookingCommand],
     ) -> int:
-        pairs: list[tuple[int, dict[str, object], dict[str, object]]] = []
+        pairs: list[tuple[str, dict[str, object], dict[str, object]]] = []
         for person_cmd, booking_cmd in zip(person_commands, booking_commands):
-            passenger_id = _parse_passenger_id(person_cmd.passenger_id)
-            if passenger_id is None:
+            passenger_id = (person_cmd.passenger_id or "").strip()
+            if not passenger_id:
                 continue
             pairs.append(
                 (
@@ -204,30 +208,16 @@ class JamesDirectorPgRepository(JamesDirectorRepository):
                 )
             )
 
-        passenger_ids = [passenger_id for passenger_id, _, _ in pairs]
-        person_id_by_passenger: dict[int, int] = {}
-        for chunk_start in range(0, len(passenger_ids), _BULK_CHUNK_SIZE):
-            chunk_ids = passenger_ids[chunk_start : chunk_start + _BULK_CHUNK_SIZE]
-            result = await session.execute(
-                select(PersonOrm.passenger_id, PersonOrm.id).where(
-                    PersonOrm.passenger_id.in_(chunk_ids)
-                )
-            )
-            person_id_by_passenger.update(dict(result.all()))
-
         booking_values: list[dict[str, object]] = []
         for passenger_id, _, booking_data in pairs:
-            person_id = person_id_by_passenger.get(passenger_id)
-            if person_id is None:
-                continue
-            booking_values.append({"person_id": person_id, **booking_data})
+            booking_values.append({"person_id": passenger_id, **booking_data})
 
         for chunk_start in range(0, len(booking_values), _BULK_CHUNK_SIZE):
             chunk = booking_values[chunk_start : chunk_start + _BULK_CHUNK_SIZE]
             booking_insert = pg_insert(BookingOrm).values(chunk)
             await session.execute(
                 booking_insert.on_conflict_do_update(
-                    constraint="uq_titanic_bookings_person_id",
+                    index_elements=[BookingOrm.person_id],
                     set_={
                         "pclass": booking_insert.excluded.pclass,
                         "ticket": booking_insert.excluded.ticket,

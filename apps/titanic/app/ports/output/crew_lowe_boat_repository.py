@@ -1,15 +1,13 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Any
 
-from titanic.adapter.inbound.api.schemas.crew_lowe_boat_schema import LoweBoatSchema
-from titanic.app.dtos.crew_lowe_boat_dto import LoweBoatResponse
+from titanic.app.dtos.crew_lowe_boat_dto import LoweBoatQuery, LoweBoatResponse
 
 
 class LoweBoatRepository(ABC):
 
     @abstractmethod
-    async def introduce_myself(self, schema: LoweBoatSchema) -> LoweBoatResponse:
-        '''로우의 자기소개 메소드'''
+    async def introduce_myself(self, query: LoweBoatQuery) -> LoweBoatResponse:
         pass

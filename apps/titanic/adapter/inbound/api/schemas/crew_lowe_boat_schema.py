@@ -4,7 +4,6 @@ class LoweBoatSchema(BaseModel):
     
     id: int = Field(0, description="Officer ID")
     name: str = Field("해롤드 로우", description="Officer's name")
-    memo: str = ""
     
     model_config = {
         "json_schema_extra": {

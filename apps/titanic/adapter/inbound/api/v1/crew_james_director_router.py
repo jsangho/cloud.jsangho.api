@@ -2,6 +2,8 @@
 
 import logging
 
+
+
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from titanic.adapter.inbound.api.schemas.crew_james_director_schema import (
@@ -11,7 +13,11 @@ from titanic.adapter.inbound.api.schemas.crew_james_director_schema import (
 )
 from titanic.app.ports.input.crew_james_director_use_case import JamesDirectorUseCase
 from titanic.dependencies.crew_james_director_provider import get_james_director_use_case
-from titanic.app.dtos.crew_james_director_dto import JamesDirectorResponse
+from titanic.app.dtos.crew_james_director_dto import (
+    JamesDirectorQuery,
+    JamesDirectorResponse,
+    TitanicRecordCommand,
+)
 '''
  감독: 제임스 카메론 (James Cameron)
  전설적인 흥행작 <타이타닉>을 연출하여
@@ -38,25 +44,42 @@ def _to_fileupload_response(result: dict[str, int]) -> JamesDirectorFileuploadRe
     count = result["count"]
     return JamesDirectorFileuploadResponse(count=count, inserted=count)
 
+
+def _to_record_commands(records: list) -> list[TitanicRecordCommand]:
+    return [
+        TitanicRecordCommand(
+            passenger_id=record.passenger_id or "",
+            survived=record.survived or "",
+            pclass=record.pclass or "",
+            name=record.name or "",
+            gender=record.gender or "",
+            age=record.age or "",
+            sib_sp=record.sib_sp or "",
+            parch=record.parch or "",
+            ticket=record.ticket or "",
+            fare=record.fare or "",
+            cabin=record.cabin or "",
+            embarked=record.embarked or "",
+        )
+        for record in records
+    ]
+
 @james_director_router.get("/myself")
 async def introduce_myself(
-    use_case: JamesDirectorUseCase = Depends(get_james_director_use_case),
+    james: JamesDirectorUseCase = Depends(get_james_director_use_case),
 ) -> JamesDirectorResponse:
     schema = JamesDirectorMyselfSchema(
-        id=1,
-        name="James Cameron",
-        memo=(
-            '전설적인 흥행작 <타이타닉>을 연출하여 "내가 세상의 왕이다!"를 외친 '
-            "제임스 카메론 감독. 완벽주의 성향으로 타이타닉의 모든 세트와 디테일을 "
-            "고증한 아키텍처의 총괄 디렉터 역할 수행"
-        ),
+        id=2,
+        name="James Cameron"
     )
-    logger.info("[JamesDirectorRouter] introduce_myself 진입 | request_data=%s", schema)
-    return await use_case.introduce_myself(schema)
-
+    logger.info("[JamesDirectorRouter] introduce_myself 진입 | request_data=%s", f"id={schema.id} name={schema.name!r}")
+    query = JamesDirectorQuery(id=schema.id, name=schema.name)
+    return await james.introduce_myself(query)
 
 @james_director_router.post(
-    "/fileupload", response_model=JamesDirectorResponse, summary="타이타닉 승객 데이터 CSV 파일 업로드"
+    "/fileupload",
+    response_model=JamesDirectorFileuploadResponse,
+    summary="타이타닉 승객 데이터 CSV 파일 업로드",
 )
 async def upload_titanic_file( 
     file: UploadFile = File(...),
@@ -69,5 +92,5 @@ async def upload_titanic_file(
         file.filename,
         len(schema.records),
     )
-    result = await james.upload_titanic_file(schema.records)
-    return await _to_fileupload_response(result)
+    result = await james.upload_titanic_file(_to_record_commands(schema.records))
+    return _to_fileupload_response(result)

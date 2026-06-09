@@ -1,19 +1,20 @@
 from __future__ import annotations
 
-from core.matrix.grid_oracle_database_manager import LAYER_LOG
-from kayfabe.adapter.inbound.api.schemas.result_schema import PleResultsResponse
+import logging
+
 from kayfabe.app.dtos.result_dto import PleResultRowDto, PleResultsDto
 from kayfabe.app.ports.input.result_use_case import ResultUseCase
 from kayfabe.app.ports.output.result_repository import ResultRepository
 
-logger = LAYER_LOG
+logger = logging.getLogger("uvicorn.error")
 
 
 class ResultInteractor(ResultUseCase):
     def __init__(self, repository: ResultRepository) -> None:
         self._repository = repository
 
-    async def list_results(self, year: int) -> PleResultsResponse:
+    async def list_results(self, year: int) -> PleResultsDto:
+        logger.info("[ResultInteractor] list_results | year=%d", year)
         events = await self._repository.list_events_by_year(year)
         rows: list[PleResultRowDto] = [
             PleResultRowDto(
@@ -27,4 +28,4 @@ class ResultInteractor(ResultUseCase):
             )
             for ple in events
         ]
-        return PleResultsDto(year=year, results=rows).to_schema()
+        return PleResultsDto(year=year, results=rows)

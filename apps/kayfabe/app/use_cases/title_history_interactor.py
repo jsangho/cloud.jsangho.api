@@ -1,8 +1,5 @@
 from __future__ import annotations
 
-from kayfabe.adapter.inbound.api.schemas.title_history_schema import (
-    CompetitorTitleHistoryResponseSchema,
-)
 from kayfabe.app.dtos.title_history_dto import CompetitorTitleHistoryDto, TitleAcquisitionDto
 from kayfabe.app.ports.input.title_history_use_case import TitleHistoryUseCase
 from kayfabe.app.ports.output.title_history_repository import TitleHistoryRepository
@@ -20,7 +17,7 @@ class TitleHistoryInteractor(TitleHistoryUseCase):
         if await self._title_history.needs_real_resync():
             await self.sync_from_real_catalog()
 
-    async def get_competitor_title_history(self, name: str) -> CompetitorTitleHistoryResponseSchema:
+    async def get_competitor_title_history(self, name: str) -> CompetitorTitleHistoryDto:
         normalized = normalize_name(name)
         await self._ensure_catalog_loaded()
         rows = await self._title_history.list_by_competitor(competitor_name=normalized)
@@ -35,4 +32,4 @@ class TitleHistoryInteractor(TitleHistoryUseCase):
                 )
                 for row in rows
             ],
-        ).to_schema()
+        )

@@ -1,4 +1,7 @@
-﻿import logging
+import logging
+
+logger = logging.getLogger("uvicorn.error")
+
 
 from fastapi import APIRouter, Depends
 
@@ -7,7 +10,7 @@ from titanic.adapter.inbound.api.schemas.crew_walter_roaster_schema import (
     WalterRoasterPassengerItem,
     WalterRoasterSchema,
 )
-from titanic.app.dtos.crew_walter_roaster_dto import WalterRoasterResponse
+from titanic.app.dtos.crew_walter_roaster_dto import WalterRoasterQuery, WalterRoasterResponse
 from titanic.app.ports.input.crew_walter_roaster_use_case import WalterRoasterUseCase
 from titanic.dependencies.crew_walter_roaster_provider import get_walter_roaster_use_case
 
@@ -16,8 +19,6 @@ from titanic.dependencies.crew_walter_roaster_provider import get_walter_roaster
 영화 <타이타닉>에서 승객 명단을 관리하는
 일등 항해사. 승객 명단 관리 담당자
 '''
-logger = logging.getLogger("uvicorn.error")
-
 walter_roaster_router = APIRouter(prefix="/walter", tags=["walter"])
 
 _DEFAULT_WALTER = {
@@ -36,8 +37,9 @@ async def introduce_myself(
         name="Walter Nichols",
         memo="타이타닉의 일등 항해사, 승객 명단 관리 담당",
     )
-    logger.info("[WalterRoasterRouter] introduce_myself 진입 | request_data=%s", schema)
-    return await walter.introduce_myself(schema)
+    logger.info("[WalterRoasterRouter] introduce_myself 진입 | request_data=%s", f"id={schema.id} name={schema.name!r}")
+    query = WalterRoasterQuery(id=schema.id, name=schema.name)
+    return await walter.introduce_myself(query)
 
 
 @walter_roaster_router.get("/openfile", response_model=WalterRoasterOpenfileResponse)
@@ -48,7 +50,7 @@ async def openfile(
 ) -> WalterRoasterOpenfileResponse:
     logger.info("[WalterRoasterRouter] openfile 진입 | page=%s pageSize=%s", page, pageSize)
     page_result = await walter.list_openfile_page(page=page, page_size=pageSize)
-    return await WalterRoasterOpenfileResponse(
+    return WalterRoasterOpenfileResponse(
         id=_DEFAULT_WALTER["id"],
         name=_DEFAULT_WALTER["name"],
         memo=_DEFAULT_WALTER["memo"],

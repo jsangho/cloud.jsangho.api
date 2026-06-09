@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, Depends
 
+from kayfabe.adapter.outbound.mappers.ranking_schema_mapper import rankings_to_schema
 from kayfabe.adapter.inbound.api.schemas.ranking_schema import RankingsResponseSchema
 from kayfabe.app.ports.input.ranking_use_case import RankingUseCase
-from kayfabe.dependencies.ranking import get_ranking_use_case
+from kayfabe.dependencies.ranking_provider import get_ranking_use_case
 
+logger = logging.getLogger("uvicorn.error")
 
 ranking_router = APIRouter(tags=["ranking"])
 
@@ -20,9 +24,5 @@ async def list_rankings(
     nickname: str | None = None,
     use_case: RankingUseCase = Depends(get_ranking_use_case),
 ):
-    """
-    PLE 예측 순위 (점수·적중률).
-    경기 결과(ple_matches.winner_pick) 확정 시 pick 일치분이 자동 집계됩니다.
-    nickname 쿼리로 내 순위(myRank)를 함께 조회할 수 있습니다.
-    """
-    return await use_case.list_rankings(limit=limit, nickname=nickname)
+    logger.info("[RankingRouter] list_rankings | limit=%d nickname=%s", limit, nickname or "-")
+    return rankings_to_schema(await use_case.list_rankings(limit=limit, nickname=nickname))

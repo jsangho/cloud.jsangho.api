@@ -1,15 +1,13 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Any
 
-from titanic.adapter.inbound.api.schemas.crew_hartley_violin_schema import HartleyViolinSchema
-from titanic.app.dtos.crew_hartley_violin_dto import HartleyViolinResponse
+from titanic.app.dtos.crew_hartley_violin_dto import HartleyViolinQuery, HartleyViolinResponse
 
 
 class HartleyViolinRepository(ABC):
 
     @abstractmethod
-    async def introduce_myself(self, schema: HartleyViolinSchema) -> HartleyViolinResponse:
-        '''하틀리의 자기소개 메소드'''
+    async def introduce_myself(self, query: HartleyViolinQuery) -> HartleyViolinResponse:
         pass

@@ -2,12 +2,15 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from kayfabe.adapter.inbound.api.schemas.ple_schema import MatchResultSchema, PleEventSyncSchema
-from kayfabe.adapter.outbound.orm.ple_orm import PleEventModel, PleMatchModel, PlePredictionModel
+from kayfabe.app.dtos.ple_dto import (
+    MatchResultDto,
+    PleEventSnapshotDto,
+    PleEventSyncCommand,
+)
 
 
 class PleRepository(ABC):
-    """PLE 쓰기 데이터를 영속화하는 출력 포트 (구현·로그 없음, ABC만)."""
+    """PLE 쓰기 출력 포트."""
 
     @abstractmethod
     async def user_exists(self, *, user_id: int) -> bool:
@@ -20,20 +23,20 @@ class PleRepository(ABC):
         ...
 
     @abstractmethod
-    async def get_event_by_slug(self, slug: str) -> PleEventModel | None:
-        """slug로 PLE 이벤트(매치 포함) 조회 — 쓰기 전 검증용."""
+    async def get_event_by_slug(self, slug: str) -> PleEventSnapshotDto | None:
+        """slug로 PLE 이벤트 스냅샷 조회 — 쓰기 전 검증용."""
         ...
 
     @abstractmethod
-    async def upsert_event_from_sync(self, payload: PleEventSyncSchema) -> PleEventModel:
-        """프론트 매치 카드를 Neon에 upsert (`sync_event`)."""
+    async def upsert_event_from_sync(self, payload: PleEventSyncCommand) -> PleEventSnapshotDto:
+        """프론트 매치 카드를 Neon에 upsert."""
         ...
 
     @abstractmethod
     async def upsert_prediction(
         self, match_id: int, client_id: str, pick: str, user_id: int
-    ) -> PlePredictionModel:
-        """경기 예측 저장 (`record_prediction`, `record_predictions_batch`)."""
+    ) -> None:
+        """경기 예측 저장."""
         ...
 
     @abstractmethod
@@ -41,10 +44,15 @@ class PleRepository(ABC):
         self,
         slug: str,
         match_key: str,
-        result: MatchResultSchema,
+        result: MatchResultDto,
         status: str | None = None,
-    ) -> PleMatchModel | None:
-        """경기 결과 저장 (`set_match_result`, `set_match_results_batch`, `sync_event`)."""
+    ) -> bool:
+        """경기 결과 저장. 성공 시 True."""
+        ...
+
+    @abstractmethod
+    async def mark_event_finished(self, *, event_id: int, finished_at) -> None:
+        """이벤트 상태를 finished로 갱신."""
         ...
 
     @abstractmethod

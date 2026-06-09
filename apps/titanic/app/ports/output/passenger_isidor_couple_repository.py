@@ -1,15 +1,13 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Any
 
-from titanic.adapter.inbound.api.schemas.passenger_isidor_couple_schema import IsidorCoupleSchema
-from titanic.app.dtos.passenger_isidor_couple_dto import IsidorCoupleResponse
+from titanic.app.dtos.passenger_isidor_couple_dto import IsidorCoupleQuery, IsidorCoupleResponse
 
 
 class IsidorCoupleRepository(ABC):
 
     @abstractmethod
-    async def introduce_myself(self, schema: IsidorCoupleSchema) -> IsidorCoupleResponse:
-        '''이시도르 & 이다 스트라우스 부부의 자기소개 메소드'''
+    async def introduce_myself(self, query: IsidorCoupleQuery) -> IsidorCoupleResponse:
         pass

@@ -3,55 +3,58 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from titanic.adapter.inbound.api.schemas.crew_james_director_schema import (
-    JamesDirectorMyselfSchema,
-    TitanicRecordSchema,
+from titanic.app.dtos.crew_james_director_dto import (
+    BookingCommand,
+    JamesDirectorQuery,
+    JamesDirectorResponse,
+    PersonCommand,
+    TitanicRecordCommand,
     format_preview_record,
 )
-from titanic.app.dtos.crew_james_director_dto import BookingCommand, JamesDirectorResponse, PersonCommand
 from titanic.app.ports.input.crew_james_director_use_case import JamesDirectorUseCase
 from titanic.app.ports.output.crew_james_director_repository import JamesDirectorRepository
 
 logger = logging.getLogger("uvicorn.error")
 
+
 class JamesDirectorInteractor(JamesDirectorUseCase):
     """James Director CSV 업로드 유스케이스."""
 
     def __init__(self, repository: JamesDirectorRepository) -> None:
-        self._repository = repository
+        self.repository = repository
 
-    async def introduce_myself(self, schema: JamesDirectorMyselfSchema) -> JamesDirectorResponse:
-        logger.info("[JamesDirectorUseCase] introduce_myself | request_data=%s", schema)
-        return await self._repository.introduce_myself(schema)
+    async def introduce_myself(self, query: JamesDirectorQuery) -> JamesDirectorResponse:
+        '''제임스 감독의 자기소개 인터렉트'''
+
+        logger.info("[JamesDirectorUseCase] introduce_myself | request_data=%s", f"id={query.id} name={query.name!r}")
+        return await self.repository.introduce_myself(query)
 
     async def upload_titanic_file(
-        self, records: list[TitanicRecordSchema]
+        self, records: list[TitanicRecordCommand]
     ) -> dict[str, int]:
         return await self.receive_uploaded_records(records)
 
     async def receive_uploaded_records(
         self,
-        schema: list[TitanicRecordSchema],
+        records: list[TitanicRecordCommand],
         *,
         filename: str = "",
     ) -> dict[str, Any]:
         logger.info(
             "[제임스 유스케이스] 라우터에서 유스케이스로 옮겨진 스키마 레코드 미리보기 (상위 %s건)",
-            min(5, len(schema)),
+            min(5, len(records)),
         )
         preview_blocks = [
             format_preview_record(index, record)
-            for index, record in enumerate(schema[:5], start=1)
+            for index, record in enumerate(records[:5], start=1)
         ]
         if preview_blocks:
             logger.info("\n%s", "\n".join(preview_blocks))
 
-        # schema 를 PersonCommand, BookingCommand 로 나눠서 옮겨담기
-
         person_commands: list[PersonCommand] = []
         booking_commands: list[BookingCommand] = []
 
-        for record in schema:
+        for record in records:
             person_commands.append(
                 PersonCommand(
                     passenger_id=record.passenger_id or "",
@@ -73,7 +76,7 @@ class JamesDirectorInteractor(JamesDirectorUseCase):
                 )
             )
 
-        count = await self._repository.upload_titanic_file(
+        count = await self.repository.upload_titanic_file(
             person_commands=person_commands,
             booking_commands=booking_commands,
             filename=filename,

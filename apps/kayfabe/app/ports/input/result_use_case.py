@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from kayfabe.adapter.inbound.api.schemas.result_schema import PleResultsResponse
+from kayfabe.app.dtos.result_dto import PleResultsDto
 
 
 class ResultUseCase(ABC):
-    """`/ple/results/results` inbound(result_router)가 호출하는 입력 포트."""
+    """`/ple/results/results` inbound(result_router) 입력 포트."""
 
     @abstractmethod
-    async def list_results(self, year: int) -> PleResultsResponse:
+    async def list_results(self, year: int) -> PleResultsDto:
         """연도별 PLE 이벤트 결과 목록."""
         ...

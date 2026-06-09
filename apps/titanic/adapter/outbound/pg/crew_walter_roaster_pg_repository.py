@@ -5,14 +5,16 @@ from typing import Any
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from titanic.adapter.outbound.orm.booking_orm import BookingOrm
-from titanic.adapter.outbound.orm.person_orm import PersonOrm
-from titanic.adapter.inbound.api.schemas.crew_walter_roaster_schema import WalterRoasterSchema
-from titanic.app.dtos.crew_walter_roaster_dto import WalterRoasterResponse
+from titanic.adapter.outbound.orm.passenger_jack_trainer_orm import JackTrainerOrm, PersonOrm
+from titanic.adapter.outbound.orm.passenger_rose_model_orm import BookingOrm, RoseModelOrm
+from titanic.app.dtos.crew_walter_roaster_dto import WalterRoasterQuery, WalterRoasterResponse
 from titanic.app.ports.output.crew_walter_roaster_repository import WalterRoasterRepository
 import logging
 
+
+
 logger = logging.getLogger("uvicorn.error")
+
 
 
 def _row_to_dict(person: PersonOrm, booking: BookingOrm | None) -> dict[str, Any]:
@@ -40,11 +42,11 @@ class WalterRoasterPgRepository(WalterRoasterRepository):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def introduce_myself(self, schema: WalterRoasterSchema) -> WalterRoasterResponse:
-        logger.info("[WalterRoasterPgRepository] introduce_myself 진입 | request_data=%s", schema)
+    async def introduce_myself(self, query: WalterRoasterQuery) -> WalterRoasterResponse:
+        logger.info("[WalterRoasterPgRepository] introduce_myself 진입 | request_data=%s", f"id={query.id} name={query.name!r}")
         return WalterRoasterResponse(
-            id=schema.id * 10000,
-            name=f"{schema.name}가 레포지토리에 다녀옴",
+            id=query.id * 10000,
+            name= query.name + "가 레포지토리에 다녀옴",
         )
 
     async def list_openfile_page(self, *, page: int, page_size: int) -> dict[str, Any]:
@@ -64,7 +66,7 @@ class WalterRoasterPgRepository(WalterRoasterRepository):
 
         result = await self.session.execute(
             select(PersonOrm, BookingOrm)
-            .join(BookingOrm, BookingOrm.person_id == PersonOrm.id)
+            .join(BookingOrm, BookingOrm.person_id == PersonOrm.passenger_id)
             .order_by(PersonOrm.passenger_id.asc())
             .offset(offset)
             .limit(safe_page_size)

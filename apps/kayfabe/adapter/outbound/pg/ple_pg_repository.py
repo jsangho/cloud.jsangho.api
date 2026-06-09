@@ -2,17 +2,15 @@ import json
 from datetime import datetime, timezone
 
 from sqlalchemy import select, update
+from sqlalchemy.orm import selectinload
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.matrix.grid_oracle_database_manager import LAYER_LOG
 from friday13th.domain.entities.user_model import UserModel
+from kayfabe.adapter.outbound.mappers.ple_orm_mapper import card_command_to_json, event_to_snapshot
 from kayfabe.adapter.outbound.pg.pleinfo_pg_repository import PleInfoPgRepository
-from kayfabe.adapter.inbound.api.schemas.ple_schema import (
-    MatchResultSchema,
-    PleAiStatsSchema,
-    PleEventSyncSchema,
-)
+from kayfabe.app.dtos.ple_dto import MatchResultDto, PleEventSnapshotDto, PleEventSyncCommand
 from kayfabe.app.ports.output.ple_repository import PleRepository
 from kayfabe.adapter.outbound.orm.ple_orm import (
     PleEventModel,
@@ -42,13 +40,16 @@ class PlePgRepository(PleRepository):
     async def flush(self) -> None:
         await self.db.flush()
 
-    async def get_event_by_slug(self, slug: str) -> PleEventModel | None:
-        return await self._info.get_event_by_slug(slug)
+    async def _get_event_orm(self, slug: str) -> PleEventModel | None:
+        return await self._info._load_event_model(slug, with_predictions=False)
 
-    async def list_events(self) -> list[PleEventModel]:
-        return await self._info.list_events()
+    async def get_event_by_slug(self, slug: str) -> PleEventSnapshotDto | None:
+        event = await self._get_event_orm(slug)
+        if event is None:
+            return None
+        return event_to_snapshot(event)
 
-    async def upsert_event_from_sync(self, payload: PleEventSyncSchema) -> PleEventModel:
+    async def upsert_event_from_sync(self, payload: PleEventSyncCommand) -> PleEventSnapshotDto:
         status_val = payload.status or PleEventStatus.UPCOMING
         await self.db.execute(
             pg_insert(PleEventModel)
@@ -70,7 +71,7 @@ class PlePgRepository(PleRepository):
         )
         await self.db.flush()
 
-        event = await self.get_event_by_slug(payload.slug)
+        event = await self._get_event_orm(payload.slug)
         if event is None:
             raise RuntimeError(f"PLE event upsert failed: slug={payload.slug!r}")
 
@@ -82,7 +83,7 @@ class PlePgRepository(PleRepository):
 
         for order, card in enumerate(payload.matches):
             seen_keys.add(card.id)
-            card_json = card.model_dump(by_alias=True, mode="json")
+            card_json = card_command_to_json(card)
             row = existing.get(card.id)
             if row is None:
                 row = PleMatchModel(
@@ -117,7 +118,10 @@ class PlePgRepository(PleRepository):
                 await self.db.delete(row)
 
         await self.db.flush()
-        return event
+        refreshed = await self._get_event_orm(payload.slug)
+        if refreshed is None:
+            raise RuntimeError(f"PLE event upsert failed: slug={payload.slug!r}")
+        return event_to_snapshot(refreshed)
 
     @staticmethod
     def _apply_point_value(row: PleMatchModel, card_dict: dict) -> None:
@@ -141,7 +145,7 @@ class PlePgRepository(PleRepository):
         await self.db.flush()
         return updated
 
-    def _apply_result_to_row(self, row: PleMatchModel, result: MatchResultSchema) -> None:
+    def _apply_result_to_row(self, row: PleMatchModel, result: MatchResultDto) -> None:
         if result.winner_side:
             row.winner_pick = result.winner_side
         elif result.winner_index is not None:
@@ -161,34 +165,37 @@ class PlePgRepository(PleRepository):
         self,
         slug: str,
         match_key: str,
-        result: MatchResultSchema,
+        result: MatchResultDto,
         status: str | None = None,
-    ) -> PleMatchModel | None:
-        event = await self.get_event_by_slug(slug)
+    ) -> bool:
+        event = await self._get_event_orm(slug)
         if event is None:
-            return None
+            return False
         row = next((m for m in event.matches if m.match_key == match_key), None)
         if row is None:
-            return None
+            return False
         self._apply_result_to_row(row, result)
         if status:
             row.status = status
         await self.db.flush()
-        return row
+        return True
 
-    async def finalize_event(self, slug: str) -> PleEventModel | None:
-        event = await self.get_event_by_slug(slug)
+    async def mark_event_finished(self, *, event_id: int, finished_at) -> None:
+        result = await self.db.execute(
+            select(PleEventModel)
+            .where(PleEventModel.id == event_id)
+            .options(selectinload(PleEventModel.matches))
+        )
+        event = result.scalar_one_or_none()
         if event is None:
-            return None
-        now = datetime.now(timezone.utc)
+            return
         event.status = PleEventStatus.FINISHED
-        event.finished_at = now
+        event.finished_at = finished_at
         for match in event.matches:
             if match.status != PleMatchStatus.FINISHED and match.winner_pick:
                 match.status = PleMatchStatus.FINISHED
-                match.finished_at = now
+                match.finished_at = finished_at
         await self.db.flush()
-        return event
 
     async def attach_user_id_by_client(self, client_id: str, user_id: int) -> int:
         result = await self.db.execute(
@@ -212,7 +219,13 @@ class PlePgRepository(PleRepository):
     async def get_prediction_by_user(
         self, match_id: int, user_id: int
     ) -> PlePredictionModel | None:
-        return await self._info.get_prediction_by_user(match_id, user_id)
+        result = await self.db.execute(
+            select(PlePredictionModel).where(
+                PlePredictionModel.match_id == match_id,
+                PlePredictionModel.user_id == user_id,
+            )
+        )
+        return result.scalar_one_or_none()
 
     async def upsert_prediction(
         self,
@@ -220,14 +233,14 @@ class PlePgRepository(PleRepository):
         client_id: str,
         pick: str,
         user_id: int,
-    ) -> PlePredictionModel:
+    ) -> None:
         existing = await self.get_prediction_by_user(match_id, user_id)
         if existing is not None:
             existing.pick = pick
             existing.client_id = client_id
             await self.db.flush()
-            return existing
-        return await self.add_prediction(match_id, client_id, pick, user_id)
+            return
+        await self.add_prediction(match_id, client_id, pick, user_id)
 
     async def add_prediction(
         self,
@@ -259,18 +272,11 @@ class PlePgRepository(PleRepository):
     async def get_prediction(
         self, match_id: int, client_id: str
     ) -> PlePredictionModel | None:
-        return await self._info.get_prediction(match_id, client_id)
-
-    @staticmethod
-    def aggregate_votes(
-        match: PleMatchModel,
-    ) -> tuple[dict[str, int | list[int]], str | None]:
-        return PleInfoPgRepository.aggregate_votes(match)
-
-    async def get_ai_stats(self) -> PleAiStatsSchema:
-        return await self._info.get_ai_stats()
-
-
-# Backward-compat export (older imports)
-PleRepository = PlePgRepository
+        result = await self.db.execute(
+            select(PlePredictionModel).where(
+                PlePredictionModel.match_id == match_id,
+                PlePredictionModel.client_id == client_id,
+            )
+        )
+        return result.scalar_one_or_none()
 

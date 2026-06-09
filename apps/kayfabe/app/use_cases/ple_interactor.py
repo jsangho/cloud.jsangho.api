@@ -1,75 +1,72 @@
-"""
-PLE ?°ê¸° ? ì¤ì¼?´ì¤(interactor).
-
-ple_router ??PleUseCase ??PleInteractor ??PleRepository(output port)
-"""
+"""PLE 쓰기 유스케이스."""
 
 from __future__ import annotations
 
 from datetime import datetime, timezone
 
-from core.matrix.grid_oracle_database_manager import LAYER_LOG
-from kayfabe.adapter.inbound.api.schemas.ple_schema import (
-    BatchPredictionRequestSchema,
-    BatchResultsRequestSchema,
-    MatchResultSchema,
-    MatchResultUpdateSchema,
-    PleBoardSchema,
-    PleEventSyncSchema,
-    PredictionRequestSchema,
+from kayfabe.app.dtos.ple_dto import (
+    BatchPredictionCommand,
+    BatchResultsCommand,
+    MatchResultDto,
+    MatchResultUpdateCommand,
+    PleBoardDto,
+    PleEventSyncCommand,
+    PredictionCommand,
 )
+from kayfabe.app.exceptions import PleAuthRequiredError
 from kayfabe.app.ports.input.ple_use_case import PleUseCase
 from kayfabe.app.ports.output.ple_repository import PleRepository
 from kayfabe.app.ports.output.pleinfo_repository import PleInfoRepository
 from kayfabe.app.use_cases.pleinfo_interactor import PleInfoInteractor
-from kayfabe.adapter.outbound.orm.ple_orm import PleEventStatus, PleMatchStatus
-from kayfabe.app.exceptions import PleAuthRequiredError
+from kayfabe.domain.value_objects.ple_status_vo import PleEventStatus, PleMatchStatus
 
-logger = LAYER_LOG
+import logging
 
-FINISHED_2026_RESULTS: dict[str, dict[str, MatchResultSchema]] = {
+logger = logging.getLogger("uvicorn.error")
+
+FINISHED_2026_RESULTS: dict[str, dict[str, MatchResultDto]] = {
     "royal-rumble": {
-        "rr26-gunther-styles": MatchResultSchema(winner_side="left", winner_name="Gunther"),
-        "rr26-undisputed": MatchResultSchema(winner_side="left", winner_name="Drew McIntyre"),
-        "rr26-women-rumble": MatchResultSchema(winner_index=1, winner_name="Liv Morgan"),
-        "rr26-men-rumble": MatchResultSchema(winner_index=0, winner_name="Roman Reigns"),
+        "rr26-gunther-styles": MatchResultDto(winner_side="left", winner_name="Gunther"),
+        "rr26-undisputed": MatchResultDto(winner_side="left", winner_name="Drew McIntyre"),
+        "rr26-women-rumble": MatchResultDto(winner_index=1, winner_name="Liv Morgan"),
+        "rr26-men-rumble": MatchResultDto(winner_index=0, winner_name="Roman Reigns"),
     },
     "elimination-chamber": {
-        "ec26-women": MatchResultSchema(winner_index=0, winner_name="Rhea Ripley"),
-        "ec26-women-ic": MatchResultSchema(winner_side="left", winner_name="AJ Lee"),
-        "ec26-whc": MatchResultSchema(winner_side="left", winner_name="CM Punk"),
-        "ec26-men": MatchResultSchema(winner_index=0, winner_name="Randy Orton"),
+        "ec26-women": MatchResultDto(winner_index=0, winner_name="Rhea Ripley"),
+        "ec26-women-ic": MatchResultDto(winner_side="left", winner_name="AJ Lee"),
+        "ec26-whc": MatchResultDto(winner_side="left", winner_name="CM Punk"),
+        "ec26-men": MatchResultDto(winner_index=0, winner_name="Randy Orton"),
     },
     "stand-and-deliver": {
-        "sad26-preshow": MatchResultSchema(winner_side="left"),
-        "sad26-sol-zaria": MatchResultSchema(winner_side="left", winner_name="Sol Ruca"),
-        "sad26-women-na": MatchResultSchema(winner_side="left", winner_name="Tatum Paxley"),
-        "sad26-na": MatchResultSchema(winner_side="left", winner_name="Myles Borne"),
-        "sad26-tag": MatchResultSchema(winner_side="left", winner_name="The Vanity Project"),
-        "sad26-women": MatchResultSchema(winner_index=0, winner_name="Lola Vice"),
-        "sad26-nxt": MatchResultSchema(winner_index=0, winner_name="Tony D'Angelo"),
+        "sad26-preshow": MatchResultDto(winner_side="left"),
+        "sad26-sol-zaria": MatchResultDto(winner_side="left", winner_name="Sol Ruca"),
+        "sad26-women-na": MatchResultDto(winner_side="left", winner_name="Tatum Paxley"),
+        "sad26-na": MatchResultDto(winner_side="left", winner_name="Myles Borne"),
+        "sad26-tag": MatchResultDto(winner_side="left", winner_name="The Vanity Project"),
+        "sad26-women": MatchResultDto(winner_index=0, winner_name="Lola Vice"),
+        "sad26-nxt": MatchResultDto(winner_index=0, winner_name="Tony D'Angelo"),
     },
     "wrestlemania": {
-        "wm42-n1-six": MatchResultSchema(winner_side="left"),
-        "wm42-n1-unsanctioned": MatchResultSchema(winner_side="left", winner_name="Jacob Fatu"),
-        "wm42-n1-women-tag": MatchResultSchema(winner_index=0),
-        "wm42-n1-women-ic": MatchResultSchema(winner_side="left", winner_name="Becky Lynch"),
-        "wm42-n1-gunther-rollins": MatchResultSchema(winner_side="left", winner_name="Gunther"),
-        "wm42-n1-women-world": MatchResultSchema(winner_side="left", winner_name="Liv Morgan"),
-        "wm42-n1-undisputed": MatchResultSchema(winner_side="left", winner_name="Cody Rhodes"),
-        "wm42-n2-femi-lesnar": MatchResultSchema(winner_side="left", winner_name="Oba Femi"),
-        "wm42-n2-ic-ladder": MatchResultSchema(winner_index=0, winner_name="Penta"),
-        "wm42-n2-us": MatchResultSchema(winner_side="left", winner_name="Trick Williams"),
-        "wm42-n2-street": MatchResultSchema(winner_side="left", winner_name="Finn BÃ¡lor"),
-        "wm42-n2-women": MatchResultSchema(winner_side="left", winner_name="Rhea Ripley"),
-        "wm42-n2-whc": MatchResultSchema(winner_side="left", winner_name="Roman Reigns"),
+        "wm42-n1-six": MatchResultDto(winner_side="left"),
+        "wm42-n1-unsanctioned": MatchResultDto(winner_side="left", winner_name="Jacob Fatu"),
+        "wm42-n1-women-tag": MatchResultDto(winner_index=0),
+        "wm42-n1-women-ic": MatchResultDto(winner_side="left", winner_name="Becky Lynch"),
+        "wm42-n1-gunther-rollins": MatchResultDto(winner_side="left", winner_name="Gunther"),
+        "wm42-n1-women-world": MatchResultDto(winner_side="left", winner_name="Liv Morgan"),
+        "wm42-n1-undisputed": MatchResultDto(winner_side="left", winner_name="Cody Rhodes"),
+        "wm42-n2-femi-lesnar": MatchResultDto(winner_side="left", winner_name="Oba Femi"),
+        "wm42-n2-ic-ladder": MatchResultDto(winner_index=0, winner_name="Penta"),
+        "wm42-n2-us": MatchResultDto(winner_side="left", winner_name="Trick Williams"),
+        "wm42-n2-street": MatchResultDto(winner_side="left", winner_name="Finn Bálor"),
+        "wm42-n2-women": MatchResultDto(winner_side="left", winner_name="Rhea Ripley"),
+        "wm42-n2-whc": MatchResultDto(winner_side="left", winner_name="Roman Reigns"),
     },
     "backlash": {
-        "bl26-danhausen": MatchResultSchema(winner_side="left"),
-        "bl26-iyo-asuka": MatchResultSchema(winner_side="left", winner_name="IYO SKY"),
-        "bl26-us": MatchResultSchema(winner_side="left", winner_name="Trick Williams"),
-        "bl26-breakker-rollins": MatchResultSchema(winner_side="left", winner_name="Bron Breakker"),
-        "bl26-whc": MatchResultSchema(winner_side="left", winner_name="Roman Reigns"),
+        "bl26-danhausen": MatchResultDto(winner_side="left"),
+        "bl26-iyo-asuka": MatchResultDto(winner_side="left", winner_name="IYO SKY"),
+        "bl26-us": MatchResultDto(winner_side="left", winner_name="Trick Williams"),
+        "bl26-breakker-rollins": MatchResultDto(winner_side="left", winner_name="Bron Breakker"),
+        "bl26-whc": MatchResultDto(winner_side="left", winner_name="Roman Reigns"),
     },
 }
 
@@ -77,8 +74,6 @@ FINISHED_2026_SLUGS = frozenset(FINISHED_2026_RESULTS.keys())
 
 
 class PleInteractor(PleUseCase):
-    """PLE ?°ê¸° ? ì¤ì¼?´ì¤ êµ¬íì²?"""
-
     def __init__(
         self,
         repository: PleRepository,
@@ -89,34 +84,37 @@ class PleInteractor(PleUseCase):
 
     async def _require_user(self, user_id: int) -> None:
         if not await self._repo.user_exists(user_id=user_id):
-            raise PleAuthRequiredError("? í¨??ë¡ê·¸???ì???ë?ë¤.")
+            raise PleAuthRequiredError("유효한 로그인 회원이 아닙니다.")
 
-    async def sync_event(self, *, payload: PleEventSyncSchema) -> PleBoardSchema:
+    async def sync_event(self, *, payload: PleEventSyncCommand) -> PleBoardDto:
         logger.info(
-            "[PleInteractor] sync_event -> Repository ??slug=%s matches=%d",
+            "[PleInteractor] sync_event | slug=%s matches=%d",
             payload.slug,
             len(payload.matches),
         )
-        event = await self._repo.upsert_event_from_sync(payload)
+        snapshot = await self._repo.upsert_event_from_sync(payload)
         if payload.slug in FINISHED_2026_SLUGS:
             results = FINISHED_2026_RESULTS.get(payload.slug) or {}
             for match_key, result in results.items():
                 await self._repo.set_match_result(
-                    payload.slug, match_key, result, status=PleMatchStatus.FINISHED
+                    payload.slug,
+                    match_key,
+                    result,
+                    status=PleMatchStatus.FINISHED,
                 )
 
-            if event.status != PleEventStatus.FINISHED:
-                event.status = PleEventStatus.FINISHED
-                event.finished_at = datetime.now(timezone.utc)
+            if snapshot.status != PleEventStatus.FINISHED:
+                await self._repo.mark_event_finished(
+                    event_id=snapshot.id,
+                    finished_at=datetime.now(timezone.utc),
+                )
             await self._repo.flush()
 
-        board = await self._info.get_board(slug=payload.slug)
-        logger.info("[PleInteractor] sync_event <- Repository ??slug=%s", payload.slug)
-        return board
+        return await self._info.get_board(slug=payload.slug)
 
     async def record_predictions_batch(
-        self, *, slug: str, body: BatchPredictionRequestSchema
-    ) -> PleBoardSchema:
+        self, *, slug: str, body: BatchPredictionCommand
+    ) -> PleBoardDto:
         await self._require_user(body.user_id)
         event = await self._repo.get_event_by_slug(slug)
         if event is None:
@@ -132,36 +130,36 @@ class PleInteractor(PleUseCase):
             await self._repo.upsert_prediction(row.id, body.client_id, item.pick, body.user_id)
 
         logger.info(
-            "[PleInteractor] record_predictions_batch <- Repository ??slug=%s count=%d",
+            "[PleInteractor] record_predictions_batch | slug=%s count=%d",
             slug,
             len(body.predictions),
         )
         return await self._info.get_board(slug=slug, client_id=body.client_id, user_id=body.user_id)
 
     async def set_match_results_batch(
-        self, *, slug: str, body: BatchResultsRequestSchema
-    ) -> PleBoardSchema:
+        self, *, slug: str, body: BatchResultsCommand
+    ) -> PleBoardDto:
         for item in body.results:
-            result = MatchResultSchema(
+            result = MatchResultDto(
                 winner_side=item.winner_side,
                 winner_index=item.winner_index,
                 winner_name=item.winner_name,
             )
-            row = await self._repo.set_match_result(slug, item.match_key, result, status=item.status)
-            if row is None:
+            ok = await self._repo.set_match_result(slug, item.match_key, result, status=item.status)
+            if not ok:
                 raise LookupError(
                     f"경기 '{item.match_key}'를 찾을 수 없습니다. PLE 카드 동기화를 다시 시도해 주세요."
                 )
         logger.info(
-            "[PleInteractor] set_match_results_batch <- Repository ??slug=%s count=%d",
+            "[PleInteractor] set_match_results_batch | slug=%s count=%d",
             slug,
             len(body.results),
         )
         return await self._info.get_board(slug=slug)
 
     async def record_prediction(
-        self, *, slug: str, match_key: str, body: PredictionRequestSchema
-    ) -> PleBoardSchema:
+        self, *, slug: str, match_key: str, body: PredictionCommand
+    ) -> PleBoardDto:
         await self._require_user(body.user_id)
         event = await self._repo.get_event_by_slug(slug)
         if event is None:
@@ -174,7 +172,7 @@ class PleInteractor(PleUseCase):
             raise ValueError("종료된 경기에는 예측할 수 없습니다.")
 
         logger.info(
-            "[PleInteractor] record_prediction -> Repository ??slug=%s match=%s userId=%s pick=%s",
+            "[PleInteractor] record_prediction | slug=%s match=%s userId=%s pick=%s",
             slug,
             match_key,
             body.user_id,
@@ -184,9 +182,9 @@ class PleInteractor(PleUseCase):
         return await self._info.get_board(slug=slug, client_id=body.client_id, user_id=body.user_id)
 
     async def set_match_result(
-        self, *, slug: str, match_key: str, body: MatchResultUpdateSchema
-    ) -> PleBoardSchema:
-        result = MatchResultSchema(
+        self, *, slug: str, match_key: str, body: MatchResultUpdateCommand
+    ) -> PleBoardDto:
+        result = MatchResultDto(
             winner_side=body.winner_side,
             winner_index=body.winner_index,
             winner_name=body.winner_name,
@@ -195,14 +193,10 @@ class PleInteractor(PleUseCase):
         if event is None:
             raise LookupError(f"PLE '{slug}'를 찾을 수 없습니다. 먼저 카드를 동기화해 주세요.")
 
-        row = await self._repo.set_match_result(slug, match_key, result, status=body.status)
-        if row is None:
+        ok = await self._repo.set_match_result(slug, match_key, result, status=body.status)
+        if not ok:
             raise LookupError(
                 f"경기 '{match_key}'를 찾을 수 없습니다. PLE 카드 동기화를 다시 시도해 주세요."
             )
-        logger.info(
-            "[PleInteractor] set_match_result <- Repository ??slug=%s match=%s",
-            slug,
-            match_key,
-        )
+        logger.info("[PleInteractor] set_match_result | slug=%s match=%s", slug, match_key)
         return await self._info.get_board(slug=slug)

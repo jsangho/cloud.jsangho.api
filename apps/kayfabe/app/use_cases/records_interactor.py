@@ -1,10 +1,6 @@
 from __future__ import annotations
 
 from core.matrix.grid_oracle_database_manager import LAYER_LOG
-from kayfabe.adapter.inbound.api.schemas.records_schema import (
-    CompetitorListResponseSchema,
-    CompetitorProfileResponseSchema,
-)
 from kayfabe.app.dtos.records_dto import (
     CompetitorListDto,
     CompetitorMatchRecordDto,
@@ -30,16 +26,16 @@ class RecordsInteractor(RecordsUseCase):
     ) -> None:
         self._records = records_repository
 
-    async def list_competitors(self, *, q: str | None = None) -> CompetitorListResponseSchema:
+    async def list_competitors(self, *, q: str | None = None) -> CompetitorListDto:
         logger.info("[RecordsInteractor] list_competitors -> Repository q=%s", q or "-")
         names = await self._records.list_competitor_names()
         if q:
             needle = q.strip().lower()
             names = [n for n in names if needle in n.lower()]
         logger.info("[RecordsInteractor] list_competitors <- Repository count=%d", len(names))
-        return CompetitorListDto(names=names).to_schema()
+        return CompetitorListDto(names=names)
 
-    async def get_competitor_profile(self, name: str) -> CompetitorProfileResponseSchema:
+    async def get_competitor_profile(self, name: str) -> CompetitorProfileDto:
         normalized = normalize_name(name)
         logger.info("[RecordsInteractor] get_competitor_profile -> Repository name=%s", normalized)
 
@@ -97,4 +93,4 @@ class RecordsInteractor(RecordsUseCase):
             normalized,
             len(matches),
         )
-        return CompetitorProfileDto(name=normalized, matches=matches, summary=summary).to_schema()
+        return CompetitorProfileDto(name=normalized, matches=matches, summary=summary)
