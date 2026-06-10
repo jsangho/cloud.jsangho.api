@@ -5,8 +5,8 @@ from typing import Any
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from titanic.adapter.outbound.orm.passenger_jack_trainer_orm import JackTrainerOrm, PersonOrm
-from titanic.adapter.outbound.orm.passenger_rose_model_orm import BookingOrm, RoseModelOrm
+from titanic.adapter.outbound.orm.passenger_jack_trainer_orm import JackTrainerOrm
+from titanic.adapter.outbound.orm.passenger_rose_model_orm import RoseModelOrm
 from titanic.app.dtos.crew_walter_roaster_dto import WalterRoasterQuery, WalterRoasterResponse
 from titanic.app.ports.output.crew_walter_roaster_repository import WalterRoasterRepository
 import logging
@@ -17,9 +17,9 @@ logger = logging.getLogger("uvicorn.error")
 
 
 
-def _row_to_dict(person: PersonOrm, booking: BookingOrm | None) -> dict[str, Any]:
+def _row_to_dict(person: JackTrainerOrm, booking: RoseModelOrm | None) -> dict[str, Any]:
     return {
-        "id": person.id,
+        "id": person.passenger_id,
         "passenger": person.passenger_id,
         "survived": person.survived,
         "pclass": booking.pclass if booking else None,
@@ -60,14 +60,14 @@ class WalterRoasterPgRepository(WalterRoasterRepository):
         offset = (safe_page - 1) * safe_page_size
 
         count_result = await self.session.execute(
-            select(func.count()).select_from(PersonOrm)
+            select(func.count()).select_from(JackTrainerOrm)
         )
         total = int(count_result.scalar_one())
 
         result = await self.session.execute(
-            select(PersonOrm, BookingOrm)
-            .join(BookingOrm, BookingOrm.person_id == PersonOrm.passenger_id)
-            .order_by(PersonOrm.passenger_id.asc())
+            select(JackTrainerOrm, RoseModelOrm)
+            .join(RoseModelOrm, RoseModelOrm.passenger_id == JackTrainerOrm.passenger_id)
+            .order_by(JackTrainerOrm.passenger_id.asc())
             .offset(offset)
             .limit(safe_page_size)
         )

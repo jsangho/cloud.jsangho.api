@@ -17,6 +17,12 @@ from titanic.dependencies.crew_smith_captain_provider import get_smith_captain_u
 smith_captain_router = APIRouter(prefix="/smith", tags=["smith"])
 
 
+@smith_captain_router.post("/chat")
+async def chat(
+    smith: SmithCaptainUseCase = Depends(get_smith_captain_use_case),
+) -> SmithCaptainResponse:
+    return None
+
 @smith_captain_router.get("/myself")
 async def introduce_myself(
     smith: SmithCaptainUseCase = Depends(get_smith_captain_use_case),

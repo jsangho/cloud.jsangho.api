@@ -11,7 +11,6 @@ from titanic.app.dtos.crew_james_director_dto import BookingCommand, PersonComma
 
 JAMES_DIRECTOR_REQUIRED_COLUMNS = (
     "PassengerId",
-    "Survived",
     "Pclass",
     "Name",
     "Sex",
@@ -31,7 +30,7 @@ class TitanicRecordSchema(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     passenger_id: str = Field(alias="PassengerId", description="타이타닉 승객 고유 번호")
-    survived: str = Field(alias="Survived", description="생존 여부")
+    survived: str = Field(default="", alias="Survived", description="생존 여부 (test.csv 등 미제공 시 빈 값)")
     pclass: str = Field(alias="Pclass", description="티켓 등급")
     name: str = Field(alias="Name", description="이름")
     gender: str | None = Field(default=None, alias="Sex", description="성별")

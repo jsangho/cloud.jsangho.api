@@ -11,7 +11,7 @@ class RoseModelMapper:
     def to_entity(orm: RoseModelOrm) -> Booking:
         return Booking.create(
             id=orm.id,
-            person_id=orm.person_id,
+            person_id=orm.passenger_id,
             pclass=orm.pclass,
             ticket=orm.ticket,
             fare=orm.fare,
@@ -23,7 +23,7 @@ class RoseModelMapper:
     def to_orm(entity: Booking) -> RoseModelOrm:
         return RoseModelOrm(
             id=entity.id,
-            person_id=entity.person_id,
+            passenger_id=entity.person_id,
             pclass=entity.pclass,
             ticket=entity.ticket,
             fare=entity.fare,

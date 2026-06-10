@@ -10,8 +10,8 @@ from sqlalchemy import text
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from titanic.adapter.outbound.orm.passenger_jack_trainer_orm import JackTrainerOrm, PersonOrm
-from titanic.adapter.outbound.orm.passenger_rose_model_orm import BookingOrm, RoseModelOrm
+from titanic.adapter.outbound.orm.passenger_jack_trainer_orm import JackTrainerOrm
+from titanic.adapter.outbound.orm.passenger_rose_model_orm import RoseModelOrm
 from titanic.app.dtos.crew_james_director_dto import (
     BookingCommand,
     JamesDirectorQuery,
@@ -77,8 +77,8 @@ async def _ensure_james_director_tables() -> None:
         )
         await conn.execute(
             text(
-                "CREATE UNIQUE INDEX IF NOT EXISTS uq_bookings_person_id "
-                "ON bookings (person_id)"
+                "CREATE UNIQUE INDEX IF NOT EXISTS uq_bookings_passenger_id "
+                "ON bookings (passenger_id)"
             )
         )
 
@@ -193,10 +193,10 @@ class JamesDirectorPgRepository(JamesDirectorRepository):
         person_values = [person_data for _, person_data, _ in pairs]
         for chunk_start in range(0, len(person_values), _BULK_CHUNK_SIZE):
             chunk = person_values[chunk_start : chunk_start + _BULK_CHUNK_SIZE]
-            person_insert = pg_insert(PersonOrm).values(chunk)
+            person_insert = pg_insert(JackTrainerOrm).values(chunk)
             await session.execute(
                 person_insert.on_conflict_do_update(
-                    index_elements=[PersonOrm.passenger_id],
+                    index_elements=[JackTrainerOrm.passenger_id],
                     set_={
                         "name": person_insert.excluded.name,
                         "gender": person_insert.excluded.gender,
@@ -210,14 +210,14 @@ class JamesDirectorPgRepository(JamesDirectorRepository):
 
         booking_values: list[dict[str, object]] = []
         for passenger_id, _, booking_data in pairs:
-            booking_values.append({"person_id": passenger_id, **booking_data})
+            booking_values.append({"passenger_id": passenger_id, **booking_data})
 
         for chunk_start in range(0, len(booking_values), _BULK_CHUNK_SIZE):
             chunk = booking_values[chunk_start : chunk_start + _BULK_CHUNK_SIZE]
-            booking_insert = pg_insert(BookingOrm).values(chunk)
+            booking_insert = pg_insert(RoseModelOrm).values(chunk)
             await session.execute(
                 booking_insert.on_conflict_do_update(
-                    index_elements=[BookingOrm.person_id],
+                    index_elements=[RoseModelOrm.passenger_id],
                     set_={
                         "pclass": booking_insert.excluded.pclass,
                         "ticket": booking_insert.excluded.ticket,

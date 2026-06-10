@@ -84,7 +84,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(titanic_router)
+app.include_router(titanic_router, prefix="/api")
 app.include_router(friday13th_router)
 app.include_router(kayfabe_router)
 
