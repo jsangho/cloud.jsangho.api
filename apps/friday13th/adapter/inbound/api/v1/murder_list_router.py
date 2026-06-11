@@ -10,12 +10,12 @@ from core.matrix.grid_oracle_database_manager import get_db
 from friday13th.adapter.inbound.api.schemas.friday13th_preview import (
     format_preview_profile_request,
 )
-from friday13th.app.ports.input.murder_list_use_case import MurderListUseCase
+from friday13th.app.ports.input.murder_list import MurderListUseCase
 from friday13th.domain.value_objects.role import UserRole
 
 logger = logging.getLogger("uvicorn.error")
 
-murder_list_router = APIRouter(prefix="/murder-list", tags=["murder-list"])
+murder_list_router = APIRouter(tags=["murder-list"])
 
 
 class UserProfileResponse(BaseModel):
@@ -28,7 +28,7 @@ class UserProfileResponse(BaseModel):
     role: UserRole
 
 
-def get_murder_list_use_case(db: AsyncSession = Depends(get_db)) -> MurderListUseCase:
+def get_murder_list(db: AsyncSession = Depends(get_db)) -> MurderListUseCase:
     from friday13th.adapter.outbound.pg.murder_list_pg_repository import MurderListPgRepository
     from friday13th.app.use_cases.murder_list_interactor import MurderListInteractor
 
@@ -42,7 +42,7 @@ def get_murder_list_use_case(db: AsyncSession = Depends(get_db)) -> MurderListUs
 )
 async def get_user_profile(
     user_id: int,
-    use_case: MurderListUseCase = Depends(get_murder_list_use_case),
+    use_case: MurderListUseCase = Depends(get_murder_list),
 ):
     logger.info(
         "[Friday13th MurderList ?¼ì°?? ?ë¡??ì¡°í ?ì²­ ë¯¸ë¦¬ë³´ê¸° (?ì %sê±?",

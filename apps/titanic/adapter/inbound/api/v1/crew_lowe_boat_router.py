@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends
 from titanic.adapter.inbound.api.schemas.crew_lowe_boat_schema import LoweBoatSchema
 from titanic.app.dtos.crew_lowe_boat_dto import LoweBoatQuery, LoweBoatResponse
 from titanic.app.ports.input.crew_lowe_boat_use_case import LoweBoatUseCase
-from titanic.dependencies.crew_lowe_boat_provider import get_lowe_boat_use_case
+from titanic.dependencies.crew_lowe_boat_provider import get_lowe_boat
 
 '''
 해롤드 로우 (Harold Lowe)
@@ -19,7 +19,7 @@ lowe_boat_router = APIRouter(prefix="/lowe", tags=["lowe"])
 
 @lowe_boat_router.get("/myself")
 async def introduce_myself(
-    lowe: LoweBoatUseCase = Depends(get_lowe_boat_use_case),
+    lowe: LoweBoatUseCase = Depends(get_lowe_boat),
 ) -> LoweBoatResponse:
     schema = LoweBoatSchema(
         id=4,

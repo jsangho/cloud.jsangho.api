@@ -8,12 +8,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.matrix.grid_oracle_database_manager import get_db
 from friday13th.adapter.inbound.api.schemas.friday13th_preview import format_preview_login
-from friday13th.app.ports.input.pamela_cook_use_case import PamelaCookUseCase
+from friday13th.app.ports.input.pamela_cook import PamelaCookUseCase
 from friday13th.domain.value_objects.role import UserRole
 
 logger = logging.getLogger("uvicorn.error")
 
-pamela_cook_router = APIRouter(prefix="/pamela-cook", tags=["pamela-cook"])
+pamela_cook_router = APIRouter(tags=["pamela-cook"])
 
 
 class LoginRequest(BaseModel):
@@ -34,7 +34,7 @@ class LoginResponse(BaseModel):
     role: UserRole
 
 
-def get_pamela_cook_use_case(db: AsyncSession = Depends(get_db)) -> PamelaCookUseCase:
+def get_pamela_cook(db: AsyncSession = Depends(get_db)) -> PamelaCookUseCase:
     from friday13th.adapter.outbound.pg.pamela_cook_pg_repository import PamelaCookPgRepository
     from friday13th.app.use_cases.pamela_cook_interactor import PamelaCookInteractor
 
@@ -44,7 +44,7 @@ def get_pamela_cook_use_case(db: AsyncSession = Depends(get_db)) -> PamelaCookUs
 @pamela_cook_router.post("/login", response_model=LoginResponse, response_model_by_alias=True)
 async def login(
     req: LoginRequest,
-    use_case: PamelaCookUseCase = Depends(get_pamela_cook_use_case),
+    use_case: PamelaCookUseCase = Depends(get_pamela_cook),
 ):
     login_id = req.user_id.strip()
     logger.info(

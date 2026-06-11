@@ -1,10 +1,15 @@
-from pydantic import BaseModel
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from friday13th.domain.value_objects.role import UserRole
 
 
-class JasonMaskSchema(BaseModel):
+@dataclass(frozen=True)
+class JasonMaskSchema:
     login_id: str
     nickname: str
     email: str
     password: str
     password_confirm: str
-    role: str
+    role: UserRole

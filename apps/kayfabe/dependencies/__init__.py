@@ -6,21 +6,21 @@ import importlib
 from typing import Any
 
 __all__ = [
-    "get_ple_use_case",
-    "get_pleinfo_use_case",
-    "get_ranking_use_case",
-    "get_records_use_case",
-    "get_result_use_case",
-    "get_title_history_use_case",
+    "get_ple",
+    "get_pleinfo",
+    "get_ranking",
+    "get_records",
+    "get_result",
+    "get_title_history",
 ]
 
 _LAZY_IMPORTS: dict[str, str] = {
-    "get_ple_use_case": "kayfabe.dependencies.ple_provider",
-    "get_pleinfo_use_case": "kayfabe.dependencies.pleinfo_provider",
-    "get_ranking_use_case": "kayfabe.dependencies.ranking_provider",
-    "get_records_use_case": "kayfabe.dependencies.records_provider",
-    "get_result_use_case": "kayfabe.dependencies.result_provider",
-    "get_title_history_use_case": "kayfabe.dependencies.title_history_provider",
+    "get_ple": "kayfabe.dependencies.ple_provider",
+    "get_pleinfo": "kayfabe.dependencies.pleinfo_provider",
+    "get_ranking": "kayfabe.dependencies.ranking_provider",
+    "get_records": "kayfabe.dependencies.records_provider",
+    "get_result": "kayfabe.dependencies.result_provider",
+    "get_title_history": "kayfabe.dependencies.title_history_provider",
 }
 
 

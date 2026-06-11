@@ -12,7 +12,7 @@ from titanic.adapter.inbound.api.schemas.crew_james_director_schema import (
     JamesDirectorSchema,
 )
 from titanic.app.ports.input.crew_james_director_use_case import JamesDirectorUseCase
-from titanic.dependencies.crew_james_director_provider import get_james_director_use_case
+from titanic.dependencies.crew_james_director_provider import get_james_director
 from titanic.app.dtos.crew_james_director_dto import (
     JamesDirectorQuery,
     JamesDirectorResponse,
@@ -66,7 +66,7 @@ def _to_record_commands(records: list) -> list[TitanicRecordCommand]:
 
 @james_director_router.get("/myself")
 async def introduce_myself(
-    james: JamesDirectorUseCase = Depends(get_james_director_use_case),
+    james: JamesDirectorUseCase = Depends(get_james_director),
 ) -> JamesDirectorResponse:
     schema = JamesDirectorMyselfSchema(
         id=2,
@@ -83,7 +83,7 @@ async def introduce_myself(
 )
 async def upload_titanic_file( 
     file: UploadFile = File(...),
-    james: JamesDirectorUseCase = Depends(get_james_director_use_case),
+    james: JamesDirectorUseCase = Depends(get_james_director),
 ):
     """타이타닉 승객 데이터 CSV 파일 업로드"""
     schema = _parse_uploaded_csv(await file.read())

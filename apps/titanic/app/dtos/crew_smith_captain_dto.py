@@ -11,3 +11,4 @@ class SmithCaptainQuery:
 class SmithCaptainResponse:
     id: int
     name: str
+

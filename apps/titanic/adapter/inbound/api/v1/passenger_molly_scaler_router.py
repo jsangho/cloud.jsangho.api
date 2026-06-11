@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 from titanic.adapter.inbound.api.schemas.passenger_molly_scaler_schema import MollyScalerSchema
 from titanic.app.dtos.passenger_molly_scaler_dto import MollyScalerQuery, MollyScalerResponse
 from titanic.app.ports.input.passenger_molly_scaler_use_case import MollyScalerUseCase
-from titanic.dependencies.passenger_molly_scaler_provider import get_molly_scaler_use_case
+from titanic.dependencies.passenger_molly_scaler_provider import get_molly_scaler
 
 '''
 몰리 브라운 (Molly Brown)
@@ -26,7 +26,7 @@ molly_scaler_router = APIRouter(prefix="/molly", tags=["molly"])
 
 @molly_scaler_router.get("/myself")
 async def introduce_myself(
-    molly: MollyScalerUseCase = Depends(get_molly_scaler_use_case)
+    molly: MollyScalerUseCase = Depends(get_molly_scaler)
 ) -> MollyScalerResponse :
     schema = MollyScalerSchema(
         id=14,

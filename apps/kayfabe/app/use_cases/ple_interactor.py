@@ -14,7 +14,7 @@ from kayfabe.app.dtos.ple_dto import (
     PredictionCommand,
 )
 from kayfabe.app.exceptions import PleAuthRequiredError
-from kayfabe.app.ports.input.ple_use_case import PleUseCase
+from kayfabe.app.ports.input.ple import PleUseCase
 from kayfabe.app.ports.output.ple_repository import PleRepository
 from kayfabe.app.ports.output.pleinfo_repository import PleInfoRepository
 from kayfabe.app.use_cases.pleinfo_interactor import PleInfoInteractor

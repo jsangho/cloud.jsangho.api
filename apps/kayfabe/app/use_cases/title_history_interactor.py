@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from kayfabe.app.dtos.title_history_dto import CompetitorTitleHistoryDto, TitleAcquisitionDto
-from kayfabe.app.ports.input.title_history_use_case import TitleHistoryUseCase
+from kayfabe.app.ports.input.title_history import TitleHistoryUseCase
 from kayfabe.app.ports.output.title_history_repository import TitleHistoryRepository
 from kayfabe.app.services.records_scoring import normalize_name
 

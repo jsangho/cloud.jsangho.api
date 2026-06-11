@@ -8,8 +8,10 @@ from titanic.app.ports.output.passenger_jack_trainer_repository import JackTrain
 from titanic.app.use_cases.passenger_jack_trainer_interactor import JackTrainerInteractor
 
 
-def get_jack_trainer_use_case(
+def get_jack_trainer(
     db: AsyncSession = Depends(get_db),
 ) -> JackTrainerUseCase:
     repository: JackTrainerRepository = JackTrainerPgRepository(session=db)
     return JackTrainerInteractor(repository=repository)
+
+get_jack_trainer_use_case = get_jack_trainer

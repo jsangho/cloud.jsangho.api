@@ -14,7 +14,7 @@ from kayfabe.app.dtos.ple_dto import (
     PleEventSummaryDto,
     VoteTotalsDto,
 )
-from kayfabe.app.ports.input.pleinfo_use_case import PleInfoUseCase
+from kayfabe.app.ports.input.pleinfo import PleInfoUseCase
 from kayfabe.app.ports.output.pleinfo_repository import PleInfoRepository
 
 logger = logging.getLogger("uvicorn.error")

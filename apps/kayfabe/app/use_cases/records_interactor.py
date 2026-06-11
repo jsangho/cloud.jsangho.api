@@ -7,7 +7,7 @@ from kayfabe.app.dtos.records_dto import (
     CompetitorProfileDto,
     CompetitorSummaryDto,
 )
-from kayfabe.app.ports.input.records_use_case import RecordsUseCase
+from kayfabe.app.ports.input.records import RecordsUseCase
 from kayfabe.app.ports.output.records_repository import RecordsRepository
 from kayfabe.app.services.records_scoring import (
     competitor_name_in_card_json,

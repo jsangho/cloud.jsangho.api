@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 
 from kayfabe.app.dtos.result_dto import PleResultRowDto, PleResultsDto
-from kayfabe.app.ports.input.result_use_case import ResultUseCase
+from kayfabe.app.ports.input.result import ResultUseCase
 from kayfabe.app.ports.output.result_repository import ResultRepository
 
 logger = logging.getLogger("uvicorn.error")

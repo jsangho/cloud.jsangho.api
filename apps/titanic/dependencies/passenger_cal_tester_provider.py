@@ -8,8 +8,10 @@ from titanic.app.ports.output.passenger_cal_tester_repository import CalTesterRe
 from titanic.app.use_cases.passenger_cal_tester_interactor import CalTesterInteractor
 
 
-def get_cal_tester_use_case(
+def get_cal_tester(
     db: AsyncSession = Depends(get_db),
 ) -> CalTesterUseCase:
     repository: CalTesterRepository = CalTesterPgRepository(session=db)
     return CalTesterInteractor(repository=repository)
+
+get_cal_tester_use_case = get_cal_tester

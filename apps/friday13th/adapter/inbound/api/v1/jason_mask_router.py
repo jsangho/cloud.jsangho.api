@@ -11,12 +11,12 @@ from friday13th.adapter.inbound.api.schemas.friday13th_preview import (
     format_preview_signup,
 )
 from friday13th.app.ports.input.jason_mask_schema import JasonMaskSchema
-from friday13th.app.ports.input.jason_mask_use_case import JasonMaskUseCase
+from friday13th.app.ports.input.jason_mask import JasonMaskUseCase
 from friday13th.domain.value_objects.role import UserRole
 
 logger = logging.getLogger("uvicorn.error")
 
-jason_mask_router = APIRouter(prefix="/jason-mask", tags=["jason-mask"])
+jason_mask_router = APIRouter(tags=["jason-mask"])
 
 
 class SignupRequest(BaseModel):
@@ -41,7 +41,7 @@ class SignupResponse(BaseModel):
     role: UserRole
 
 
-def get_jason_mask_use_case(db: AsyncSession = Depends(get_db)) -> JasonMaskUseCase:
+def get_jason_mask(db: AsyncSession = Depends(get_db)) -> JasonMaskUseCase:
     from friday13th.adapter.outbound.pg.jason_mask_pg_repository import JasonMaskPgRepository
     from friday13th.app.use_cases.jason_mask_interactor import JasonMaskInteractor
 
@@ -51,7 +51,7 @@ def get_jason_mask_use_case(db: AsyncSession = Depends(get_db)) -> JasonMaskUseC
 @jason_mask_router.post("/signup", response_model=SignupResponse)
 async def signup(
     req: SignupRequest,
-    use_case: JasonMaskUseCase = Depends(get_jason_mask_use_case),
+    use_case: JasonMaskUseCase = Depends(get_jason_mask),
 ):
     logger.info(
         "[Friday13th JasonMask ???] ???? ?? ???? (?? %s?)",

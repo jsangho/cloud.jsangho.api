@@ -19,8 +19,8 @@ from kayfabe.adapter.inbound.api.schemas.ple_schema import (
     PleEventSummarySchema,
 )
 from kayfabe.app.exceptions import PleAuthRequiredError
-from kayfabe.app.ports.input.pleinfo_use_case import PleInfoUseCase
-from kayfabe.dependencies.pleinfo_provider import get_pleinfo_use_case
+from kayfabe.app.ports.input.pleinfo import PleInfoUseCase
+from kayfabe.dependencies.pleinfo_provider import get_pleinfo
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -42,7 +42,7 @@ def _ple_http_error(exc: Exception) -> HTTPException:
     response_model=list[PleEventSummarySchema],
     response_model_by_alias=True,
 )
-async def list_ple_events(use_case: PleInfoUseCase = Depends(get_pleinfo_use_case)):
+async def list_ple_events(use_case: PleInfoUseCase = Depends(get_pleinfo)):
     logger.info("[PleInfoRouter] list_ple_events")
     events = await use_case.list_events()
     return [event_summary_to_schema(e) for e in events]
@@ -53,7 +53,7 @@ async def list_ple_events(use_case: PleInfoUseCase = Depends(get_pleinfo_use_cas
     response_model=PleAiStatsSchema,
     response_model_by_alias=True,
 )
-async def get_ple_ai_stats(use_case: PleInfoUseCase = Depends(get_pleinfo_use_case)):
+async def get_ple_ai_stats(use_case: PleInfoUseCase = Depends(get_pleinfo)):
     logger.info("[PleInfoRouter] get_ple_ai_stats")
     return ai_stats_to_schema(await use_case.get_ai_stats())
 
@@ -67,7 +67,7 @@ async def get_ple_board(
     slug: str,
     client_id: str | None = None,
     user_id: int | None = None,
-    use_case: PleInfoUseCase = Depends(get_pleinfo_use_case),
+    use_case: PleInfoUseCase = Depends(get_pleinfo),
 ):
     logger.info("[PleInfoRouter] get_ple_board | slug=%s", slug)
     try:
@@ -95,7 +95,7 @@ async def ple_live_board(
                     return
                 try:
                     async with AsyncSessionLocal() as session:
-                        use_case = get_pleinfo_use_case(session)
+                        use_case = get_pleinfo(session)
                         board = await use_case.get_board(
                             slug=slug, client_id=client_id, user_id=user_id
                         )

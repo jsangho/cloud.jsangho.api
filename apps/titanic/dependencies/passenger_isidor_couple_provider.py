@@ -8,8 +8,10 @@ from titanic.app.ports.output.passenger_isidor_couple_repository import IsidorCo
 from titanic.app.use_cases.passenger_isidor_couple_interactor import IsidorCoupleInteractor
 
 
-def get_isidor_couple_use_case(
+def get_isidor_couple(
     db: AsyncSession = Depends(get_db),
 ) -> IsidorCoupleUseCase:
     repository: IsidorCoupleRepository = IsidorCouplePgRepository(session=db)
     return IsidorCoupleInteractor(repository=repository)
+
+get_isidor_couple_use_case = get_isidor_couple

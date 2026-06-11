@@ -3,12 +3,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.matrix.grid_oracle_database_manager import get_db
 from kayfabe.adapter.outbound.pg.title_history_pg_repository import TitleHistoryPgRepository
-from kayfabe.app.ports.input.title_history_use_case import TitleHistoryUseCase
+from kayfabe.app.ports.input.title_history import TitleHistoryUseCase
 from kayfabe.app.ports.output.title_history_repository import TitleHistoryRepository
 from kayfabe.app.use_cases.title_history_interactor import TitleHistoryInteractor
 
 
-def get_title_history_use_case(
+def get_title_history(
     db: AsyncSession = Depends(get_db),
 ) -> TitleHistoryUseCase:
     repository: TitleHistoryRepository = TitleHistoryPgRepository(db)

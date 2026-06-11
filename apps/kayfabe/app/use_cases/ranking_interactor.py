@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 
 from kayfabe.app.dtos.ranking_dto import LeaderboardRow, RankingRowDto, RankingsDto
-from kayfabe.app.ports.input.ranking_use_case import RankingUseCase
+from kayfabe.app.ports.input.ranking import RankingUseCase
 from kayfabe.app.ports.output.ple_repository import PleRepository
 from kayfabe.app.ports.output.ranking_repository import RankingRepository
 

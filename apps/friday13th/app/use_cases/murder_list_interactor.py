@@ -7,7 +7,7 @@ from friday13th.adapter.inbound.api.schemas.friday13th_preview import (
     format_preview_profile_request,
     format_preview_profile_response,
 )
-from friday13th.app.ports.input.murder_list_use_case import MurderListUseCase
+from friday13th.app.ports.input.murder_list import MurderListUseCase
 from friday13th.app.ports.output.murder_list_repository import MurderListRepository
 from friday13th.domain.entities.user_model import UserModel
 

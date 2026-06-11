@@ -1,46 +1,22 @@
-from datetime import datetime
-from typing import Optional
+from __future__ import annotations
 
-from sqlalchemy import Column, DateTime, String, func
-from sqlmodel import Field, SQLModel
+from sqlalchemy import Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
 
 from core.matrix.grid_oracle_database_manager import Base
 
 
-class UserModel(SQLModel, table=True):
-    """users ?ì´ë¸? PK ê·ì¹: docs/DevOps/Backend/ENTITY_RULE.md"""
-
+class UserModel(Base):
     __tablename__ = "users"
-    metadata = Base.metadata
 
-    id: Optional[int] = Field(
-        default=None,
-        primary_key=True,
-        sa_column_kwargs={"name": "id"},
-    )
-    login_id: Optional[str] = Field(
-        default=None,
-        max_length=50,
-        sa_column=Column(String(50), unique=True, nullable=True, index=True),
-    )
-    nickname: str = Field(max_length=50)
-    email: str = Field(
-        max_length=255,
-        sa_column=Column(String(255), unique=True, nullable=False, index=True),
-    )
-    password_hash: str = Field(
-        sa_column=Column("password", String(255), nullable=False),
-    )
-    role: str = Field(default="user", max_length=20)
-    created_at: datetime = Field(
-        sa_column=Column(
-            DateTime(timezone=True),
-            server_default=func.now(),
-            nullable=False,
-        ),
-    )
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    login_id: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    nickname: Mapped[str] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String, nullable=False)
+    role: Mapped[str] = mapped_column(String, nullable=False, default="user")
 
-    def to_log_dict(self) -> dict:
+    def to_log_dict(self) -> dict[str, object]:
         return {
             "id": self.id,
             "login_id": self.login_id,

@@ -12,7 +12,7 @@ from titanic.adapter.inbound.api.schemas.crew_walter_roaster_schema import (
 )
 from titanic.app.dtos.crew_walter_roaster_dto import WalterRoasterQuery, WalterRoasterResponse
 from titanic.app.ports.input.crew_walter_roaster_use_case import WalterRoasterUseCase
-from titanic.dependencies.crew_walter_roaster_provider import get_walter_roaster_use_case
+from titanic.dependencies.crew_walter_roaster_provider import get_walter_roaster
 
 '''
 윌터 와일딩 (Walter Nichols)
@@ -30,7 +30,7 @@ _DEFAULT_WALTER = {
 
 @walter_roaster_router.get("/myself")
 async def introduce_myself(
-    walter: WalterRoasterUseCase = Depends(get_walter_roaster_use_case),
+    walter: WalterRoasterUseCase = Depends(get_walter_roaster),
 ) -> WalterRoasterResponse:
     schema = WalterRoasterSchema(
         id=6,
@@ -46,7 +46,7 @@ async def introduce_myself(
 async def openfile(
     page: int = 1,
     pageSize: int = 50,
-    walter: WalterRoasterUseCase = Depends(get_walter_roaster_use_case),
+    walter: WalterRoasterUseCase = Depends(get_walter_roaster),
 ) -> WalterRoasterOpenfileResponse:
     logger.info("[WalterRoasterRouter] openfile 진입 | page=%s pageSize=%s", page, pageSize)
     page_result = await walter.list_openfile_page(page=page, page_size=pageSize)

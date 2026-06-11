@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends
 from titanic.adapter.inbound.api.schemas.crew_andrews_architect_schema import AndrewsArchitectSchema
 from titanic.app.dtos.crew_andrews_architect_dto import AndrewsArchitectQuery, AndrewsArchitectResponse
 from titanic.app.ports.input.crew_andrews_architect_use_case import AndrewsArchitectUseCase
-from titanic.dependencies.crew_andrews_architect_provider import get_andrews_architect_use_case
+from titanic.dependencies.crew_andrews_architect_provider import get_andrews_architect
 '''
 토마스 앤드류스 (Thomas Andrews)
 타이타닉을 설계한 수석 디자이너입니다. 배의 침몰을 가장 먼저 직감하고, 마지막 순간 흡연실 시계 앞에서 죄책감에 잠겨 있던 모습이 관객들에게 깊은 여운을 남겼습니다. 시스템의 구조나 메타데이터를 다루는 역할로 좋습니다.
@@ -20,7 +20,7 @@ andrews_architect_router = APIRouter(prefix="/andrews", tags=["andrews"])
 
 @andrews_architect_router.get("/myself")
 async def introduce_myself(
-    andrews: AndrewsArchitectUseCase = Depends(get_andrews_architect_use_case)
+    andrews: AndrewsArchitectUseCase = Depends(get_andrews_architect)
 )-> AndrewsArchitectResponse:
     schema = AndrewsArchitectSchema(
         id=2,

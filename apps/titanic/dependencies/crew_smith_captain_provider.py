@@ -8,8 +8,10 @@ from titanic.app.ports.output.crew_smith_captain_repository import SmithCaptainR
 from titanic.app.use_cases.crew_smith_captain_interactor import SmithCaptainInteractor
 
 
-def get_smith_captain_use_case(
+def get_smith_captain(
     db: AsyncSession = Depends(get_db),
 ) -> SmithCaptainUseCase:
     repository: SmithCaptainRepository = SmithCaptainPgRepository(session=db)
     return SmithCaptainInteractor(repository=repository)
+
+get_smith_captain_use_case = get_smith_captain

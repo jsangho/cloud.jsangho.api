@@ -22,8 +22,8 @@ from kayfabe.adapter.inbound.api.schemas.ple_schema import (
     PredictionRequestSchema,
 )
 from kayfabe.app.exceptions import PleAuthRequiredError
-from kayfabe.app.ports.input.ple_use_case import PleUseCase
-from kayfabe.dependencies.ple_provider import get_ple_use_case
+from kayfabe.app.ports.input.ple import PleUseCase
+from kayfabe.dependencies.ple_provider import get_ple
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -48,7 +48,7 @@ def _ple_http_error(exc: Exception) -> HTTPException:
 async def sync_ple_from_client(
     slug: str,
     payload: PleEventSyncSchema,
-    use_case: PleUseCase = Depends(get_ple_use_case),
+    use_case: PleUseCase = Depends(get_ple),
 ):
     if payload.slug != slug:
         raise HTTPException(status_code=400, detail="URL slug와 본문 slug가 일치하지 않습니다.")
@@ -80,7 +80,7 @@ async def link_ple_predictions(body: LinkPredictionsSchema):
 async def predict_ple_batch(
     slug: str,
     body: BatchPredictionRequestSchema,
-    use_case: PleUseCase = Depends(get_ple_use_case),
+    use_case: PleUseCase = Depends(get_ple),
 ):
     logger.info("[PleRouter] predict_ple_batch | slug=%s count=%d", slug, len(body.predictions))
     try:
@@ -101,7 +101,7 @@ async def predict_ple_batch(
 async def set_ple_results_batch(
     slug: str,
     body: BatchResultsRequestSchema,
-    use_case: PleUseCase = Depends(get_ple_use_case),
+    use_case: PleUseCase = Depends(get_ple),
 ):
     logger.info("[PleRouter] set_ple_results_batch | slug=%s count=%d", slug, len(body.results))
     try:
@@ -123,7 +123,7 @@ async def predict_ple_match(
     slug: str,
     match_key: str,
     body: PredictionRequestSchema,
-    use_case: PleUseCase = Depends(get_ple_use_case),
+    use_case: PleUseCase = Depends(get_ple),
 ):
     logger.info("[PleRouter] predict_ple_match | slug=%s match=%s", slug, match_key)
     try:
@@ -146,7 +146,7 @@ async def set_ple_match_result(
     slug: str,
     match_key: str,
     body: MatchResultUpdateSchema,
-    use_case: PleUseCase = Depends(get_ple_use_case),
+    use_case: PleUseCase = Depends(get_ple),
 ):
     logger.info("[PleRouter] set_ple_match_result | slug=%s match=%s", slug, match_key)
     try:

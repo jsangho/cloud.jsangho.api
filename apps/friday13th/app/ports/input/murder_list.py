@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 from friday13th.domain.entities.user_model import UserModel
 
 
-class PamelaCookRepository(ABC):
+class MurderListUseCase(ABC):
     @abstractmethod
-    async def find_by_login_id(self, login_id: str) -> UserModel | None:
+    async def get_user_by_id(self, *, user_id: int) -> UserModel:
         ...

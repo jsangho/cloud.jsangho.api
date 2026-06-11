@@ -8,8 +8,8 @@ from kayfabe.adapter.inbound.api.schemas.records_schema import (
     CompetitorListResponseSchema,
     CompetitorProfileResponseSchema,
 )
-from kayfabe.app.ports.input.records_use_case import RecordsUseCase
-from kayfabe.dependencies.records_provider import get_records_use_case
+from kayfabe.app.ports.input.records import RecordsUseCase
+from kayfabe.dependencies.records_provider import get_records
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -23,7 +23,7 @@ records_router = APIRouter(prefix="/records", tags=["records"])
 )
 async def list_competitors(
     q: str | None = None,
-    use_case: RecordsUseCase = Depends(get_records_use_case),
+    use_case: RecordsUseCase = Depends(get_records),
 ):
     logger.info("[RecordsRouter] list_competitors | q=%s", q or "-")
     return (await use_case.list_competitors(q=q)).to_schema()
@@ -36,7 +36,7 @@ async def list_competitors(
 )
 async def get_competitor_profile(
     name: str,
-    use_case: RecordsUseCase = Depends(get_records_use_case),
+    use_case: RecordsUseCase = Depends(get_records),
 ):
     logger.info("[RecordsRouter] get_competitor_profile | name=%s", name)
     profile = await use_case.get_competitor_profile(name)
