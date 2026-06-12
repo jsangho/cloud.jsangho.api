@@ -7,8 +7,10 @@ from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.matrix.vault_keymaker_secret_manager import Keymaker
-from titanic.adapter.inbound.api.schemas.crew_smith_captain_schema import ChatSchema
 from titanic.app.dtos.crew_smith_captain_dto import (
+    SmithCaptainChatCommand,
+    SmithCaptainChatResponse,
+    SmithCaptainChatTurnDto,
     SmithCaptainQuery,
     SmithCaptainResponse,
 )

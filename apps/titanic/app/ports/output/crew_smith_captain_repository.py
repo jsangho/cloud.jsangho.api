@@ -1,12 +1,14 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from collections.abc import Iterator
 
 from titanic.app.dtos.crew_smith_captain_dto import (
+    SmithCaptainChatCommand,
+    SmithCaptainChatResponse,
     SmithCaptainQuery,
     SmithCaptainResponse,
 )
-from titanic.adapter.inbound.api.schemas.crew_smith_captain_schema import ChatSchema
 
 
 class SmithCaptainRepository(ABC):
@@ -16,6 +18,9 @@ class SmithCaptainRepository(ABC):
         pass
 
     @abstractmethod
-    async def chat(self, schema: ChatSchema) -> SmithCaptainResponse:
+    async def chat(self, command: SmithCaptainChatCommand) -> SmithCaptainChatResponse:
         pass
 
+    @abstractmethod
+    def chat_stream(self, command: SmithCaptainChatCommand) -> Iterator[str]:
+        pass

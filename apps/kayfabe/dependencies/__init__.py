@@ -12,6 +12,7 @@ __all__ = [
     "get_records",
     "get_result",
     "get_title_history",
+    "get_championship",
 ]
 
 _LAZY_IMPORTS: dict[str, str] = {
@@ -21,6 +22,7 @@ _LAZY_IMPORTS: dict[str, str] = {
     "get_records": "kayfabe.dependencies.records_provider",
     "get_result": "kayfabe.dependencies.result_provider",
     "get_title_history": "kayfabe.dependencies.title_history_provider",
+    "get_championship": "kayfabe.dependencies.championship_provider",
 }
 
 
