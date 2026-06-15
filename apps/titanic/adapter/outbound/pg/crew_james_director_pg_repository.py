@@ -1,9 +1,5 @@
 from __future__ import annotations
 
-import logging
-
-
-
 from core.matrix.grid_oracle_database_manager import AsyncSessionLocal, Base, engine
 from fastapi import HTTPException
 from sqlalchemy import text
@@ -21,8 +17,6 @@ from titanic.app.dtos.crew_james_director_dto import (
     format_preview_person_command,
 )
 from titanic.app.ports.output.crew_james_director_repository import JamesDirectorRepository
-
-logger = logging.getLogger("uvicorn.error")
 
 _BULK_CHUNK_SIZE = 300
 
@@ -93,11 +87,6 @@ class JamesDirectorPgRepository(JamesDirectorRepository):
         
         '''제임스 디렉터의 자기 소개 레포지토리 구현 메소드'''
 
-        logger.info(
-            "[JamesDirectorPgRepository] introduce_myself 진입 | request_data=%s",
-            f"id={query.id} name={query.name!r}",
-        )
-        
         response: JamesDirectorResponse = JamesDirectorResponse(
             id=query.id * 10000,
             name=query.name + "이 레포지토리에 다녀옴"
@@ -118,31 +107,6 @@ class JamesDirectorPgRepository(JamesDirectorRepository):
 
         await _ensure_james_director_tables()
 
-        if person_commands:
-            limit = min(5, len(person_commands))
-            logger.info(
-                "[제임스 레포지토리] PersonCommand 인코딩 미리보기 (순위 %s번)",
-                limit,
-            )
-            preview_blocks = [
-                format_preview_person_command(index, cmd)
-                for index, cmd in enumerate(person_commands[:5], start=1)
-            ]
-            if preview_blocks:
-                logger.info("\n%s", "\n".join(preview_blocks))
-        if booking_commands:
-            limit = min(5, len(booking_commands))
-            logger.info(
-                "[제임스 레포지토리] BookingCommand 인코딩 미리보기 (순위 %s번)",
-                limit,
-            )
-            preview_blocks = [
-                format_preview_booking_command(index, cmd)
-                for index, cmd in enumerate(booking_commands[:5], start=1)
-            ]
-            if preview_blocks:
-                logger.info("\n%s", "\n".join(preview_blocks))
-
         if self._session is None:
             async with AsyncSessionLocal() as session:
                 saved = await self._save_person_and_booking_commands(
@@ -159,12 +123,6 @@ class JamesDirectorPgRepository(JamesDirectorRepository):
             )
             await self._session.commit()
 
-        logger.info(
-            "[제임스 레포지토리] upload done: file=%s persons/bookings=%s rows=%s",
-            filename,
-            saved,
-            len(person_commands),
-        )
         return len(person_commands)
 
     async def _save_person_and_booking_commands(

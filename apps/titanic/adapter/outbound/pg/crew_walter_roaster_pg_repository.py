@@ -9,12 +9,6 @@ from titanic.adapter.outbound.orm.passenger_jack_trainer_orm import JackTrainerO
 from titanic.adapter.outbound.orm.passenger_rose_model_orm import RoseModelOrm
 from titanic.app.dtos.crew_walter_roaster_dto import WalterRoasterQuery, WalterRoasterResponse
 from titanic.app.ports.output.crew_walter_roaster_repository import WalterRoasterRepository
-import logging
-
-
-
-logger = logging.getLogger("uvicorn.error")
-
 
 
 def _row_to_dict(person: JackTrainerOrm, booking: RoseModelOrm | None) -> dict[str, Any]:
@@ -43,18 +37,12 @@ class WalterRoasterPgRepository(WalterRoasterRepository):
         self.session = session
 
     async def introduce_myself(self, query: WalterRoasterQuery) -> WalterRoasterResponse:
-        logger.info("[WalterRoasterPgRepository] introduce_myself 진입 | request_data=%s", f"id={query.id} name={query.name!r}")
         return WalterRoasterResponse(
             id=query.id * 10000,
             name= query.name + "가 레포지토리에 다녀옴",
         )
 
     async def list_openfile_page(self, *, page: int, page_size: int) -> dict[str, Any]:
-        logger.info(
-            "[WalterRoasterPgRepository] list_openfile_page 진입 | page=%s page_size=%s",
-            page,
-            page_size,
-        )
         safe_page_size = max(1, min(int(page_size), 200))
         safe_page = max(1, int(page))
         offset = (safe_page - 1) * safe_page_size

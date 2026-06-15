@@ -5,23 +5,20 @@ from pydantic import BaseModel, Field
 
 class ChatMessageSchema(BaseModel):
     role: Literal["user", "assistant"]
-    text: str = Field(..., min_length=1)
+    text: str
 
 
 class ChatSchema(BaseModel):
-    messages: list[ChatMessageSchema] = Field(..., min_length=1)
-    stream: bool = False
+    messages: str = Field(..., description="채팅 메시지 히스토리")
 
     model_config = {
         "json_schema_extra": {
             "example": {
-                "messages": [
-                    {"role": "user", "text": "타이타닉 총 탑승객은 몇 명이야?"},
-                ],
-                "stream": True,
+                "messages": "탑승객은 몇 명이야?",
             }
         }
     }
+
 
 
 class SmithCaptainChatResponseSchema(BaseModel):

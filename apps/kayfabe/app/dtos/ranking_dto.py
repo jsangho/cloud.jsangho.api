@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from dataclasses import dataclass
 
@@ -13,7 +13,7 @@ class LeaderboardRow:
 
 
 @dataclass(frozen=True)
-class RankingRowDto:
+class RankingRowResponse:
     rank: int
     nickname: str
     score: int
@@ -21,6 +21,6 @@ class RankingRowDto:
 
 
 @dataclass(frozen=True)
-class RankingsDto:
-    rows: list[RankingRowDto]
-    my_rank: RankingRowDto | None
+class RankingsResponse:
+    rows: list[RankingRowResponse]
+    my_rank: RankingRowResponse | None

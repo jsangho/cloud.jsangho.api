@@ -1,8 +1,3 @@
-import logging
-
-logger = logging.getLogger("uvicorn.error")
-
-
 from fastapi import APIRouter, Depends
 from titanic.adapter.inbound.api.schemas.passenger_molly_scaler_schema import MollyScalerSchema
 from titanic.app.dtos.passenger_molly_scaler_dto import MollyScalerQuery, MollyScalerResponse
@@ -33,6 +28,5 @@ async def introduce_myself(
         name="몰리 브라운 (Molly Brown)",
         memo="생존 예측 모델의 핵심 인터페이스를 담당합니다.",
     )
-    logger.info("[MollyScalerRouter] introduce_myself 진입 | request_data=%s", f"id={schema.id} name={schema.name!r}")
     query = MollyScalerQuery(id=schema.id, name=schema.name)
     return await molly.introduce_myself(query)

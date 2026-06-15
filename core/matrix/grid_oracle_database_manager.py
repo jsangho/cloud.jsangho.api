@@ -1,4 +1,4 @@
-"""Neon(Postgres) 비동기 연결 · FastAPI Depends(get_db)."""
+﻿"""Neon(Postgres) 비동기 연결 · FastAPI Depends(get_db)."""
 
 from __future__ import annotations
 
@@ -164,7 +164,7 @@ async def init_db() -> None:
         pass
 
     try:
-        import friday13th.domain.entities.user_model  # noqa: F401
+        import user.domain.entities.user_model  # noqa: F401
     except ImportError:
         pass
 

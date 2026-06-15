@@ -1,61 +1,65 @@
-"""Pydantic Schema ↔ app DTO 변환 (HTTP 경계)."""
+﻿"""Pydantic Schema ↔ app DTO 변환 (HTTP 경계)."""
 
 from __future__ import annotations
 
-from kayfabe.adapter.inbound.api.schemas.ple_schema import (
-    BatchPredictionRequestSchema,
-    BatchResultsRequestSchema,
+from kayfabe.adapter.inbound.api.schemas.ple_events_schema import (
     CompetitorSchema,
     MatchBoardSchema,
     MatchCardSyncSchema,
     MatchResultSchema,
-    MatchResultUpdateSchema,
     PleAiRecordSchema,
     PleAiStatsSchema,
     PleBoardSchema,
     PleEventSummarySchema,
     PleEventSyncSchema,
-    PredictionRequestSchema,
     VoteTotalsSchema,
+)
+from kayfabe.adapter.inbound.api.schemas.ple_match_pick_schema import (
+    BatchPredictionRequestSchema,
+    PredictionRequestSchema,
+)
+from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import (
+    BatchResultsRequestSchema,
+    MatchResultUpdateSchema,
 )
 from kayfabe.app.dtos.ple_dto import (
     BatchPredictionCommand,
     BatchResultItemCommand,
     BatchResultsCommand,
-    CompetitorDto,
-    MatchBoardDto,
+    CompetitorResponse,
+    MatchBoardResponse,
     MatchCardSyncCommand,
-    MatchResultDto,
+    MatchResultResponse,
     MatchResultUpdateCommand,
-    PleAiStatsDto,
-    PleBoardDto,
-    PleEventSummaryDto,
+    PleAiStatsResponse,
+    PleBoardResponse,
+    PleEventSummaryResponse,
     PleEventSyncCommand,
     PredictionCommand,
     PredictionItemCommand,
-    VoteTotalsDto,
+    VoteTotalsResponse,
 )
 
 
-def _competitor_from_schema(schema: CompetitorSchema) -> CompetitorDto:
-    return CompetitorDto(name=schema.name, is_champion=schema.is_champion)
+def _competitor_from_schema(schema: CompetitorSchema) -> CompetitorResponse:
+    return CompetitorResponse(name=schema.name, is_champion=schema.is_champion)
 
 
-def _competitor_to_schema(dto: CompetitorDto) -> CompetitorSchema:
+def _competitor_to_schema(dto: CompetitorResponse) -> CompetitorSchema:
     return CompetitorSchema(name=dto.name, isChampion=dto.is_champion)
 
 
-def _match_result_from_schema(schema: MatchResultSchema | None) -> MatchResultDto | None:
+def _match_result_from_schema(schema: MatchResultSchema | None) -> MatchResultResponse | None:
     if schema is None:
         return None
-    return MatchResultDto(
+    return MatchResultResponse(
         winner_side=schema.winner_side,
         winner_index=schema.winner_index,
         winner_name=schema.winner_name,
     )
 
 
-def _match_result_to_schema(dto: MatchResultDto | None) -> MatchResultSchema | None:
+def _match_result_to_schema(dto: MatchResultResponse | None) -> MatchResultSchema | None:
     if dto is None:
         return None
     return MatchResultSchema(
@@ -133,7 +137,7 @@ def match_result_update_from_schema(schema: MatchResultUpdateSchema) -> MatchRes
     )
 
 
-def board_to_schema(dto: PleBoardDto) -> PleBoardSchema:
+def board_to_schema(dto: PleBoardResponse) -> PleBoardSchema:
     return PleBoardSchema(
         slug=dto.slug,
         label=dto.label,
@@ -146,7 +150,7 @@ def board_to_schema(dto: PleBoardDto) -> PleBoardSchema:
     )
 
 
-def _match_board_to_schema(dto: MatchBoardDto) -> MatchBoardSchema:
+def _match_board_to_schema(dto: MatchBoardResponse) -> MatchBoardSchema:
     return MatchBoardSchema(
         id=dto.id,
         db_id=dto.db_id,
@@ -169,10 +173,11 @@ def _match_board_to_schema(dto: MatchBoardDto) -> MatchBoardSchema:
         aiPick=dto.ai_pick,
         aiPickName=dto.ai_pick_name,
         aiCorrect=dto.ai_correct,
+        pointValue=dto.point_value,
     )
 
 
-def event_summary_to_schema(dto: PleEventSummaryDto) -> PleEventSummarySchema:
+def event_summary_to_schema(dto: PleEventSummaryResponse) -> PleEventSummarySchema:
     return PleEventSummarySchema(
         slug=dto.slug,
         label=dto.label,
@@ -183,7 +188,7 @@ def event_summary_to_schema(dto: PleEventSummaryDto) -> PleEventSummarySchema:
     )
 
 
-def ai_stats_to_schema(dto: PleAiStatsDto) -> PleAiStatsSchema:
+def ai_stats_to_schema(dto: PleAiStatsResponse) -> PleAiStatsSchema:
     return PleAiStatsSchema(
         totalGraded=dto.total_graded,
         correct=dto.correct,
@@ -204,8 +209,8 @@ def ai_stats_to_schema(dto: PleAiStatsDto) -> PleAiStatsSchema:
     )
 
 
-def match_result_from_command(cmd: MatchResultUpdateCommand | BatchResultItemCommand) -> MatchResultDto:
-    return MatchResultDto(
+def match_result_from_command(cmd: MatchResultUpdateCommand | BatchResultItemCommand) -> MatchResultResponse:
+    return MatchResultResponse(
         winner_side=cmd.winner_side,
         winner_index=cmd.winner_index,
         winner_name=cmd.winner_name,

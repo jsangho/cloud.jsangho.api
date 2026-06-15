@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 from typing import Any
 
 from titanic.app.dtos.crew_james_director_dto import (
@@ -14,9 +13,6 @@ from titanic.app.dtos.crew_james_director_dto import (
 from titanic.app.ports.input.crew_james_director_use_case import JamesDirectorUseCase
 from titanic.app.ports.output.crew_james_director_repository import JamesDirectorRepository
 
-logger = logging.getLogger("uvicorn.error")
-
-
 class JamesDirectorInteractor(JamesDirectorUseCase):
     """James Director CSV 업로드 유스케이스."""
 
@@ -26,7 +22,6 @@ class JamesDirectorInteractor(JamesDirectorUseCase):
     async def introduce_myself(self, query: JamesDirectorQuery) -> JamesDirectorResponse:
         '''제임스 감독의 자기소개 인터렉트'''
 
-        logger.info("[JamesDirectorUseCase] introduce_myself | request_data=%s", f"id={query.id} name={query.name!r}")
         return await self.repository.introduce_myself(query)
 
     async def upload_titanic_file(
@@ -40,17 +35,10 @@ class JamesDirectorInteractor(JamesDirectorUseCase):
         *,
         filename: str = "",
     ) -> dict[str, Any]:
-        logger.info(
-            "[제임스 유스케이스] 라우터에서 유스케이스로 옮겨진 스키마 레코드 미리보기 (상위 %s건)",
-            min(5, len(records)),
-        )
         preview_blocks = [
             format_preview_record(index, record)
             for index, record in enumerate(records[:5], start=1)
         ]
-        if preview_blocks:
-            logger.info("\n%s", "\n".join(preview_blocks))
-
         person_commands: list[PersonCommand] = []
         booking_commands: list[BookingCommand] = []
 

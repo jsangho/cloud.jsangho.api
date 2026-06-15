@@ -1,8 +1,3 @@
-import logging
-
-logger = logging.getLogger("uvicorn.error")
-
-
 from fastapi import APIRouter, Depends
 
 from titanic.adapter.inbound.api.schemas.crew_lowe_boat_schema import LoweBoatSchema
@@ -26,6 +21,5 @@ async def introduce_myself(
         name="Harold Lowe",
         memo="구명보트 조종을 담당하는 항해사.",
     )
-    logger.info("[LoweBoatRouter] introduce_myself 진입 | request_data=%s", f"id={schema.id} name={schema.name!r}")
     query = LoweBoatQuery(id=schema.id, name=schema.name)
     return await lowe.introduce_myself(query)

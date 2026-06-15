@@ -1,8 +1,3 @@
-import logging
-
-logger = logging.getLogger("uvicorn.error")
-
-
 from fastapi import APIRouter, Depends
 
 from titanic.adapter.inbound.api.schemas.passenger_jack_trainer_schema import JackTrainerSchema
@@ -26,6 +21,5 @@ async def introduce_myself(
         name="Jack Dawson",
         memo="자유로운 영혼의 3등석 화가. 로즈에게 진정한 삶을 가르쳐준 인물이자 타이타닉 생존 스토리의 주역",
     )
-    logger.info("[JackTrainerRouter] introduce_myself 진입 | request_data=%s", f"id={schema.id} name={schema.name!r}")
     query = JackTrainerQuery(id=schema.id, name=schema.name)
     return await jack.introduce_myself(query)

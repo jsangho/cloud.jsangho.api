@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import re
 
-from kayfabe.adapter.inbound.api.schemas.ple_schema import CompetitorSchema, MatchBoardSchema
-from kayfabe.adapter.inbound.api.schemas.records_schema import (
+from kayfabe.adapter.inbound.api.schemas.ple_events_schema import CompetitorSchema, MatchBoardSchema
+from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import (
     CompetitorMatchRecordSchema,
     MatchResultKind,
 )

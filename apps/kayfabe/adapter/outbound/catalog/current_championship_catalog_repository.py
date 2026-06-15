@@ -1,11 +1,11 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from kayfabe.app.dtos.championship_dto import (
-    BrandRosterDto,
-    ChampionshipBoardDto,
-    TitleReignDto,
+    BrandRosterResponse,
+    ChampionshipBoardResponse,
+    TitleReignResponse,
 )
-from kayfabe.app.ports.output.championship_repository import ChampionshipRepository
+from kayfabe.app.ports.output.title_acquisitions_repository import ChampionshipRepository
 from kayfabe.app.services.current_championship_catalog import (
     CHAMPIONSHIP_AS_OF,
     WWE_BRAND_CHAMPIONS,
@@ -13,15 +13,15 @@ from kayfabe.app.services.current_championship_catalog import (
 
 
 class CurrentChampionshipCatalogRepository(ChampionshipRepository):
-    async def get_board(self) -> ChampionshipBoardDto:
+    async def get_board(self) -> ChampionshipBoardResponse:
         brands = [
-            BrandRosterDto(
+            BrandRosterResponse(
                 id=brand["id"],
                 label=brand["label"],
                 tagline=brand["tagline"],
                 accent=brand["accent"],
                 titles=[
-                    TitleReignDto(
+                    TitleReignResponse(
                         belt_name=title["belt_name"],
                         champions=list(title["champions"]),
                         team_name=title.get("team_name"),
@@ -34,4 +34,4 @@ class CurrentChampionshipCatalogRepository(ChampionshipRepository):
             )
             for brand in WWE_BRAND_CHAMPIONS
         ]
-        return ChampionshipBoardDto(as_of=CHAMPIONSHIP_AS_OF, brands=brands)
+        return ChampionshipBoardResponse(as_of=CHAMPIONSHIP_AS_OF, brands=brands)

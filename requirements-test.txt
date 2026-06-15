@@ -1,7 +1,0 @@
-# 테스트 전용 의존성 (런타임 requirements.txt 포함)
-# 설치: pip install -r requirements-test.txt
-
--r requirements.txt
-
-pytest==8.4.2
-pytest-asyncio==1.4.0

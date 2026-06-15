@@ -1,8 +1,3 @@
-import logging
-
-logger = logging.getLogger("uvicorn.error")
-
-
 from fastapi import APIRouter, Depends
 
 from titanic.adapter.inbound.api.schemas.passenger_rose_model_schema import RoseModelSchema
@@ -26,6 +21,5 @@ async def introduce_myself(
         name="Rose DeWitt Bukater",
         memo="상류층의 답답함에서 벗어나고자 하는 의지. ML 모델 결과 분석·조회 담당자",
     )
-    logger.info("[RoseModelRouter] introduce_myself 진입 | request_data=%s", f"id={schema.id} name={schema.name!r}")
     query = RoseModelQuery(id=schema.id, name=schema.name)
     return await rose.introduce_myself(query)

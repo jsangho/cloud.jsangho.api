@@ -1,8 +1,3 @@
-import logging
-
-logger = logging.getLogger("uvicorn.error")
-
-
 from fastapi import APIRouter, Depends
 
 from titanic.adapter.inbound.api.schemas.passenger_ruth_validation_schema import RuthValidationSchema
@@ -26,6 +21,5 @@ async def introduce_myself(
         name="Ruth DeWitt Bukater",
         memo="딸 로즈의 코르셋 끈을 강하게 조이며 상류층의 체면을 강요하던 통제욕의 상징. 1등석 승객(상류층) 조회를 담당한다.",
     )
-    logger.info("[RuthValidationRouter] introduce_myself 진입 | request_data=%s", f"id={schema.id} name={schema.name!r}")
     query = RuthValidationQuery(id=schema.id, name=schema.name)
     return await ruth.introduce_myself(query)

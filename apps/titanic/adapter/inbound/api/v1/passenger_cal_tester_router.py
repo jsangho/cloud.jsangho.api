@@ -1,8 +1,3 @@
-import logging
-
-logger = logging.getLogger("uvicorn.error")
-
-
 from fastapi import APIRouter, Depends
 
 from titanic.adapter.inbound.api.schemas.passenger_cal_tester_schema import CalTesterSchema
@@ -25,6 +20,5 @@ async def introduce_myself(
         id=6,
         name="Caledon Hockley",
     )
-    logger.info("[CalTesterRouter] introduce_myself 진입 | request_data=%s", f"id={schema.id} name={schema.name!r}")
     query = CalTesterQuery(id=schema.id, name=schema.name)
     return await cal.introduce_myself(query)

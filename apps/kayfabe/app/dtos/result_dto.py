@@ -1,17 +1,17 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
-    from kayfabe.adapter.inbound.api.schemas.result_schema import PleResultRow, PleResultsResponse
+    from kayfabe.adapter.inbound.api.schemas.ple_events_schema import PleResultRowSchema, PleResultsResponseSchema
 
 PleEventStatus = Literal["upcoming", "live", "finished"]
 
 
 @dataclass(frozen=True)
-class PleResultRowDto:
+class PleResultRowResponse:
     slug: str
     label: str
     month: int
@@ -21,9 +21,9 @@ class PleResultRowDto:
     finished_at: datetime | None
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.result_schema import PleResultRow
+        from kayfabe.adapter.inbound.api.schemas.ple_events_schema import PleResultRowSchema
 
-        return PleResultRow(
+        return PleResultRowSchema(
             slug=self.slug,
             label=self.label,
             month=self.month,
@@ -35,12 +35,11 @@ class PleResultRowDto:
 
 
 @dataclass(frozen=True)
-class PleResultsDto:
+class PleResultsResponse:
     year: int
-    results: list[PleResultRowDto]
+    results: list[PleResultRowResponse]
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.result_schema import PleResultsResponse
+        from kayfabe.adapter.inbound.api.schemas.ple_events_schema import PleResultsResponseSchema
 
-        return PleResultsResponse(year=self.year, results=[r.to_schema() for r in self.results])
-
+        return PleResultsResponseSchema(year=self.year, results=[r.to_schema() for r in self.results])

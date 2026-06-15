@@ -1,4 +1,4 @@
-import asyncio
+﻿import asyncio
 import json
 import logging
 import os
@@ -35,7 +35,7 @@ from core.matrix.grid_oracle_database_manager import (
 )
 from social_network.app.doro_director import DoroDirector
 from core.matrix.vault_keymaker_secret_manager import get_keymaker
-from friday13th.adapter.inbound.api import friday13th_router
+from user.adapter.inbound.api import user_router
 from kayfabe.adapter.inbound.api import kayfabe_router
 from titanic.adapter.inbound.api import titanic_router
 keymaker = get_keymaker()
@@ -85,8 +85,8 @@ app.add_middleware(
 )
 
 app.include_router(titanic_router, prefix="/api")
-app.include_router(friday13th_router)
-app.include_router(kayfabe_router)
+app.include_router(user_router, prefix="/api")
+app.include_router(kayfabe_router, prefix="/api")
 
 
 @app.middleware("http")

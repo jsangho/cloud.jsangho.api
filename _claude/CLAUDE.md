@@ -1,7 +1,7 @@
-# 백엔드 행동 지침 (보조)
+# 백엔드 행동 지침 (메인)
 
-> **메인 규칙:** [`sangho/.cursorrules`](.cursorrules)를 먼저 Read한다.  
-> 본 문서는 Karpathy 원칙의 **백엔드 적용 보조**다. 충돌 시 `.cursorrules`가 우선한다.  
+> **본 문서가 메인 규칙이다.** 충돌 시 `CLAUDE.md`가 우선한다.  
+> [`sangho/.cursorrules`](.cursorrules)는 보조 참고용이다.  
 **스택:** FastAPI · SQLAlchemy(async) · PostgreSQL · `main.py`
 
 ---

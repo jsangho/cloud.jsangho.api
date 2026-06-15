@@ -1,8 +1,3 @@
-import logging
-
-logger = logging.getLogger("uvicorn.error")
-
-
 from fastapi import APIRouter, Depends
 
 from titanic.adapter.inbound.api.schemas.passenger_isidor_couple_schema import IsidorCoupleSchema
@@ -29,6 +24,5 @@ async def introduce_myself(
             "침대 위에서 서로를 꼭 껴안고 물이 차오르는 것을 맞이한 노부부입니다."
         ),
     )
-    logger.info("[IsidorCoupleRouter] introduce_myself 진입 | request_data=%s", f"id={schema.id} name={schema.name!r}")
     query = IsidorCoupleQuery(id=schema.id, name=schema.name)
     return await isidor.introduce_myself(query)

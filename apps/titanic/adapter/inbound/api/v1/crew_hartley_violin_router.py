@@ -1,8 +1,3 @@
-import logging
-
-logger = logging.getLogger("uvicorn.error")
-
-
 from fastapi import APIRouter, Depends
 
 from titanic.adapter.inbound.api.schemas.crew_hartley_violin_schema import HartleyViolinSchema
@@ -26,6 +21,5 @@ async def introduce_myself(
         name="Wallace Hartley",
         memo="배가 가라앉는 극도의 공포 속에서도 승객들을 진정시키기 위해 끝까지 찬송가를 연주했던 악단장입니다.",
     )
-    logger.info("[HartleyViolinRouter] introduce_myself 진입 | request_data=%s", f"id={schema.id} name={schema.name!r}")
     query = HartleyViolinQuery(id=schema.id, name=schema.name)
     return await hartley.introduce_myself(query)

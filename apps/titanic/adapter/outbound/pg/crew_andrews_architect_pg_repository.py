@@ -1,13 +1,9 @@
 ﻿from __future__ import annotations
-import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from titanic.app.dtos.crew_andrews_architect_dto import AndrewsArchitectQuery, AndrewsArchitectResponse
 from titanic.app.ports.output.crew_andrews_architect_repository import AndrewsArchitectRepository
-
-logger = logging.getLogger("uvicorn.error")
-
 
 class AndrewsArchitectPgRepository(AndrewsArchitectRepository):
 
@@ -18,8 +14,6 @@ class AndrewsArchitectPgRepository(AndrewsArchitectRepository):
         
         '''앤드류 설계자의 자기 소개 레포지토리 구현 메소드'''
 
-        logger.info("[AndrewsArchitectPgRepository] introduce_myself 진입 | request_data=%s", f"id={query.id} name={query.name!r}")
-        
         response: AndrewsArchitectResponse = AndrewsArchitectResponse(
             id= query.id * 10000,
             name= query.name + "가 레포지토리에 다녀옴"

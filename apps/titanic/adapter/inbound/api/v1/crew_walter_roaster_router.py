@@ -1,8 +1,3 @@
-import logging
-
-logger = logging.getLogger("uvicorn.error")
-
-
 from fastapi import APIRouter, Depends
 
 from titanic.adapter.inbound.api.schemas.crew_walter_roaster_schema import (
@@ -37,7 +32,6 @@ async def introduce_myself(
         name="Walter Nichols",
         memo="타이타닉의 일등 항해사, 승객 명단 관리 담당",
     )
-    logger.info("[WalterRoasterRouter] introduce_myself 진입 | request_data=%s", f"id={schema.id} name={schema.name!r}")
     query = WalterRoasterQuery(id=schema.id, name=schema.name)
     return await walter.introduce_myself(query)
 
@@ -48,7 +42,6 @@ async def openfile(
     pageSize: int = 50,
     walter: WalterRoasterUseCase = Depends(get_walter_roaster),
 ) -> WalterRoasterOpenfileResponse:
-    logger.info("[WalterRoasterRouter] openfile 진입 | page=%s pageSize=%s", page, pageSize)
     page_result = await walter.list_openfile_page(page=page, page_size=pageSize)
     return WalterRoasterOpenfileResponse(
         id=_DEFAULT_WALTER["id"],

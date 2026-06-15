@@ -1,4 +1,4 @@
-﻿from fastapi import Depends
+from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.matrix.grid_oracle_database_manager import get_db
@@ -7,11 +7,15 @@ from titanic.app.ports.input.crew_hartley_violin_use_case import HartleyViolinUs
 from titanic.app.ports.output.crew_hartley_violin_repository import HartleyViolinRepository
 from titanic.app.use_cases.crew_hartley_violin_interactor import HartleyViolinInteractor
 
+def get_hartley_violin_repository(
+    db: AsyncSession = Depends(get_db)
+) -> HartleyViolinRepository:
+
+    return HartleyViolinPgRepository(session=db)
 
 def get_hartley_violin(
-    db: AsyncSession = Depends(get_db),
+    repository: HartleyViolinRepository = Depends(get_hartley_violin_repository)
 ) -> HartleyViolinUseCase:
-    repository: HartleyViolinRepository = HartleyViolinPgRepository(session=db)
+
     return HartleyViolinInteractor(repository=repository)
 
-get_hartley_violin_use_case = get_hartley_violin

@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Literal
@@ -9,7 +9,7 @@ BrandAccent = Literal["red", "blue", "gold", "purple"]
 
 
 @dataclass(frozen=True)
-class TitleReignDto:
+class TitleReignResponse:
     belt_name: str
     champions: list[str]
     won_at: str
@@ -18,7 +18,7 @@ class TitleReignDto:
     won_event: str | None = None
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.championship_schema import TitleReignSchema
+        from kayfabe.adapter.inbound.api.schemas.title_acquisitions_schema import TitleReignSchema
 
         return TitleReignSchema(
             belt_name=self.belt_name,
@@ -31,15 +31,15 @@ class TitleReignDto:
 
 
 @dataclass(frozen=True)
-class BrandRosterDto:
+class BrandRosterResponse:
     id: BrandId
     label: str
     tagline: str
     accent: BrandAccent
-    titles: list[TitleReignDto]
+    titles: list[TitleReignResponse]
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.championship_schema import BrandRosterSchema
+        from kayfabe.adapter.inbound.api.schemas.title_acquisitions_schema import BrandRosterSchema
 
         return BrandRosterSchema(
             id=self.id,
@@ -51,12 +51,12 @@ class BrandRosterDto:
 
 
 @dataclass(frozen=True)
-class ChampionshipBoardDto:
+class ChampionshipBoardResponse:
     as_of: str
-    brands: list[BrandRosterDto]
+    brands: list[BrandRosterResponse]
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.championship_schema import (
+        from kayfabe.adapter.inbound.api.schemas.title_acquisitions_schema import (
             ChampionshipBoardResponseSchema,
         )
 

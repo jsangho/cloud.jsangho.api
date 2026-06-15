@@ -1,6 +1,5 @@
 ﻿from __future__ import annotations
 
-import logging
 from collections.abc import Iterator
 
 from fastapi import HTTPException
@@ -16,8 +15,6 @@ from titanic.app.dtos.crew_smith_captain_dto import (
 )
 from titanic.app.ports.output.crew_smith_captain_repository import SmithCaptainRepository
 
-logger = logging.getLogger("uvicorn.error")
-
 SMITH_PERSONA = (
     "당신은 RMS 타이타닉의 에드워드 스미스 선장입니다. "
     "1912년 어조로 한국어로 2~4문장 안에 간결히 답하세요."
@@ -31,10 +28,6 @@ class SmithCaptainPgRepository(SmithCaptainRepository):
         self.session = session
 
     async def introduce_myself(self, query: SmithCaptainQuery) -> SmithCaptainResponse:
-        logger.info(
-            "[SmithCaptainPgRepository] introduce_myself 진입 | request_data=%s",
-            f"id={query.id} name={query.name!r}",
-        )
         return SmithCaptainResponse(
             id=query.id * 10000,
             name=query.name + "가 레포지토리에 다녀옴",

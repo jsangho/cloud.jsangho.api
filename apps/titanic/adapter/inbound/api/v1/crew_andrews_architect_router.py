@@ -1,8 +1,3 @@
-import logging
-
-logger = logging.getLogger("uvicorn.error")
-
-
 from fastapi import APIRouter
 from fastapi import APIRouter, Depends
 
@@ -26,6 +21,5 @@ async def introduce_myself(
         id=2,
         name="토마스 앤드류스 (Thomas Andrews)"
     )
-    logger.info("[AndrewsArchitectRouter] introduce_myself 진입 | request_data=%s", f"id={schema.id} name={schema.name!r}")
     query = AndrewsArchitectQuery(id=schema.id, name=schema.name)
     return await andrews.introduce_myself(query)

@@ -1,10 +1,10 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
-    from kayfabe.adapter.inbound.api.schemas.records_schema import (
+    from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import (
         CompetitorListResponseSchema,
         CompetitorMatchRecordSchema,
         CompetitorProfileResponseSchema,
@@ -15,7 +15,7 @@ MatchResultKind = Literal["win", "loss", "no-contest", "pending"]
 
 
 @dataclass(frozen=True)
-class CompetitorMatchRecordDto:
+class CompetitorMatchRecordResponse:
     slug: str
     ple_label: str
     match_key: str
@@ -28,7 +28,7 @@ class CompetitorMatchRecordDto:
     was_champion: bool
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.records_schema import CompetitorMatchRecordSchema
+        from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import CompetitorMatchRecordSchema
 
         return CompetitorMatchRecordSchema(
             slug=self.slug,
@@ -45,7 +45,7 @@ class CompetitorMatchRecordDto:
 
 
 @dataclass(frozen=True)
-class CompetitorSummaryDto:
+class CompetitorSummaryResponse:
     total: int
     wins: int
     losses: int
@@ -56,7 +56,7 @@ class CompetitorSummaryDto:
     champion_appearances: int
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.records_schema import CompetitorSummarySchema
+        from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import CompetitorSummarySchema
 
         return CompetitorSummarySchema(
             total=self.total,
@@ -71,13 +71,13 @@ class CompetitorSummaryDto:
 
 
 @dataclass(frozen=True)
-class CompetitorProfileDto:
+class CompetitorProfileResponse:
     name: str
-    matches: list[CompetitorMatchRecordDto]
-    summary: CompetitorSummaryDto
+    matches: list[CompetitorMatchRecordResponse]
+    summary: CompetitorSummaryResponse
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.records_schema import (
+        from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import (
             CompetitorProfileResponseSchema,
         )
 
@@ -89,10 +89,10 @@ class CompetitorProfileDto:
 
 
 @dataclass(frozen=True)
-class CompetitorListDto:
+class CompetitorListResponse:
     names: list[str]
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.records_schema import CompetitorListResponseSchema
+        from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import CompetitorListResponseSchema
 
         return CompetitorListResponseSchema(names=list(self.names))

@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -6,13 +6,13 @@ from typing import Any, Literal
 
 
 @dataclass(frozen=True)
-class CompetitorDto:
+class CompetitorResponse:
     name: str
     is_champion: bool | None = None
 
 
 @dataclass(frozen=True)
-class MatchResultDto:
+class MatchResultResponse:
     winner_side: Literal["left", "right"] | None = None
     winner_index: int | None = None
     winner_name: str | None = None
@@ -24,11 +24,11 @@ class MatchCardSyncCommand:
     title: str
     card_variant: Literal["sideA", "sideB"]
     format: Literal["singles", "multi"]
-    left: CompetitorDto | None = None
-    right: CompetitorDto | None = None
-    competitors: list[CompetitorDto] | None = None
+    left: CompetitorResponse | None = None
+    right: CompetitorResponse | None = None
+    competitors: list[CompetitorResponse] | None = None
     bookmaker_decimal: dict[str, Any] | list[float] | None = None
-    result: MatchResultDto | None = None
+    result: MatchResultResponse | None = None
 
 
 @dataclass(frozen=True)
@@ -84,47 +84,48 @@ class MatchResultUpdateCommand:
 
 
 @dataclass(frozen=True)
-class VoteTotalsDto:
+class VoteTotalsResponse:
     left: int = 0
     right: int = 0
     multi: list[int] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
-class MatchBoardDto:
+class MatchBoardResponse:
     id: str
     db_id: int
     title: str
     card_variant: str
     format: Literal["singles", "multi"]
-    left: CompetitorDto | None
-    right: CompetitorDto | None
-    competitors: list[CompetitorDto] | None
+    left: CompetitorResponse | None
+    right: CompetitorResponse | None
+    competitors: list[CompetitorResponse] | None
     bookmaker_decimal: dict[str, Any] | list[float] | None
     status: str
-    result: MatchResultDto | None
-    site_votes: VoteTotalsDto
+    result: MatchResultResponse | None
+    site_votes: VoteTotalsResponse
     locked: bool
     my_pick: str | None
     ai_pick: str | None
     ai_pick_name: str | None
     ai_correct: bool | None
+    point_value: int = 1
 
 
 @dataclass(frozen=True)
-class PleBoardDto:
+class PleBoardResponse:
     slug: str
     label: str
     month: int
     year: int
     status: str
     finished_at: datetime | None
-    matches: list[MatchBoardDto]
+    matches: list[MatchBoardResponse]
     updated_at: datetime
 
 
 @dataclass(frozen=True)
-class PleAiRecordDto:
+class PleAiRecordResponse:
     event_slug: str
     event_label: str
     match_key: str
@@ -135,42 +136,56 @@ class PleAiRecordDto:
 
 
 @dataclass(frozen=True)
-class PleAiStatsDto:
+class PleAiStatsResponse:
     total_graded: int
     correct: int
     incorrect: int
     accuracy_percent: float | None
-    recent: list[PleAiRecordDto]
+    recent: list[PleAiRecordResponse]
 
 
 @dataclass(frozen=True)
-class PleEventSummaryDto:
+class PleEventSummaryResponse:
     slug: str
     label: str
     month: int
     year: int
     status: str
     match_count: int
+    finished_at: datetime | None = None
 
 
 @dataclass(frozen=True)
-class PleMatchSnapshotDto:
+class MatchSnapshotQuery:
+    event_slug: str
+    event_label: str
+    match_key: str
+    title: str
+    format: str
+    card_json: str
+    winner_pick: str | None
+    winner_name: str | None
+    status: str
+
+
+@dataclass(frozen=True)
+class PleMatchSnapshotQuery:
     id: int
     match_key: str
     status: str
 
 
 @dataclass(frozen=True)
-class PleEventSnapshotDto:
+class PleEventSnapshotQuery:
     id: int
     slug: str
     status: str
     finished_at: datetime | None
-    matches: list[PleMatchSnapshotDto]
+    matches: list[PleMatchSnapshotQuery]
 
 
 @dataclass(frozen=True)
-class PleMatchReadDto:
+class PleMatchReadQuery:
     id: int
     match_key: str
     title: str
@@ -184,10 +199,11 @@ class PleMatchReadDto:
     ai_pick: str | None
     ai_pick_name: str | None
     ai_correct: bool | None
+    point_value: int = 1
 
 
 @dataclass(frozen=True)
-class PleEventReadDto:
+class PleEventReadQuery:
     slug: str
     label: str
     month: int
@@ -195,4 +211,4 @@ class PleEventReadDto:
     status: str
     finished_at: datetime | None
     updated_at: datetime
-    matches: list[PleMatchReadDto]
+    matches: list[PleMatchReadQuery]

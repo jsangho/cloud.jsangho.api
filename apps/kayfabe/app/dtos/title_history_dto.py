@@ -1,24 +1,24 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from kayfabe.adapter.inbound.api.schemas.title_history_schema import (
+    from kayfabe.adapter.inbound.api.schemas.title_acquisitions_schema import (
         CompetitorTitleHistoryResponseSchema,
         TitleAcquisitionSchema,
     )
 
 
 @dataclass(frozen=True)
-class TitleAcquisitionDto:
+class TitleAcquisitionResponse:
     belt_name: str
     won_at: str
     won_at_slug: str | None
     match_key: str | None
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.title_history_schema import TitleAcquisitionSchema
+        from kayfabe.adapter.inbound.api.schemas.title_acquisitions_schema import TitleAcquisitionSchema
 
         return TitleAcquisitionSchema(
             belt_name=self.belt_name,
@@ -29,12 +29,12 @@ class TitleAcquisitionDto:
 
 
 @dataclass(frozen=True)
-class CompetitorTitleHistoryDto:
+class CompetitorTitleHistoryResponse:
     name: str
-    acquisitions: list[TitleAcquisitionDto]
+    acquisitions: list[TitleAcquisitionResponse]
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.title_history_schema import (
+        from kayfabe.adapter.inbound.api.schemas.title_acquisitions_schema import (
             CompetitorTitleHistoryResponseSchema,
         )
 

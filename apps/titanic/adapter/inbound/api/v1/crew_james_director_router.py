@@ -1,9 +1,5 @@
 ﻿from __future__ import annotations
 
-import logging
-
-
-
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from titanic.adapter.inbound.api.schemas.crew_james_director_schema import (
@@ -25,8 +21,6 @@ from titanic.app.dtos.crew_james_director_dto import (
  완벽주의 성향으로 타이타닉의 모든 세트와 디테일을
  고증한 아키텍처의 총괄 디렉터 역할 수행
 '''
-
-logger = logging.getLogger("uvicorn.error")
 
 james_director_router = APIRouter(prefix="/james", tags=["james"])
 
@@ -72,7 +66,6 @@ async def introduce_myself(
         id=2,
         name="James Cameron"
     )
-    logger.info("[JamesDirectorRouter] introduce_myself 진입 | request_data=%s", f"id={schema.id} name={schema.name!r}")
     query = JamesDirectorQuery(id=schema.id, name=schema.name)
     return await james.introduce_myself(query)
 
@@ -87,10 +80,5 @@ async def upload_titanic_file(
 ):
     """타이타닉 승객 데이터 CSV 파일 업로드"""
     schema = _parse_uploaded_csv(await file.read())
-    logger.info(
-        "[JamesDirectorRouter] upload_titanic_file 진입 | filename=%s rows=%s",
-        file.filename,
-        len(schema.records),
-    )
     result = await james.upload_titanic_file(_to_record_commands(schema.records))
     return _to_fileupload_response(result)
