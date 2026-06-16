@@ -19,9 +19,11 @@ from kayfabe.adapter.outbound.orm.ple_orm import (
     PleMatchStatus,
     PlePredictionModel,
 )
-from kayfabe.app.dtos.myself_dto import MyselfQuery, MyselfRepository, MyselfResponse
-from kayfabe.app.dtos.ple_dto import (
+from kayfabe.app.dtos.ple_events_dto import (
     MatchResultResponse,
+    MyselfQuery,
+    MyselfRepository,
+    MyselfResponse,
     PleAiRecordResponse,
     PleAiStatsResponse,
     PleEventReadQuery,
@@ -30,7 +32,7 @@ from kayfabe.app.dtos.ple_dto import (
     PleEventSyncCommand,
 )
 
-from kayfabe.app.ports.output.ple_events_repository import PleInfoRepository, PleRepository
+from kayfabe.app.ports.output.ple_events_repository import PleEventsRepository
 from kayfabe.app.services.ple_ai import derive_ai_pick_from_card, grade_ai_correct
 from kayfabe.app.services.ple_scoring import competitor_count_from_card, derive_match_point_value
 from user.domain.entities.user_model import UserModel
@@ -38,7 +40,7 @@ from user.domain.entities.user_model import UserModel
 logger = LAYER_LOG
 
 
-class PleInfoPgRepository(PleInfoRepository):
+class PleEventsPgRepository(PleEventsRepository):
     """Neon(Postgres) PLE 조회 어댑터."""
 
     def __init__(self, db: AsyncSession) -> None:
@@ -140,7 +142,7 @@ class PleInfoPgRepository(PleInfoRepository):
         ]
 
     async def get_ai_stats(self) -> PleAiStatsResponse:
-        logger.info("[PleInfoPgRepository] get_ai_stats -> Neon")
+        logger.info("[PleEventsPgRepository] get_ai_stats -> Neon")
         agg = await self.db.execute(
             select(
                 func.count(PleMatchModel.id),
@@ -187,14 +189,14 @@ class PleInfoPgRepository(PleInfoRepository):
             accuracy_percent=accuracy,
             recent=recent,
         )
-        logger.info("[PleInfoPgRepository] get_ai_stats <- Neon | graded=%d", total_graded)
+        logger.info("[PleEventsPgRepository] get_ai_stats <- Neon | graded=%d", total_graded)
         return stats
 
 
-class PlePgRepository(PleRepository):
+class PleEventsPgRepository(PleEventsRepository):
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
-        self._info = PleInfoPgRepository(db)
+        self._info = PleEventsPgRepository(db)
 
     async def user_exists(self, *, user_id: int) -> bool:
         result = await self.db.execute(select(UserModel.id).where(UserModel.id == user_id))
@@ -426,25 +428,8 @@ class PlePgRepository(PleRepository):
         )
         return result.scalar_one_or_none()
 
-
-class PleMyselfPgRepository(MyselfRepository):
-    def __init__(self, session: AsyncSession) -> None:
-        self.session = session
-
     async def introduce_myself(self, query: MyselfQuery) -> MyselfResponse:
         return MyselfResponse(
             id=query.id * 10000,
             name=query.name + "이 레포지토리에 다녀옴",
         )
-
-
-class PleinfoMyselfPgRepository(MyselfRepository):
-    def __init__(self, session: AsyncSession) -> None:
-        self.session = session
-
-    async def introduce_myself(self, query: MyselfQuery) -> MyselfResponse:
-        return MyselfResponse(
-            id=query.id * 10000,
-            name=query.name + "이 레포지토리에 다녀옴",
-        )
-

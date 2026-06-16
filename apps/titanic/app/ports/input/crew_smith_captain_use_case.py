@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from collections.abc import Iterator
 
-from titanic.adapter.inbound.api.schemas.crew_smith_captain_schema import ChatSchema
 from titanic.app.dtos.crew_smith_captain_dto import (
-    SmithCaptainChatResponse,
+    ChatResponse,
+    SmithCaptainChatCommand,
     SmithCaptainQuery,
     SmithCaptainResponse,
 )
@@ -22,9 +21,11 @@ class SmithCaptainUseCase(ABC):
         ...
 
     @abstractmethod
-    async def chat(self, schema: ChatSchema,
-                jack: JackTrainerUseCase,
-                rose: RoseModelUseCase,
-                ) -> SmithCaptainChatResponse:
+    async def chat(
+        self,
+        command: SmithCaptainChatCommand,
+        jack: JackTrainerUseCase,
+        rose: RoseModelUseCase,
+    ) -> ChatResponse:
         """채팅창 자연어 입력에 대한 선장 응답"""
         ...

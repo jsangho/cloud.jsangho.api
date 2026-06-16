@@ -1,6 +1,6 @@
 ﻿from __future__ import annotations
 
-from kayfabe.app.dtos.championship_dto import (
+from kayfabe.app.dtos.title_acquisitions_dto import (
     BrandRosterResponse,
     ChampionshipBoardResponse,
     TitleReignResponse,

@@ -1,10 +1,10 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
-class LeaderboardRow:
+class LeaderboardQuery:
     rank: int
     nickname: str
     score: int

@@ -1,9 +1,9 @@
 # Kayfabe 앱 행동 지침 (메인)
 
 > **본 문서가 메인 규칙이다.** 충돌 시 `CLAUDE.md`가 우선한다.  
-> [`.cursorrules`](.cursorrules)는 보조 참고용이다.
+> `.cursorrules`는 보조 참고용이다.
 
-상위 메인: [sangho `CLAUDE.md`](../../../_claude/CLAUDE.md) · [루트 `CLAUDE.md`](../../../../CLAUDE.md)
+상위 메인: `sangho/CLAUDE.md` · `CLAUDE.md` (루트)
 
 **패키지:** `kayfabe` · **API prefix:** `/ple`, `/rankings`, `/records`, `/title-history`, `/championship`
 
@@ -97,24 +97,24 @@ adapter/outbound/orm/          ← SQLAlchemy ORM 모델
 
 ## HTTP API 요약
 
-| 메서드 | 경로 | 라우터 파일 |
-|--------|------|--------|
-| GET | `/ple/events` | `ple_events_router` |
-| GET | `/ple/ai-stats` | `ple_events_router` |
-| GET | `/ple/results` | `ple_events_router` |
-| GET | `/ple/{slug}` | `ple_events_router` |
-| GET | `/ple/{slug}/live` | `ple_events_router` (SSE) |
-| POST | `/ple/{slug}/sync-from-client` | `ple_events_router` |
-| POST | `/ple/{slug}/predictions/batch` | `ple_match_pick_router` |
-| POST | `/ple/{slug}/matches/{match_key}/predict` | `ple_match_pick_router` |
-| POST | `/ple/{slug}/results/batch` | `ple_matches_router` |
-| POST | `/ple/{slug}/matches/{match_key}/result` | `ple_matches_router` |
-| GET | `/rankings` | `ple_match_pick_router` (ranking_router) |
-| GET | `/records/competitors` | `ple_matches_router` (records_router) |
-| GET | `/records/competitors/{name}` | `ple_matches_router` (records_router) |
-| GET | `/title-history/competitors/{name}` | `title_acquisitions_router` |
-| POST | `/title-history/sync` | `title_acquisitions_router` |
-| GET | `/championship` | `title_acquisitions_router` (championship_router) |
+| 메서드  | 경로                                        | 라우터 파일                                            |
+| ---- | ----------------------------------------- | ------------------------------------------------- |
+| GET  | `/ple/events`                             | `ple_events_router`                               |
+| GET  | `/ple/ai-stats`                           | `ple_events_router`                               |
+| GET  | `/ple/results`                            | `ple_events_router`                               |
+| GET  | `/ple/{slug}`                             | `ple_events_router`                               |
+| GET  | `/ple/{slug}/live`                        | `ple_events_router` (SSE)                         |
+| POST | `/ple/{slug}/sync-from-client`            | `ple_events_router`                               |
+| POST | `/ple/{slug}/predictions/batch`           | `ple_match_pick_router`                           |
+| POST | `/ple/{slug}/matches/{match_key}/predict` | `ple_match_pick_router`                           |
+| POST | `/ple/{slug}/results/batch`               | `ple_matches_router`                              |
+| POST | `/ple/{slug}/matches/{match_key}/result`  | `ple_matches_router`                              |
+| GET  | `/rankings`                               | `ple_match_pick_router` (ranking_router)          |
+| GET  | `/records/competitors`                    | `ple_matches_router` (records_router)             |
+| GET  | `/records/competitors/{name}`             | `ple_matches_router` (records_router)             |
+| GET  | `/title-history/competitors/{name}`       | `title_acquisitions_router`                       |
+| POST | `/title-history/sync`                     | `title_acquisitions_router`                       |
+| GET  | `/championship`                           | `title_acquisitions_router` (championship_router) |
 
 > 예측 POST 시 body `userId` 필수 · 미제공 → **422** · DB에 없는 id → **401**
 
@@ -122,7 +122,7 @@ adapter/outbound/orm/          ← SQLAlchemy ORM 모델
 
 ## ERD 참조
 
-→ [`KAYFABE_ERD.md`](KAYFABE_ERD.md)
+→ `KAYFABE_ERD.md`
 
 ---
 

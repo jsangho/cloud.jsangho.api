@@ -8,10 +8,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from core.matrix.vault_keymaker_secret_manager import Keymaker
 from titanic.app.dtos.crew_smith_captain_dto import (
     SmithCaptainChatCommand,
-    SmithCaptainChatResponse,
+    SmithCaptainResponse,
     SmithCaptainChatTurnDto,
     SmithCaptainQuery,
     SmithCaptainResponse,
+    ChatResponse
 )
 from titanic.app.ports.output.crew_smith_captain_repository import SmithCaptainRepository
 
@@ -33,10 +34,10 @@ class SmithCaptainPgRepository(SmithCaptainRepository):
             name=query.name + "가 레포지토리에 다녀옴",
         )
 
-    async def chat(self, command: SmithCaptainChatCommand) -> SmithCaptainChatResponse:
+    async def chat(self, command: SmithCaptainChatCommand) -> SmithCaptainResponse:
         prompt = self._build_prompt(command.messages)
         reply = self._generate_reply(prompt)
-        return SmithCaptainChatResponse(reply=reply)
+        return ChatResponse(reply=reply)
 
     def chat_stream(self, command: SmithCaptainChatCommand) -> Iterator[str]:
         prompt = self._build_prompt(command.messages)

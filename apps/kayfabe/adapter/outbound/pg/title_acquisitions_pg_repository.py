@@ -10,18 +10,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from kayfabe.adapter.outbound.orm.championship_orm import ChampionshipTitleModel
 from kayfabe.adapter.outbound.orm.title_history_orm import TitleAcquisitionModel
-from kayfabe.app.dtos.championship_dto import (
+from kayfabe.app.dtos.ple_events_dto import MyselfQuery, MyselfResponse
+from kayfabe.app.dtos.title_acquisitions_dto import (
     BrandRosterResponse,
     ChampionshipBoardResponse,
     TitleReignResponse,
 )
-from kayfabe.app.dtos.myself_dto import MyselfQuery, MyselfRepository, MyselfResponse
-from kayfabe.app.ports.output.title_acquisitions_repository import (
-    ChampionshipRepository,
-    TitleAcquisitionRow,
-    TitleHistoryRepository,
-)
-from kayfabe.app.services.competitor_roster import is_team_roster_name
+from kayfabe.app.ports.output.title_acquisitions_repository import TitleAcquisitionsRepository, TitleAcquisitionRow
 from kayfabe.app.services.current_championship_catalog import (
     CHAMPIONSHIP_AS_OF,
     WWE_BRAND_CHAMPIONS,
@@ -34,7 +29,7 @@ _BRAND_ORDER = [b["id"] for b in WWE_BRAND_CHAMPIONS]
 _BRAND_META = {b["id"]: b for b in WWE_BRAND_CHAMPIONS}
 
 
-class TitleHistoryPgRepository(TitleHistoryRepository):
+class TitleAcquisitionsPgRepository(TitleAcquisitionsRepository):
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
 
@@ -112,13 +107,6 @@ class TitleHistoryPgRepository(TitleHistoryRepository):
             await self.db.flush()
             return inserted
 
-
-class ChampionshipPgRepository(ChampionshipRepository):
-    """Neon(Postgres) 챔피언십 어댑터."""
-
-    def __init__(self, db: AsyncSession) -> None:
-        self.db = db
-
     async def get_board(self) -> ChampionshipBoardResponse:
         result = await self.db.execute(
             select(ChampionshipTitleModel).order_by(
@@ -181,22 +169,6 @@ class ChampionshipPgRepository(ChampionshipRepository):
                 inserted += 1
         await self.db.flush()
         return inserted
-
-
-class TitleHistoryMyselfPgRepository(MyselfRepository):
-    def __init__(self, session: AsyncSession) -> None:
-        self.session = session
-
-    async def introduce_myself(self, query: MyselfQuery) -> MyselfResponse:
-        return MyselfResponse(
-            id=query.id * 10000,
-            name=query.name + "이 레포지토리에 다녀옴",
-        )
-
-
-class ChampionshipMyselfPgRepository(MyselfRepository):
-    def __init__(self, session: AsyncSession) -> None:
-        self.session = session
 
     async def introduce_myself(self, query: MyselfQuery) -> MyselfResponse:
         return MyselfResponse(

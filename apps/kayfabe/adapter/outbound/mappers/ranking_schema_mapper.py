@@ -1,5 +1,5 @@
 ﻿from kayfabe.adapter.inbound.api.schemas.ple_match_pick_schema import RankingRowSchema, RankingsResponseSchema
-from kayfabe.app.dtos.ranking_dto import RankingsResponse
+from kayfabe.app.dtos.ple_match_pick_dto import RankingsResponse
 
 
 def rankings_to_schema(dto: RankingsResponse) -> RankingsResponseSchema:

@@ -22,15 +22,10 @@ from kayfabe.adapter.outbound.mappers.ple_schema_mapper import (
     event_summary_to_schema,
     event_sync_from_schema,
 )
-from kayfabe.app.dtos.myself_dto import MyselfQuery, MyselfResponse, MyselfUseCase
+from kayfabe.app.dtos.ple_events_dto import MyselfQuery, MyselfResponse, MyselfUseCase
 from kayfabe.app.exceptions import PleAuthRequiredError
-from kayfabe.app.ports.input.ple_events_use_case import PleInfoUseCase, PleUseCase
-from kayfabe.dependencies.ple_events_provider import (
-    get_ple,
-    get_ple_myself,
-    get_pleinfo,
-    get_pleinfo_repository,
-)
+from kayfabe.app.ports.input.ple_events_use_case import PleEventsUseCase
+from kayfabe.dependencies.ple_events_provider import get_ple_events, get_ple_events_repository
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -48,7 +43,7 @@ def _ple_http_error(exc: Exception) -> HTTPException:
 
 @ple_events_router.get("/myself", response_model=None)
 async def introduce_ple_events_myself(
-    use_case: MyselfUseCase = Depends(get_ple_myself),
+    use_case: MyselfUseCase = Depends(get_ple_events),
 ) -> MyselfResponse:
     schema = MyselfSchema(id=2, name="ple_events_router")
     query = MyselfQuery(id=schema.id, name=schema.name)
@@ -59,7 +54,7 @@ async def introduce_ple_events_myself(
     response_model=list[PleEventSummarySchema],
     response_model_by_alias=True,
 )
-async def list_ple_events(use_case: PleInfoUseCase = Depends(get_pleinfo)):
+async def list_ple_events(use_case: PleEventsUseCase = Depends(get_ple_events)):
     logger.info("[PleEventsRouter] list_ple_events")
     events = await use_case.list_events()
     return [event_summary_to_schema(e) for e in events]
@@ -70,7 +65,7 @@ async def list_ple_events(use_case: PleInfoUseCase = Depends(get_pleinfo)):
     response_model=PleAiStatsSchema,
     response_model_by_alias=True,
 )
-async def get_ple_ai_stats(use_case: PleInfoUseCase = Depends(get_pleinfo)):
+async def get_ple_ai_stats(use_case: PleEventsUseCase = Depends(get_ple_events)):
     logger.info("[PleEventsRouter] get_ple_ai_stats")
     return ai_stats_to_schema(await use_case.get_ai_stats())
 
@@ -78,7 +73,7 @@ async def get_ple_ai_stats(use_case: PleInfoUseCase = Depends(get_pleinfo)):
 @ple_events_router.get("/results", response_model=PleResultsResponseSchema)
 async def list_ple_results(
     year: int = 2026,
-    use_case: PleInfoUseCase = Depends(get_pleinfo),
+    use_case: PleEventsUseCase = Depends(get_ple_events),
 ):
     return (await use_case.list_results(year)).to_schema()
 
@@ -91,7 +86,7 @@ async def list_ple_results(
 async def sync_ple_from_client(
     slug: str,
     payload: PleEventSyncSchema,
-    use_case: PleUseCase = Depends(get_ple),
+    use_case: PleEventsUseCase = Depends(get_ple_events),
 ):
     if payload.slug != slug:
         raise HTTPException(status_code=400, detail="URL slug와 본문 slug가 일치하지 않습니다.")
@@ -116,7 +111,7 @@ async def get_ple_board(
     slug: str,
     client_id: str | None = None,
     user_id: int | None = None,
-    use_case: PleInfoUseCase = Depends(get_pleinfo),
+    use_case: PleEventsUseCase = Depends(get_ple_events),
 ):
     logger.info("[PleEventsRouter] get_ple_board | slug=%s", slug)
     try:
@@ -144,7 +139,7 @@ async def ple_live_board(
                     return
                 try:
                     async with AsyncSessionLocal() as session:
-                        use_case = get_pleinfo(get_pleinfo_repository(session))
+                        use_case = get_ple_events(get_ple_events_repository(session))
                         board = await use_case.get_board(
                             slug=slug, client_id=client_id, user_id=user_id
                         )

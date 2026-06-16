@@ -4,27 +4,27 @@ from __future__ import annotations
 
 import logging
 
-from kayfabe.app.dtos.myself_dto import MyselfQuery, MyselfRepository, MyselfResponse, MyselfUseCase
-from kayfabe.app.dtos.ranking_dto import LeaderboardRow, RankingRowResponse, RankingsResponse
-from kayfabe.app.ports.input.ple_match_pick_use_case import RankingUseCase
-from kayfabe.app.ports.output.ple_events_repository import PleRepository
-from kayfabe.app.ports.output.ple_match_pick_repository import RankingRepository
+from kayfabe.app.dtos.ple_events_dto import MyselfQuery, MyselfResponse
+from kayfabe.app.dtos.ple_match_pick_dto import LeaderboardQuery, RankingRowResponse, RankingsResponse
+from kayfabe.app.ports.input.ple_match_pick_use_case import PleMatchPickUseCase
+from kayfabe.app.ports.output.ple_events_repository import PleEventsRepository
+from kayfabe.app.ports.output.ple_match_pick_repository import PleMatchPickRepository
 
 logger = logging.getLogger("uvicorn.error")
 
 
-class PleMatchPickInteractor(RankingUseCase):
+class PleMatchPickInteractor(PleMatchPickUseCase):
     def __init__(
         self,
         *,
-        ranking_repository: RankingRepository,
-        ple_repository: PleRepository,
+        repository: PleMatchPickRepository,
+        ple_repository: PleEventsRepository,
     ) -> None:
-        self._ranking_repository = ranking_repository
+        self._ranking_repository = repository
         self._ple_repository = ple_repository
 
     @staticmethod
-    def _to_row_dto(row: LeaderboardRow) -> RankingRowResponse:
+    def _to_row_dto(row: LeaderboardQuery) -> RankingRowResponse:
         graded = row.graded
         accuracy = (row.correct / graded) if graded > 0 else 0.0
         return RankingRowResponse(
@@ -41,7 +41,7 @@ class PleMatchPickInteractor(RankingUseCase):
         nickname: str | None = None,
     ) -> RankingsResponse:
         logger.info(
-            "[RankingInteractor] list_rankings | limit=%d nickname=%s",
+            "[PleMatchPickInteractor] list_rankings | limit=%d nickname=%s",
             limit,
             nickname or "-",
         )
@@ -58,16 +58,8 @@ class PleMatchPickInteractor(RankingUseCase):
                 if mine is not None:
                     my_rank = self._to_row_dto(mine)
 
-        logger.info("[RankingInteractor] list_rankings | rows=%d", len(rows))
+        logger.info("[PleMatchPickInteractor] list_rankings | rows=%d", len(rows))
         return RankingsResponse(rows=rows, my_rank=my_rank)
 
-
-RankingInteractor = PleMatchPickInteractor
-
-
-class RankingMyselfInteractor(MyselfUseCase):
-    def __init__(self, repository: MyselfRepository) -> None:
-        self.repository = repository
-
     async def introduce_myself(self, query: MyselfQuery) -> MyselfResponse:
-        return await self.repository.introduce_myself(query)
+        return await self._ranking_repository.introduce_myself(query)

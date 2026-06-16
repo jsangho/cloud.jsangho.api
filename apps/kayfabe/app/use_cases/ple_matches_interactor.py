@@ -3,15 +3,15 @@
 from __future__ import annotations
 
 from core.matrix.grid_oracle_database_manager import LAYER_LOG
-from kayfabe.app.dtos.myself_dto import MyselfQuery, MyselfRepository, MyselfResponse, MyselfUseCase
-from kayfabe.app.dtos.records_dto import (
+from kayfabe.app.dtos.ple_events_dto import MyselfQuery, MyselfResponse
+from kayfabe.app.dtos.ple_matches_dto import (
     CompetitorListResponse,
     CompetitorMatchRecordResponse,
     CompetitorProfileResponse,
     CompetitorSummaryResponse,
 )
-from kayfabe.app.ports.input.ple_matches_use_case import RecordsUseCase
-from kayfabe.app.ports.output.ple_matches_repository import RecordsRepository
+from kayfabe.app.ports.input.ple_matches_use_case import PleMatchesUseCase
+from kayfabe.app.ports.output.ple_matches_repository import PleMatchesRepository
 from kayfabe.app.services.records_scoring import (
     competitor_name_in_card_json,
     derive_match_record_from_orm,
@@ -21,26 +21,26 @@ from kayfabe.app.services.records_scoring import (
 logger = LAYER_LOG
 
 
-class RecordsInteractor(RecordsUseCase):
+class PleMatchesInteractor(PleMatchesUseCase):
     def __init__(
         self,
         *,
-        records_repository: RecordsRepository,
+        records_repository: PleMatchesRepository,
     ) -> None:
         self._records = records_repository
 
     async def list_competitors(self, *, q: str | None = None) -> CompetitorListResponse:
-        logger.info("[RecordsInteractor] list_competitors -> Repository q=%s", q or "-")
+        logger.info("[PleMatchesInteractor] list_competitors -> Repository q=%s", q or "-")
         names = await self._records.list_competitor_names()
         if q:
             needle = q.strip().lower()
             names = [n for n in names if needle in n.lower()]
-        logger.info("[RecordsInteractor] list_competitors <- Repository count=%d", len(names))
+        logger.info("[PleMatchesInteractor] list_competitors <- Repository count=%d", len(names))
         return CompetitorListResponse(names=names)
 
     async def get_competitor_profile(self, name: str) -> CompetitorProfileResponse:
         normalized = normalize_name(name)
-        logger.info("[RecordsInteractor] get_competitor_profile -> Repository name=%s", normalized)
+        logger.info("[PleMatchesInteractor] get_competitor_profile -> Repository name=%s", normalized)
 
         matches: list[CompetitorMatchRecordResponse] = []
         snapshots = await self._records.list_match_snapshots()
@@ -92,16 +92,11 @@ class RecordsInteractor(RecordsUseCase):
         )
 
         logger.info(
-            "[RecordsInteractor] get_competitor_profile <- name=%s matches=%d",
+            "[PleMatchesInteractor] get_competitor_profile <- name=%s matches=%d",
             normalized,
             len(matches),
         )
         return CompetitorProfileResponse(name=normalized, matches=matches, summary=summary)
 
-
-class RecordsMyselfInteractor(MyselfUseCase):
-    def __init__(self, repository: MyselfRepository) -> None:
-        self.repository = repository
-
     async def introduce_myself(self, query: MyselfQuery) -> MyselfResponse:
-        return await self.repository.introduce_myself(query)
+        return await self._records.introduce_myself(query)

@@ -2,53 +2,20 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.matrix.grid_oracle_database_manager import get_db
-from kayfabe.adapter.outbound.pg.ple_events_pg_repository import (
-    PleInfoPgRepository,
-    PleMyselfPgRepository,
-    PlePgRepository,
-)
-from kayfabe.app.dtos.myself_dto import MyselfRepository, MyselfUseCase
-from kayfabe.app.ports.input.ple_events_use_case import PleInfoUseCase, PleUseCase
-from kayfabe.app.ports.output.ple_events_repository import PleInfoRepository, PleRepository
-from kayfabe.app.use_cases.ple_events_interactor import (
-    PleInfoInteractor,
-    PleInteractor,
-    PleMyselfInteractor,
-)
+from kayfabe.adapter.outbound.pg.ple_events_pg_repository import PleEventsPgRepository
+from kayfabe.app.ports.input.ple_events_use_case import PleEventsUseCase
+from kayfabe.app.ports.output.ple_events_repository import PleEventsRepository
+from kayfabe.app.use_cases.ple_events_interactor import PleEventsInteractor
 
+def get_ple_events_repository(
+    db: AsyncSession = Depends(get_db)
+) -> PleEventsRepository:
 
-def get_pleinfo_repository(
-    db: AsyncSession = Depends(get_db),
-) -> PleInfoRepository:
-    return PleInfoPgRepository(db)
+    return PleEventsPgRepository(session=db)
 
+def get_ple_events(
+    repository: PleEventsRepository = Depends(get_ple_events_repository)
+) -> PleEventsUseCase:
 
-def get_pleinfo(
-    repository: PleInfoRepository = Depends(get_pleinfo_repository),
-) -> PleInfoUseCase:
-    return PleInfoInteractor(repository=repository)
+    return PleEventsInteractor(repository=repository)
 
-
-def get_ple_repository(
-    db: AsyncSession = Depends(get_db),
-) -> PleRepository:
-    return PlePgRepository(db)
-
-
-def get_ple(
-    repository: PleRepository = Depends(get_ple_repository),
-    info_use_case: PleInfoUseCase = Depends(get_pleinfo),
-) -> PleUseCase:
-    return PleInteractor(repository=repository, info_use_case=info_use_case)
-
-
-def get_ple_myself_repository(
-    db: AsyncSession = Depends(get_db),
-) -> MyselfRepository:
-    return PleMyselfPgRepository(session=db)
-
-
-def get_ple_myself(
-    repository: MyselfRepository = Depends(get_ple_myself_repository),
-) -> MyselfUseCase:
-    return PleMyselfInteractor(repository=repository)

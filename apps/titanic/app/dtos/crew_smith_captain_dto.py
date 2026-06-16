@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from pydantic import BaseModel
+
 
 @dataclass(frozen=True)
 class SmithCaptainQuery:
@@ -26,6 +28,6 @@ class SmithCaptainChatCommand:
 
 
 @dataclass(frozen=True)
-class SmithCaptainChatResponse:
-    reply: str
-
+class ChatResponse(BaseModel):
+    text: str
+ 

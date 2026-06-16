@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from kayfabe.app.dtos.ple_dto import MatchSnapshotQuery
+from kayfabe.app.dtos.ple_events_dto import MatchSnapshotQuery
 
 
-class RecordsRepository(ABC):
-    """PLE 카드(card_json)에서 출전 선수명을 수집하는 출력 포트."""
+class PleMatchesRepository(ABC):
+    """PLE 경기 정보 조회 출력 포트."""
 
     @abstractmethod
     async def list_competitor_names(self) -> list[str]:

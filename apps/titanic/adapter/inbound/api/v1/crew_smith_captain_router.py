@@ -1,15 +1,17 @@
+from logging import getLogger
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends
-from fastapi.responses import StreamingResponse
 
 from titanic.adapter.inbound.api.schemas.crew_smith_captain_schema import (
-    ChatMessageSchema,
     ChatSchema,
     SmithCaptainChatResponseSchema,
     SmithCaptainSchema,
 )
 from titanic.app.dtos.crew_smith_captain_dto import (
+    ChatResponse,
+    SmithCaptainChatCommand,
+    SmithCaptainChatTurnDto,
     SmithCaptainQuery,
     SmithCaptainResponse,
 )
@@ -19,6 +21,8 @@ from titanic.app.ports.input.passenger_rose_model_use_case import RoseModelUseCa
 from titanic.dependencies.crew_smith_captain_provider import get_smith_captain
 from titanic.dependencies.passenger_jack_trainer_provider import get_jack_trainer
 from titanic.dependencies.passenger_rose_model_provider import get_rose_model
+
+logger = getLogger(__name__)
 
 '''
 스미스 선장 (Captain Edward John Smith)
@@ -32,28 +36,22 @@ async def chat(
     schema: Annotated[ChatSchema, Body()],
     smith: SmithCaptainUseCase = Depends(get_smith_captain),
     jack: JackTrainerUseCase = Depends(get_jack_trainer),
-    rose: RoseModelUseCase = Depends(get_rose_model)
-):
-
-    response = await smith.chat(schema, jack, rose)
-    return SmithCaptainChatResponseSchema(reply=response.reply)
-
-
-def _format_messages_log(messages: list[ChatMessageSchema]) -> str:
-    lines = [
-        f"  messages[{index}]: role={message.role} text={message.text!r}"
-        for index, message in enumerate(messages)
-    ]
-    return "\n".join(lines) if lines else "  messages: (비어 있음)"
+    rose: RoseModelUseCase = Depends(get_rose_model),
+) -> ChatResponse:
+    logger.info("[smith/chat] messages=%s", schema.messages)
+    command = SmithCaptainChatCommand(
+        messages=(SmithCaptainChatTurnDto(role="user", text=schema.messages),),
+    )
+    response = await smith.chat(command, jack, rose)
+    return SmithCaptainChatResponseSchema(reply=response)
 
 
 @smith_captain_router.get("/myself")
 async def introduce_myself(
     smith: SmithCaptainUseCase = Depends(get_smith_captain),
 ) -> SmithCaptainResponse:
-    schema = SmithCaptainSchema(
+    return await smith.introduce_myself(SmithCaptainQuery(
         id=5,
         name="Captain Edward John Smith",
-    )
-    query = SmithCaptainQuery(id=schema.id, name=schema.name)
-    return await smith.introduce_myself(query)
+    ))
+   

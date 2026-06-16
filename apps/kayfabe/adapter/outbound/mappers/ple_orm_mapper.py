@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
-from kayfabe.app.dtos.ple_dto import (
+from kayfabe.app.dtos.ple_events_dto import (
     PleAiRecordResponse,
     PleAiStatsResponse,
     PleEventReadQuery,

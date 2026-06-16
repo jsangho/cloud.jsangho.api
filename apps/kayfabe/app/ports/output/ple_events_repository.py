@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from kayfabe.app.dtos.ple_dto import (
+from kayfabe.app.dtos.ple_events_dto import (
     MatchResultResponse,
     PleAiStatsResponse,
     PleEventReadQuery,
@@ -12,7 +12,7 @@ from kayfabe.app.dtos.ple_dto import (
 )
 
 
-class PleInfoRepository(ABC):
+class PleEventsRepository(ABC):
     """PLE 조회 출력 포트."""
 
     @abstractmethod
@@ -46,10 +46,6 @@ class PleInfoRepository(ABC):
     async def list_events_by_year(self, year: int) -> list[PleEventSummaryResponse]:
         """연도별 PLE 이벤트 목록."""
         ...
-
-
-class PleRepository(ABC):
-    """PLE 쓰기 출력 포트."""
 
     @abstractmethod
     async def user_exists(self, *, user_id: int) -> bool:

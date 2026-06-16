@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter
+
+from fastapi import Depends, HTTPException
 
 from kayfabe.adapter.inbound.api.schemas.ple_events_schema import MyselfSchema
 from kayfabe.adapter.inbound.api.schemas.ple_match_pick_schema import (
@@ -18,18 +20,16 @@ from kayfabe.adapter.outbound.mappers.ple_schema_mapper import (
     prediction_from_schema,
 )
 from kayfabe.adapter.outbound.mappers.ranking_schema_mapper import rankings_to_schema
-from kayfabe.app.dtos.myself_dto import MyselfQuery, MyselfResponse, MyselfUseCase
+from kayfabe.app.dtos.ple_events_dto import MyselfQuery, MyselfResponse, MyselfUseCase
 from kayfabe.app.exceptions import PleAuthRequiredError
-from kayfabe.app.ports.input.ple_events_use_case import PleUseCase
-from kayfabe.app.ports.input.ple_match_pick_use_case import RankingUseCase
-from kayfabe.dependencies.ple_events_provider import get_ple
-from kayfabe.dependencies.ple_match_pick_provider import get_ranking, get_ranking_myself
+from kayfabe.app.ports.input.ple_events_use_case import PleEventsUseCase
+from kayfabe.app.ports.input.ple_match_pick_use_case import PleMatchPickUseCase
+from kayfabe.dependencies.ple_events_provider import get_ple_events, get_ple_events_repository
+from kayfabe.dependencies.ple_match_pick_provider import get_ple_match_pick
 
 logger = logging.getLogger("uvicorn.error")
 
-ple_match_pick_router = APIRouter(prefix="/ple", tags=["ple-match-pick"])
-ranking_router = APIRouter(prefix="/rankings", tags=["ranking"])
-
+ple_match_pick_router = APIRouter(prefix="/ple-match-picks", tags=["ple-match-picks"])
 
 def _ple_http_error(exc: Exception) -> HTTPException:
     if isinstance(exc, LookupError):
@@ -41,16 +41,16 @@ def _ple_http_error(exc: Exception) -> HTTPException:
     raise exc
 
 
-@ranking_router.get("/myself", response_model=None)
+@ple_match_pick_router.get("/myself", response_model=None)
 async def introduce_ranking_myself(
-    use_case: MyselfUseCase = Depends(get_ranking_myself),
+    use_case: MyselfUseCase = Depends(get_ple_match_pick),
 ) -> MyselfResponse:
     schema = MyselfSchema(id=4, name="ple_match_pick_router")
     query = MyselfQuery(id=schema.id, name=schema.name)
     return await use_case.introduce_myself(query)
 
 
-@ranking_router.get(
+@ple_match_pick_router.get(
     "/",
     response_model=RankingsResponseSchema,
     response_model_by_alias=True,
@@ -58,7 +58,7 @@ async def introduce_ranking_myself(
 async def list_rankings(
     limit: int = 120,
     nickname: str | None = None,
-    use_case: RankingUseCase = Depends(get_ranking),
+    use_case: PleMatchPickUseCase = Depends(get_ple_match_pick),
 ):
     logger.info("[PleMatchPickRouter] list_rankings | limit=%d nickname=%s", limit, nickname or "-")
     return rankings_to_schema(await use_case.list_rankings(limit=limit, nickname=nickname))
@@ -80,7 +80,7 @@ async def link_ple_predictions(body: LinkPredictionsSchema):
 async def predict_ple_batch(
     slug: str,
     body: BatchPredictionRequestSchema,
-    use_case: PleUseCase = Depends(get_ple),
+    use_case: PleEventsUseCase = Depends(get_ple_events),
 ):
     logger.info("[PleMatchPickRouter] predict_ple_batch | slug=%s count=%d", slug, len(body.predictions))
     try:
@@ -102,7 +102,7 @@ async def predict_ple_match(
     slug: str,
     match_key: str,
     body: PredictionRequestSchema,
-    use_case: PleUseCase = Depends(get_ple),
+    use_case: PleEventsUseCase = Depends(get_ple_events),
 ):
     logger.info("[PleMatchPickRouter] predict_ple_match | slug=%s match=%s", slug, match_key)
     try:

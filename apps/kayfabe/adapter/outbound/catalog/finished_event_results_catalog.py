@@ -1,6 +1,6 @@
 ﻿from __future__ import annotations
 
-from kayfabe.app.dtos.ple_dto import MatchResultResponse
+from kayfabe.app.dtos.ple_events_dto import MatchResultResponse
 
 FINISHED_EVENT_RESULTS: dict[str, dict[str, MatchResultResponse]] = {
     "royal-rumble": {

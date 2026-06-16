@@ -7,15 +7,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.matrix.grid_oracle_database_manager import LAYER_LOG
 from kayfabe.adapter.outbound.orm.ple_orm import PleMatchModel, PleMatchStatus, PlePredictionModel
-from kayfabe.app.dtos.myself_dto import MyselfQuery, MyselfRepository, MyselfResponse
-from kayfabe.app.dtos.ranking_dto import LeaderboardRow
-from kayfabe.app.ports.output.ple_match_pick_repository import RankingRepository
+from kayfabe.app.dtos.ple_events_dto import MyselfQuery, MyselfResponse
+from kayfabe.app.dtos.ple_match_pick_dto import LeaderboardQuery
+from kayfabe.app.ports.output.ple_match_pick_repository import PleMatchPickRepository
 from user.domain.entities.user_model import UserModel
 
 logger = LAYER_LOG
 
 
-class RankingPgRepository(RankingRepository):
+class PleMatchPickPgRepository(PleMatchPickRepository):
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
 
@@ -57,7 +57,7 @@ class RankingPgRepository(RankingRepository):
             .subquery()
         )
 
-    async def list_ranked(self, limit: int) -> list[LeaderboardRow]:
+    async def list_ranked(self, limit: int) -> list[LeaderboardQuery]:
         agg = self._aggregated_subquery()
         rank_col = func.rank().over(
             order_by=(agg.c.score.desc(), agg.c.correct.desc(), agg.c.nickname.asc())
@@ -77,7 +77,7 @@ class RankingPgRepository(RankingRepository):
         )
         result = await self.db.execute(stmt)
         rows = [
-            LeaderboardRow(
+            LeaderboardQuery(
                 rank=int(rank),
                 nickname=str(nickname),
                 score=int(score or 0),
@@ -86,10 +86,10 @@ class RankingPgRepository(RankingRepository):
             )
             for rank, nickname, score, correct, graded in result.all()
         ]
-        logger.info("[RankingPgRepository] list_ranked <- Neon count=%d", len(rows))
+        logger.info("[PleMatchPickPgRepository] list_ranked <- Neon count=%d", len(rows))
         return rows
 
-    async def get_ranked_by_nickname(self, nickname: str) -> LeaderboardRow | None:
+    async def get_ranked_by_nickname(self, nickname: str) -> LeaderboardQuery | None:
         agg = self._aggregated_subquery()
         rank_col = func.rank().over(
             order_by=(agg.c.score.desc(), agg.c.correct.desc(), agg.c.nickname.asc())
@@ -112,18 +112,13 @@ class RankingPgRepository(RankingRepository):
         if row is None:
             return None
         rank, nick, score, correct, graded = row
-        return LeaderboardRow(
+        return LeaderboardQuery(
             rank=int(rank),
             nickname=str(nick),
             score=int(score or 0),
             correct=int(correct or 0),
             graded=int(graded or 0),
         )
-
-
-class RankingMyselfPgRepository(MyselfRepository):
-    def __init__(self, session: AsyncSession) -> None:
-        self.session = session
 
     async def introduce_myself(self, query: MyselfQuery) -> MyselfResponse:
         return MyselfResponse(

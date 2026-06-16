@@ -3,7 +3,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from kayfabe.app.dtos.championship_dto import ChampionshipBoardResponse
+from kayfabe.app.dtos.title_acquisitions_dto import ChampionshipBoardResponse
 
 
 @dataclass(frozen=True)
@@ -14,7 +14,7 @@ class TitleAcquisitionRow:
     match_key: str | None
 
 
-class TitleHistoryRepository(ABC):
+class TitleAcquisitionsRepository(ABC):
     @abstractmethod
     async def count(self) -> int:
         ...
@@ -31,10 +31,6 @@ class TitleHistoryRepository(ABC):
     async def sync_from_real_catalog(self) -> int:
         """실제 WWE 타이틀 획득 카탈로그로 NeonDB를 재생성. 기록 건수 반환."""
         ...
-
-
-class ChampionshipRepository(ABC):
-    """현역 챔피언 데이터 소스 (카탈로그·DB 등)."""
 
     @abstractmethod
     async def get_board(self) -> ChampionshipBoardResponse:

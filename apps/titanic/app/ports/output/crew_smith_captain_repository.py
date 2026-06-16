@@ -5,7 +5,7 @@ from collections.abc import Iterator
 
 from titanic.app.dtos.crew_smith_captain_dto import (
     SmithCaptainChatCommand,
-    SmithCaptainChatResponse,
+    ChatResponse,
     SmithCaptainQuery,
     SmithCaptainResponse,
 )
@@ -18,7 +18,7 @@ class SmithCaptainRepository(ABC):
         pass
 
     @abstractmethod
-    async def chat(self, command: SmithCaptainChatCommand) -> SmithCaptainChatResponse:
+    async def chat(self, command: SmithCaptainChatCommand) -> ChatResponse:
         pass
 
     @abstractmethod

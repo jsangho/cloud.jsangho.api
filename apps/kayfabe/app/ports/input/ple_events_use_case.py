@@ -2,18 +2,20 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from kayfabe.app.dtos.ple_dto import PleAiStatsResponse, PleBoardResponse, PleEventSummaryResponse
-from kayfabe.app.dtos.ple_dto import (
+from kayfabe.app.dtos.ple_events_dto import (
     BatchPredictionCommand,
     BatchResultsCommand,
     MatchResultUpdateCommand,
+    PleAiStatsResponse,
+    PleBoardResponse,
+    PleEventSummaryResponse,
     PleEventSyncCommand,
+    PleResultsResponse,
     PredictionCommand,
 )
-from kayfabe.app.dtos.result_dto import PleResultsResponse
 
 
-class PleInfoUseCase(ABC):
+class PleEventsUseCase(ABC):
     """`/ple/*` GET inbound(ple_events_router) 조회 입력 포트."""
 
     @abstractmethod
@@ -37,10 +39,6 @@ class PleInfoUseCase(ABC):
     @abstractmethod
     async def list_results(self, year: int) -> PleResultsResponse:
         ...
-
-
-class PleUseCase(ABC):
-    """`/ple/*` POST inbound(ple_events_router, ple_match_pick_router, ple_matches_router) 입력 포트."""
 
     @abstractmethod
     async def sync_event(self, *, payload: PleEventSyncCommand) -> PleBoardResponse:

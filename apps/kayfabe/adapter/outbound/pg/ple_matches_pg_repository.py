@@ -9,9 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.matrix.grid_oracle_database_manager import LAYER_LOG
 from kayfabe.adapter.outbound.orm.ple_orm import PleEventModel, PleMatchModel
-from kayfabe.app.dtos.myself_dto import MyselfQuery, MyselfRepository, MyselfResponse
-from kayfabe.app.dtos.ple_dto import MatchSnapshotQuery
-from kayfabe.app.ports.output.ple_matches_repository import RecordsRepository
+from kayfabe.app.dtos.ple_events_dto import MatchSnapshotQuery, MyselfQuery, MyselfRepository, MyselfResponse
+from kayfabe.app.ports.output.ple_matches_repository import PleMatchesRepository
 from kayfabe.app.services.records_scoring import names_from_card_json, normalize_name
 
 logger = LAYER_LOG
@@ -21,7 +20,7 @@ _names_cache: tuple[float, list[str]] | None = None
 _snapshots_cache: tuple[float, list[MatchSnapshotQuery]] | None = None
 
 
-class RecordsPgRepository(RecordsRepository):
+class PleMatchesPgRepository(PleMatchesRepository):
     def __init__(self, db: AsyncSession) -> None:
         self.db = db
 
@@ -31,7 +30,7 @@ class RecordsPgRepository(RecordsRepository):
         if _names_cache and (now - _names_cache[0]) < _CACHE_TTL_S:
             return _names_cache[1]
 
-        logger.info("[RecordsPgRepository] list_competitor_names -> Neon")
+        logger.info("[PleMatchesPgRepository] list_competitor_names -> Neon")
         result = await self.db.execute(select(PleMatchModel.card_json))
         names: set[str] = set()
         for (card_json,) in result.all():
@@ -40,7 +39,7 @@ class RecordsPgRepository(RecordsRepository):
             for name in names_from_card_json(card_json):
                 names.add(normalize_name(name))
         rows = sorted(names)
-        logger.info("[RecordsPgRepository] list_competitor_names <- Neon count=%d", len(rows))
+        logger.info("[PleMatchesPgRepository] list_competitor_names <- Neon count=%d", len(rows))
         _names_cache = (now, rows)
         return rows
 
@@ -50,7 +49,7 @@ class RecordsPgRepository(RecordsRepository):
         if _snapshots_cache and (now - _snapshots_cache[0]) < _CACHE_TTL_S:
             return _snapshots_cache[1]
 
-        logger.info("[RecordsPgRepository] list_match_snapshots -> Neon")
+        logger.info("[PleMatchesPgRepository] list_match_snapshots -> Neon")
         stmt = (
             select(PleEventModel, PleMatchModel)
             .join(PleMatchModel, PleMatchModel.event_id == PleEventModel.id)
@@ -71,15 +70,10 @@ class RecordsPgRepository(RecordsRepository):
             )
             for event, match in result.all()
         ]
-        logger.info("[RecordsPgRepository] list_match_snapshots <- Neon count=%d", len(rows))
+        logger.info("[PleMatchesPgRepository] list_match_snapshots <- Neon count=%d", len(rows))
         _snapshots_cache = (now, rows)
         return rows
-
-
-class RecordsMyselfPgRepository(MyselfRepository):
-    def __init__(self, session: AsyncSession) -> None:
-        self.session = session
-
+    
     async def introduce_myself(self, query: MyselfQuery) -> MyselfResponse:
         return MyselfResponse(
             id=query.id * 10000,

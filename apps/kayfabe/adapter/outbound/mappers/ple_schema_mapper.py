@@ -22,7 +22,7 @@ from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import (
     BatchResultsRequestSchema,
     MatchResultUpdateSchema,
 )
-from kayfabe.app.dtos.ple_dto import (
+from kayfabe.app.dtos.ple_events_dto import (
     BatchPredictionCommand,
     BatchResultItemCommand,
     BatchResultsCommand,

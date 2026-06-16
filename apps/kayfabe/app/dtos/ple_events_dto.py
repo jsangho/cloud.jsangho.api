@@ -1,8 +1,31 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Literal
+
+
+@dataclass(frozen=True)
+class MyselfQuery:
+    id: int
+    name: str
+
+
+@dataclass(frozen=True)
+class MyselfResponse:
+    id: int
+    name: str
+
+
+class MyselfRepository(ABC):
+    @abstractmethod
+    async def introduce_myself(self, query: MyselfQuery) -> MyselfResponse: ...
+
+
+class MyselfUseCase(ABC):
+    @abstractmethod
+    async def introduce_myself(self, query: MyselfQuery) -> MyselfResponse: ...
 
 
 @dataclass(frozen=True)
@@ -212,3 +235,41 @@ class PleEventReadQuery:
     finished_at: datetime | None
     updated_at: datetime
     matches: list[PleMatchReadQuery]
+
+
+PleEventStatus = Literal["upcoming", "live", "finished"]
+
+
+@dataclass(frozen=True)
+class PleResultRowResponse:
+    slug: str
+    label: str
+    month: int
+    year: int
+    event_at: datetime | None
+    status: PleEventStatus
+    finished_at: datetime | None
+
+    def to_schema(self):
+        from kayfabe.adapter.inbound.api.schemas.ple_events_schema import PleResultRowSchema
+
+        return PleResultRowSchema(
+            slug=self.slug,
+            label=self.label,
+            month=self.month,
+            year=self.year,
+            eventAt=self.event_at,
+            status=self.status,
+            finishedAt=self.finished_at,
+        )
+
+
+@dataclass(frozen=True)
+class PleResultsResponse:
+    year: int
+    results: list[PleResultRowResponse]
+
+    def to_schema(self):
+        from kayfabe.adapter.inbound.api.schemas.ple_events_schema import PleResultsResponseSchema
+
+        return PleResultsResponseSchema(year=self.year, results=[r.to_schema() for r in self.results])

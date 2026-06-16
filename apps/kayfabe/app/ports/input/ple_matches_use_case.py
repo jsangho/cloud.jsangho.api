@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from kayfabe.app.dtos.records_dto import CompetitorListResponse, CompetitorProfileResponse
+from kayfabe.app.dtos.ple_matches_dto import CompetitorListResponse, CompetitorProfileResponse
 
 
-class RecordsUseCase(ABC):
+class PleMatchesUseCase(ABC):
     """`/records/*` inbound(ple_matches_router > records_router) 입력 포트."""
 
     @abstractmethod

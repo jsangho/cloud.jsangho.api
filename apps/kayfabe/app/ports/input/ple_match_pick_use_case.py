@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from kayfabe.app.dtos.ranking_dto import RankingsResponse
+from kayfabe.app.dtos.ple_match_pick_dto import RankingsResponse
 
 
-class RankingUseCase(ABC):
+class PleMatchPickUseCase(ABC):
     """`/rankings` inbound(ple_match_pick_router > ranking_router) 입력 포트."""
 
     @abstractmethod

@@ -10,36 +10,42 @@ from kayfabe.adapter.outbound.catalog.finished_event_results_catalog import (
     FINISHED_EVENT_RESULTS,
     FINISHED_EVENT_SLUGS,
 )
-from kayfabe.app.dtos.myself_dto import MyselfQuery, MyselfRepository, MyselfResponse, MyselfUseCase
-from kayfabe.app.dtos.ple_dto import (
+from kayfabe.app.dtos.ple_events_dto import (
     BatchPredictionCommand,
     BatchResultsCommand,
     CompetitorResponse,
     MatchBoardResponse,
     MatchResultResponse,
     MatchResultUpdateCommand,
+    MyselfQuery,
+    MyselfRepository,
+    MyselfResponse,
+    MyselfUseCase,
     PleAiStatsResponse,
     PleBoardResponse,
     PleEventSummaryResponse,
     PleEventSyncCommand,
+    PleResultRowResponse,
+    PleResultsResponse,
     PredictionCommand,
     VoteTotalsResponse,
 )
-from kayfabe.app.dtos.result_dto import PleResultRowResponse, PleResultsResponse
 from kayfabe.app.exceptions import PleAuthRequiredError
-from kayfabe.app.ports.input.ple_events_use_case import PleInfoUseCase, PleUseCase
-from kayfabe.app.ports.output.ple_events_repository import PleInfoRepository, PleRepository
+from kayfabe.app.ports.input.ple_events_use_case import PleEventsUseCase
+from kayfabe.app.ports.output.ple_events_repository import PleEventsRepository
 from kayfabe.domain.value_objects.ple_status_vo import PleEventStatus, PleMatchStatus
 
 logger = logging.getLogger("uvicorn.error")
 
 
-class PleInfoInteractor(PleInfoUseCase):
-    def __init__(self, repository: PleInfoRepository) -> None:
+class PleEventsInteractor(PleEventsUseCase):
+    def __init__(self, repository: PleEventsRepository,
+                 info_use_case: PleEventsUseCase,) -> None:
         self._repo = repository
+        self._info = info_use_case
 
     async def list_events(self) -> list[PleEventSummaryResponse]:
-        logger.info("[PleInfoInteractor] list_events")
+        logger.info("[PleEventsInteractor] list_events")
         events = await self._repo.list_events()
         return [
             PleEventSummaryResponse(
@@ -54,7 +60,7 @@ class PleInfoInteractor(PleInfoUseCase):
         ]
 
     async def get_ai_stats(self) -> PleAiStatsResponse:
-        logger.info("[PleInfoInteractor] get_ai_stats")
+        logger.info("[PleEventsInteractor] get_ai_stats")
         return await self._repo.get_ai_stats()
 
     async def get_board(
@@ -168,16 +174,6 @@ class PleInfoInteractor(PleInfoUseCase):
             for ple in events
         ]
         return PleResultsResponse(year=year, results=rows)
-
-
-class PleInteractor(PleUseCase):
-    def __init__(
-        self,
-        repository: PleRepository,
-        info_use_case: PleInfoUseCase,
-    ) -> None:
-        self._repo = repository
-        self._info = info_use_case
 
     async def _require_user(self, user_id: int) -> None:
         if not await self._repo.user_exists(user_id=user_id):
@@ -297,11 +293,6 @@ class PleInteractor(PleUseCase):
             )
         logger.info("[PleInteractor] set_match_result | slug=%s match=%s", slug, match_key)
         return await self._info.get_board(slug=slug)
-
-
-class PleMyselfInteractor(MyselfUseCase):
-    def __init__(self, repository: MyselfRepository) -> None:
-        self.repository = repository
-
+    
     async def introduce_myself(self, query: MyselfQuery) -> MyselfResponse:
         return await self.repository.introduce_myself(query)

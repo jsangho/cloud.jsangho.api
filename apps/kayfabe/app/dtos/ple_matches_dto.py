@@ -1,15 +1,14 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal
+from typing import Literal
 
-if TYPE_CHECKING:
-    from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import (
-        CompetitorListResponseSchema,
-        CompetitorMatchRecordSchema,
-        CompetitorProfileResponseSchema,
-        CompetitorSummarySchema,
-    )
+from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import (
+    CompetitorListResponseSchema, 
+    CompetitorMatchRecordSchema, 
+    CompetitorProfileResponseSchema, 
+    CompetitorSummarySchema
+)
 
 MatchResultKind = Literal["win", "loss", "no-contest", "pending"]
 
@@ -28,8 +27,6 @@ class CompetitorMatchRecordResponse:
     was_champion: bool
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import CompetitorMatchRecordSchema
-
         return CompetitorMatchRecordSchema(
             slug=self.slug,
             ple_label=self.ple_label,
@@ -56,8 +53,6 @@ class CompetitorSummaryResponse:
     champion_appearances: int
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import CompetitorSummarySchema
-
         return CompetitorSummarySchema(
             total=self.total,
             wins=self.wins,
@@ -77,10 +72,6 @@ class CompetitorProfileResponse:
     summary: CompetitorSummaryResponse
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import (
-            CompetitorProfileResponseSchema,
-        )
-
         return CompetitorProfileResponseSchema(
             name=self.name,
             matches=[m.to_schema() for m in self.matches],
@@ -93,6 +84,4 @@ class CompetitorListResponse:
     names: list[str]
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import CompetitorListResponseSchema
-
         return CompetitorListResponseSchema(names=list(self.names))
