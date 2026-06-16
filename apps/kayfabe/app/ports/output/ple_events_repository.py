@@ -58,11 +58,6 @@ class PleEventsRepository(ABC):
         ...
 
     @abstractmethod
-    async def get_event_by_slug(self, slug: str) -> PleEventSnapshotQuery | None:
-        """slug로 PLE 이벤트 스냅샷 조회 — 쓰기 전 검증용."""
-        ...
-
-    @abstractmethod
     async def upsert_event_from_sync(self, payload: PleEventSyncCommand) -> PleEventSnapshotQuery:
         """프론트 매치 카드를 Neon에 upsert."""
         ...

@@ -17,6 +17,7 @@ from kayfabe.app.dtos.title_acquisitions_dto import (
     TitleReignResponse,
 )
 from kayfabe.app.ports.output.title_acquisitions_repository import TitleAcquisitionsRepository, TitleAcquisitionRow
+from kayfabe.app.services.competitor_roster import is_team_roster_name
 from kayfabe.app.services.current_championship_catalog import (
     CHAMPIONSHIP_AS_OF,
     WWE_BRAND_CHAMPIONS,
@@ -115,6 +116,15 @@ class TitleAcquisitionsPgRepository(TitleAcquisitionsRepository):
             )
         )
         rows = list(result.scalars().all())
+        if not rows:
+            await self.sync_from_catalog()
+            result = await self.db.execute(
+                select(ChampionshipTitleModel).order_by(
+                    ChampionshipTitleModel.brand_id,
+                    ChampionshipTitleModel.id,
+                )
+            )
+            rows = list(result.scalars().all())
 
         brands_map: dict[str, list[ChampionshipTitleModel]] = {}
         for row in rows:

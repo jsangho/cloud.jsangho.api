@@ -28,7 +28,7 @@ class TitleAcquisitionsInteractor(TitleAcquisitionsUseCase):
         if await self._title_Acquisitions.needs_real_resync():
             await self.sync_from_real_catalog()
 
-    async def get_competitor_title_Acquisitions(self, name: str) -> CompetitorTitleHistoryResponse:
+    async def get_competitor_title_history(self, name: str) -> CompetitorTitleHistoryResponse:
         normalized = normalize_name(name)
         await self._ensure_catalog_loaded()
         rows = await self._title_Acquisitions.list_by_competitor(competitor_name=normalized)
@@ -46,7 +46,7 @@ class TitleAcquisitionsInteractor(TitleAcquisitionsUseCase):
         )
     async def get_board(self) -> ChampionshipBoardResponse:
         logger.info("[ChampionshipInteractor] get_board -> Repository")
-        board = await self._championship.get_board()
+        board = await self._title_Acquisitions.get_board()
         logger.info(
             "[ChampionshipInteractor] get_board <- Repository brands=%d as_of=%s",
             len(board.brands),
@@ -55,5 +55,8 @@ class TitleAcquisitionsInteractor(TitleAcquisitionsUseCase):
         return board
 
     async def introduce_myself(self, query: MyselfQuery) -> MyselfResponse:
-        return await self.repository.introduce_myself(query)
+        return MyselfResponse(
+            id=query.id * 10000,
+            name=query.name + " 타이틀 레포지토리에 다녀옴",
+        )
 

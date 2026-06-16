@@ -9,6 +9,17 @@ from titanic.app.dtos.crew_walter_roaster_dto import WalterRoasterQuery, WalterR
 class WalterRoasterUseCase(ABC):
 
     @abstractmethod
+    def get_train_set(self) -> dict[str, Any]:
+        """월터가 DB에서 train_set을 가져오는 메소드"""
+        ...
+
+    @abstractmethod
+    def get_test_set(self) -> dict[str, Any]:
+        """월터가 DB에서 test_set을 가져오는 메소드"""
+        ...
+    
+
+    @abstractmethod
     async def introduce_myself(self, query: WalterRoasterQuery) -> WalterRoasterResponse:
         """윌터 자기소개 메소드 (`GET /myself`)."""
         ...

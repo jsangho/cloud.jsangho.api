@@ -40,9 +40,9 @@ logger = logging.getLogger("uvicorn.error")
 
 class PleEventsInteractor(PleEventsUseCase):
     def __init__(self, repository: PleEventsRepository,
-                 info_use_case: PleEventsUseCase,) -> None:
+                 info_use_case: PleEventsUseCase | None = None) -> None:
         self._repo = repository
-        self._info = info_use_case
+        self._info: PleEventsUseCase = info_use_case or self
 
     async def list_events(self) -> list[PleEventSummaryResponse]:
         logger.info("[PleEventsInteractor] list_events")

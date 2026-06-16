@@ -10,12 +10,12 @@ from kayfabe.app.use_cases.title_acquisitions_interactor import TitleAcquisition
 def get_title_acquisitions_repository(
     db: AsyncSession = Depends(get_db)
 ) -> TitleAcquisitionsRepository:
-
-    return TitleAcquisitionsPgRepository(session=db)
+    
+    return TitleAcquisitionsPgRepository(db=db)
 
 def get_title_acquisitions(
     repository: TitleAcquisitionsRepository = Depends(get_title_acquisitions_repository)
 ) -> TitleAcquisitionsUseCase:
 
-    return TitleAcquisitionsInteractor(repository=repository)
+    return TitleAcquisitionsInteractor(title_Acquisitions_repository=repository)
 

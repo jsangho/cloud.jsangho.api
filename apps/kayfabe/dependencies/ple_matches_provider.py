@@ -11,11 +11,11 @@ def get_ple_matches_repository(
     db: AsyncSession = Depends(get_db)
 ) -> PleMatchesRepository:
 
-    return PleMatchesPgRepository(session=db)
+    return PleMatchesPgRepository(db=db)
 
 def get_ple_matches(
     repository: PleMatchesRepository = Depends(get_ple_matches_repository)
 ) -> PleMatchesUseCase:
 
-    return PleMatchesInteractor(repository=repository)
+    return PleMatchesInteractor(records_repository=repository)
 

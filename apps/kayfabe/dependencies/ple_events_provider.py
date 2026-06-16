@@ -11,7 +11,7 @@ def get_ple_events_repository(
     db: AsyncSession = Depends(get_db)
 ) -> PleEventsRepository:
 
-    return PleEventsPgRepository(session=db)
+    return PleEventsPgRepository(db=db)
 
 def get_ple_events(
     repository: PleEventsRepository = Depends(get_ple_events_repository)

@@ -193,11 +193,6 @@ class PleEventsPgRepository(PleEventsRepository):
         return stats
 
 
-class PleEventsPgRepository(PleEventsRepository):
-    def __init__(self, db: AsyncSession) -> None:
-        self.db = db
-        self._info = PleEventsPgRepository(db)
-
     async def user_exists(self, *, user_id: int) -> bool:
         result = await self.db.execute(select(UserModel.id).where(UserModel.id == user_id))
         return result.scalar_one_or_none() is not None
@@ -206,13 +201,7 @@ class PleEventsPgRepository(PleEventsRepository):
         await self.db.flush()
 
     async def _get_event_orm(self, slug: str) -> PleEventModel | None:
-        return await self._info._load_event_model(slug, with_predictions=False)
-
-    async def get_event_by_slug(self, slug: str) -> PleEventSnapshotQuery | None:
-        event = await self._get_event_orm(slug)
-        if event is None:
-            return None
-        return event_to_snapshot(event)
+        return await self._load_event_model(slug, with_predictions=False)
 
     async def upsert_event_from_sync(self, payload: PleEventSyncCommand) -> PleEventSnapshotQuery:
         status_val = payload.status or PleEventStatus.UPCOMING
