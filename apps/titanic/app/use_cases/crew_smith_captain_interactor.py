@@ -27,12 +27,21 @@ logger = logging.getLogger(__name__)
 
 class SmithCaptainInteractor(SmithCaptainUseCase):
 
-    def __init__(self, repository: SmithCaptainRepository):
+    def __init__(
+        self,
+        repository: SmithCaptainRepository,
+        jack: JackTrainerUseCase,
+        rose: RoseModelUseCase,
+        cal: CalTesterUseCase,
+        walter: WalterRoasterUseCase
+    ):
         self.repository = repository
-        self.jack: JackTrainerUseCase = Depends(get_jack_trainer)
-        self.rose: RoseModelUseCase = Depends(get_rose_model)
-        self.cal: CalTesterUseCase = Depends(get_cal_tester)
-        self.walter: WalterRoasterUseCase = Depends(get_walter_roaster)
+        self.jack = jack
+        self.rose = rose
+        self.cal = cal
+        self.walter = walter
+
+
 
     async def chat(self, Schema: ChatSchema) -> ChatResponse:
         logger.info(f"[SmithCaptainInteractor] chat 진입 | messages={Schema.messages}")
