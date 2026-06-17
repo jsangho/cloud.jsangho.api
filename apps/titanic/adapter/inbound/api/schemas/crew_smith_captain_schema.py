@@ -9,12 +9,12 @@ class ChatMessageSchema(BaseModel):
 
 
 class ChatSchema(BaseModel):
-    messages: str = Field(..., description="채팅 메시지 히스토리")
+    messages: list[ChatMessageSchema] = Field(..., description="채팅 메시지 히스토리")
 
     model_config = {
         "json_schema_extra": {
             "example": {
-                "messages": "탑승객은 몇 명이야?",
+                "messages": [{"role": "user", "text": "탑승객은 몇 명이야?"}],
             }
         }
     }

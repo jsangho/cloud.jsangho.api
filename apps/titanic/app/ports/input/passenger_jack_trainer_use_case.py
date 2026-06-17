@@ -19,7 +19,3 @@ class JackTrainerUseCase(ABC):
         """로즈가 제안한 모델들을 훈련시키는 메소드."""
         ...
 
-    @abstractmethod
-    async def analyze_message_intent(self, user_message: str) -> dict:
-        """메시지 의도를 형태소 분석으로 파악하는 메소드."""
-        ...

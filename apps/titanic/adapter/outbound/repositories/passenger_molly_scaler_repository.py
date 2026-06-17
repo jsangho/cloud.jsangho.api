@@ -1,11 +1,11 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from titanic.app.dtos.passenger_molly_scaler_dto import MollyScalerQuery, MollyScalerResponse
-from titanic.app.ports.output.passenger_molly_scaler_repository import MollyScalerRepository
+from titanic.app.ports.output.passenger_molly_scaler_port import MollyScalerPort
 
-class MollyScalerPgRepository(MollyScalerRepository):
+class MollyScalerRepository(MollyScalerPort):
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session

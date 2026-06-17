@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from titanic.adapter.outbound.orm.passenger_jack_trainer_orm import JackTrainerOrm
-from titanic.adapter.outbound.orm.passenger_rose_model_orm import RoseModelOrm
+from titanic.adapter.outbound.orm.passenger_rose_model_strategies import RoseModelOrm
 from titanic.app.dtos.crew_james_director_dto import (
     BookingCommand,
     JamesDirectorQuery,
@@ -16,7 +16,7 @@ from titanic.app.dtos.crew_james_director_dto import (
     format_preview_booking_command,
     format_preview_person_command,
 )
-from titanic.app.ports.output.crew_james_director_repository import JamesDirectorRepository
+from titanic.app.ports.output.crew_james_director_port import JamesDirectorPort
 
 _BULK_CHUNK_SIZE = 300
 
@@ -59,7 +59,7 @@ async def _ensure_james_director_tables() -> None:
             detail="DATABASE_URL이 .env 등에 설정되지 않았습니다.",
         )
     import titanic.adapter.outbound.orm.passenger_jack_trainer_orm  # noqa: F401
-    import titanic.adapter.outbound.orm.passenger_rose_model_orm  # noqa: F401
+    import titanic.adapter.outbound.orm.passenger_rose_model_strategies  # noqa: F401
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -77,14 +77,14 @@ async def _ensure_james_director_tables() -> None:
         )
 
 
-class JamesDirectorPgRepository(JamesDirectorRepository):
+class JamesDirectorRepository(JamesDirectorPort):
     """Neon(Postgres) James Director 업로드 어댑터."""
 
     def __init__(self, session: AsyncSession | None) -> None:
         self._session = session
 
     async def introduce_myself(self, query: JamesDirectorQuery) -> JamesDirectorResponse:
-        
+
         '''제임스 디렉터의 자기 소개 레포지토리 구현 메소드'''
 
         response: JamesDirectorResponse = JamesDirectorResponse(

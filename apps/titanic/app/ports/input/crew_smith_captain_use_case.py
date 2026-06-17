@@ -3,7 +3,6 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 from titanic.app.dtos.crew_smith_captain_dto import (
-    ChatResponse,
     SmithCaptainChatCommand,
     SmithCaptainQuery,
     SmithCaptainResponse,
@@ -21,6 +20,6 @@ class SmithCaptainUseCase(ABC):
         ...
 
     @abstractmethod
-    async def chat(self, command: SmithCaptainChatCommand) -> ChatResponse:
+    async def chat(self, command: SmithCaptainChatCommand) -> str:
         """채팅창 자연어 입력에 대한 선장 응답"""
         ...

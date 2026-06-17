@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from collections.abc import Iterator
 
@@ -14,7 +14,7 @@ from titanic.app.dtos.crew_smith_captain_dto import (
     SmithCaptainResponse,
     ChatResponse
 )
-from titanic.app.ports.output.crew_smith_captain_repository import SmithCaptainRepository
+from titanic.app.ports.output.crew_smith_captain_port import SmithCaptainPort
 
 SMITH_PERSONA = (
     "당신은 RMS 타이타닉의 에드워드 스미스 선장입니다. "
@@ -23,7 +23,7 @@ SMITH_PERSONA = (
 MAX_PROMPT_MESSAGES = 8
 
 
-class SmithCaptainPgRepository(SmithCaptainRepository):
+class SmithCaptainRepository(SmithCaptainPort):
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session

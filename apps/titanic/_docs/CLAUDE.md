@@ -126,3 +126,4 @@ POST /titanic/smith/chat
 - 타이타닉 ERD: [[titanic-erd]]
 - 타이타닉 NF: [[titanic-nf]]
 - 타이타닉 알고리즘: [[titanic-algorithm]]
+- 타이타닉 월터: [[titanic-walter]]

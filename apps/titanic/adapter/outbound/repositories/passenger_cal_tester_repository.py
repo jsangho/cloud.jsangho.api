@@ -1,11 +1,11 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from titanic.app.dtos.passenger_cal_tester_dto import CalTesterQuery, CalTesterResponse
-from titanic.app.ports.output.passenger_cal_tester_repository import CalTesterRepository
+from titanic.app.ports.output.passenger_cal_tester_port import CalTesterPort
 
-class CalTesterPgRepository(CalTesterRepository):
+class CalTesterRepository(CalTesterPort):
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session

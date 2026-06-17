@@ -10,7 +10,7 @@ from titanic.app.dtos.crew_james_director_dto import (
 )
 
 
-class JamesDirectorRepository(ABC):
+class JamesDirectorPort(ABC):
 
     @abstractmethod
     async def introduce_myself(self, query: JamesDirectorQuery) -> JamesDirectorResponse:

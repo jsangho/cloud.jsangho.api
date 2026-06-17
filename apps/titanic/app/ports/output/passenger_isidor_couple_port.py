@@ -6,7 +6,7 @@ from typing import Any
 from titanic.app.dtos.passenger_isidor_couple_dto import IsidorCoupleQuery, IsidorCoupleResponse
 
 
-class IsidorCoupleRepository(ABC):
+class IsidorCouplePort(ABC):
 
     @abstractmethod
     async def introduce_myself(self, query: IsidorCoupleQuery) -> IsidorCoupleResponse:

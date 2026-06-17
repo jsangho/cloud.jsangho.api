@@ -6,7 +6,7 @@ from typing import Any
 from titanic.app.dtos.passenger_cal_tester_dto import CalTesterQuery, CalTesterResponse
 
 
-class CalTesterRepository(ABC):
+class CalTesterPort(ABC):
 
     @abstractmethod
     async def introduce_myself(self, query: CalTesterQuery) -> CalTesterResponse:

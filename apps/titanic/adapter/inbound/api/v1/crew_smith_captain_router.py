@@ -2,6 +2,7 @@ from logging import getLogger
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends
+from fastapi.responses import PlainTextResponse
 
 from titanic.adapter.inbound.api.schemas.crew_smith_captain_schema import (
     ChatSchema,
@@ -9,7 +10,6 @@ from titanic.adapter.inbound.api.schemas.crew_smith_captain_schema import (
     SmithCaptainSchema,
 )
 from titanic.app.dtos.crew_smith_captain_dto import (
-    ChatResponse,
     SmithCaptainChatCommand,
     SmithCaptainChatTurnDto,
     SmithCaptainQuery,
@@ -31,14 +31,17 @@ smith_captain_router = APIRouter(prefix="/smith", tags=["smith"])
 async def chat(
     schema: Annotated[ChatSchema, Body()],
     smith: SmithCaptainUseCase = Depends(get_smith_captain)
-) -> ChatResponse:
-    logger.info("[smith/chat] messages=%s", schema.messages)
+) -> PlainTextResponse:
+    for msg in schema.messages:
+        logger.info("[smith/chat] messages | role=%s | text=%s", msg.role, msg.text)
     command = SmithCaptainChatCommand(
-        messages=(SmithCaptainChatTurnDto(role="user", text=schema.messages),),
+        messages=tuple(
+            SmithCaptainChatTurnDto(role=msg.role, text=msg.text)
+            for msg in schema.messages
+        ),
     )
-    response = await smith.chat(Schema=schema)
-    return SmithCaptainChatResponseSchema(reply=response)
-
+    response = await smith.chat(command=command)
+    return PlainTextResponse(content=response)
 
 @smith_captain_router.get("/myself")
 async def introduce_myself(

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from titanic.adapter.outbound.orm.passenger_rose_model_orm import RoseModelOrm
+from titanic.adapter.outbound.orm.passenger_rose_model_strategies import RoseModelOrm
 from titanic.domain.entities.passenger_rose_model_entity import Booking
 
 

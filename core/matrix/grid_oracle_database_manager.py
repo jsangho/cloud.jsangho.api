@@ -150,7 +150,7 @@ async def init_db() -> None:
         return
 
     import titanic.adapter.outbound.orm.passenger_jack_trainer_orm  # noqa: F401
-    import titanic.adapter.outbound.orm.passenger_rose_model_orm  # noqa: F401
+    import titanic.adapter.outbound.orm.passenger_rose_model_strategies  # noqa: F401
 
     try:
         import secom.app.models.user_model  # noqa: F401

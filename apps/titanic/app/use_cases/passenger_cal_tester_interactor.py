@@ -5,12 +5,12 @@ from typing import Any
 from titanic.app.dtos.passenger_cal_tester_dto import CalTesterQuery, CalTesterResponse
 from titanic.app.ports.input.passenger_cal_tester_use_case import CalTesterUseCase
 from titanic.app.ports.input.passenger_rose_model_use_case import RoseModelUseCase
-from titanic.app.ports.output.passenger_cal_tester_repository import CalTesterRepository
+from titanic.app.ports.output.passenger_cal_tester_port import CalTesterPort
 
 
 class CalTesterInteractor(CalTesterUseCase):
 
-    def __init__(self, repository: CalTesterRepository, rose: RoseModelUseCase):
+    def __init__(self, repository: CalTesterPort, rose: RoseModelUseCase):
         self.repository = repository
         self.rose = rose
 
@@ -20,6 +20,10 @@ class CalTesterInteractor(CalTesterUseCase):
 
         # ── 1. test_set 전처리 ────────────────────────────────────────────────
         df = test_set.copy()
+
+        if df.empty or "survived" not in df.columns:
+            return {"test_samples": 0, "ranking_metric": "f1", "rankings": []}
+
         df["sex"] = (df["sex"] == "female").astype(float)
         df["embarked"] = df["embarked"].map({"S": 0.0, "C": 1.0, "Q": 2.0}).fillna(0.0)
 

@@ -12,7 +12,7 @@ from titanic.app.ports.input.passenger_rose_model_use_case import (
     RoseModelUseCase,
     SurvivalPredictionStrategy,
 )
-from titanic.app.ports.output.passenger_rose_model_repository import RoseModelRepository
+from titanic.app.ports.output.passenger_rose_model_port import RoseModelPort
 
 
 # ── 피처 인코딩 ───────────────────────────────────────────────────────────────
@@ -239,7 +239,7 @@ _REGISTRY: dict[str, type[SurvivalPredictionStrategy]] = {
 
 class RoseModelInteractor(RoseModelUseCase):
 
-    def __init__(self, repository: RoseModelRepository) -> None:
+    def __init__(self, repository: RoseModelPort) -> None:
         self.repository = repository
         self._strategies: dict[str, SurvivalPredictionStrategy] = {}
 

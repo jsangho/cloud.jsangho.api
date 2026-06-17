@@ -6,7 +6,7 @@ from typing import Any
 from titanic.app.dtos.passenger_rose_model_dto import RoseModelQuery, RoseModelResponse
 
 
-class RoseModelRepository(ABC):
+class RoseModelPort(ABC):
 
     @abstractmethod
     async def introduce_myself(self, query: RoseModelQuery) -> RoseModelResponse:
