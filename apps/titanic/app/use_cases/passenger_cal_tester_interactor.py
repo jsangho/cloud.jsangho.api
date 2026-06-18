@@ -24,10 +24,10 @@ class CalTesterInteractor(CalTesterUseCase):
         if df.empty or "survived" not in df.columns:
             return {"test_samples": 0, "ranking_metric": "f1", "rankings": []}
 
-        df["sex"] = (df["sex"] == "female").astype(float)
+        df["gender"] = (df["gender"] == "female").astype(float)
         df["embarked"] = df["embarked"].map({"S": 0.0, "C": 1.0, "Q": 2.0}).fillna(0.0)
 
-        feature_cols = ["pclass", "sex", "age", "sibsp", "parch", "fare", "embarked"]
+        feature_cols = ["pclass", "gender", "age", "sibsp", "parch", "fare", "embarked"]
         mask = df[feature_cols + ["survived"]].notna().all(axis=1)
         X_test = df.loc[mask, feature_cols].values.tolist()
         y_test = df.loc[mask, "survived"].astype(int).tolist()

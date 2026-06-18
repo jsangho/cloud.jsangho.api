@@ -3,18 +3,21 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
 
+import pandas as pd
+
+
 from titanic.app.dtos.crew_walter_roaster_dto import WalterRoasterQuery, WalterRoasterResponse
 
 
 class WalterRoasterUseCase(ABC):
 
     @abstractmethod
-    async def get_train_set(self):
+    async def get_train_set(self) -> pd.DataFrame:
         """월터가 DB에서 train_set을 가져오는 메소드"""
         ...
 
     @abstractmethod
-    async def get_test_set(self):
+    async def get_test_set(self) -> pd.DataFrame:
         """월터가 DB에서 test_set을 가져오는 메소드"""
         ...
     

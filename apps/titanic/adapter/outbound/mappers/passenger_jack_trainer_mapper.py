@@ -19,8 +19,8 @@ class JackTrainerMapper:
 
         return JackTrainerOrm(
             id=entity.id,
-            passenger_id=str(entity.passenger_id) if entity.passenger_id else None,
-            name=entity.name.full_name if entity.name else None,
+            passenger_id=entity.passenger_id,
+            name=entity.name,
             gender=str(entity.gender),
             age=str(entity.age) if not entity.age.is_unknown else None,
             sib_sp=str(entity.family_relation.sib_sp),

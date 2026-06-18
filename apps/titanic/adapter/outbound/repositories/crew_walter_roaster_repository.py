@@ -18,7 +18,7 @@ def _to_row(person: JackTrainerOrm, booking: RoseModelOrm) -> dict[str, Any]:
         "name":         person.name,
         "survived":     person.survived,
         "pclass":       booking.pclass,
-        "sex":          person.gender,
+        "gender":       person.gender,
         "age":          person.age,
         "sibsp":        person.sib_sp,
         "parch":        person.parch,

@@ -1,51 +1,9 @@
 import pytest
 
-from titanic.domain.value_objects.passenger_jack_trainer_vo import (
-    Age,
-    FamilyRelation,
-    Gender,
-    GenderType,
-    PassengerId,
-    PassengerName,
-    SurvivalStatus,
-)
-
-
-class TestPassengerId:
-    def test_valid_id_creates_successfully(self):
-        pid = PassengerId("P001")
-        assert pid.value == "P001"
-
-    def test_empty_string_raises(self):
-        with pytest.raises(ValueError, match="빈 값"):
-            PassengerId("")
-
-    def test_whitespace_only_raises(self):
-        with pytest.raises(ValueError, match="빈 값"):
-            PassengerId("   ")
-
-    def test_str_returns_value(self):
-        assert str(PassengerId("42")) == "42"
-
-
-class TestPassengerName:
-    def test_valid_name_creates_successfully(self):
-        name = PassengerName("Dawson, Mr. Jack")
-        assert name.full_name == "Dawson, Mr. Jack"
-
-    def test_empty_string_raises(self):
-        with pytest.raises(ValueError):
-            PassengerName("")
-
-    def test_exactly_200_chars_is_allowed(self):
-        PassengerName("A" * 200)
-
-    def test_201_chars_raises(self):
-        with pytest.raises(ValueError, match="200자"):
-            PassengerName("A" * 201)
-
-    def test_normalized_strips_surrounding_whitespace(self):
-        assert PassengerName("  Jack  ").normalized == "Jack"
+from titanic.domain.value_objects.age_vo import Age
+from titanic.domain.value_objects.gender_vo import Gender, GenderType
+from titanic.domain.value_objects.family_relation_vo import FamilyRelation
+from titanic.domain.value_objects.survived_vo import Survived
 
 
 class TestGender:
@@ -144,22 +102,22 @@ class TestFamilyRelation:
             FamilyRelation(sib_sp=0, parch=-1)
 
 
-class TestSurvivalStatus:
+class TestSurvived:
     def test_from_raw_1_means_survived(self):
-        assert SurvivalStatus.from_raw("1").survived is True
+        assert Survived.from_raw("1").survived is True
 
     def test_from_raw_0_means_did_not_survive(self):
-        assert SurvivalStatus.from_raw("0").survived is False
+        assert Survived.from_raw("0").survived is False
 
     def test_from_raw_none_is_unknown(self):
-        assert SurvivalStatus.from_raw(None).is_unknown is True
+        assert Survived.from_raw(None).is_unknown is True
 
     def test_from_raw_empty_string_is_unknown(self):
-        assert SurvivalStatus.from_raw("").is_unknown is True
+        assert Survived.from_raw("").is_unknown is True
 
     def test_from_raw_invalid_value_raises(self):
         with pytest.raises(ValueError, match="파싱 실패"):
-            SurvivalStatus.from_raw("2")
+            Survived.from_raw("2")
 
     def test_is_unknown_false_when_survival_is_known(self):
-        assert SurvivalStatus.from_raw("1").is_unknown is False
+        assert Survived.from_raw("1").is_unknown is False

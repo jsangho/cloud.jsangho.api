@@ -2,16 +2,11 @@ import pytest
 from types import SimpleNamespace
 
 from titanic.adapter.outbound.mappers.passenger_jack_trainer_mapper import JackTrainerMapper
-from titanic.domain.value_objects.passenger_jack_trainer_vo import (
-    Age,
-    FamilyRelation,
-    Gender,
-    GenderType,
-    PassengerId,
-    PassengerName,
-    SurvivalStatus,
-)
 from titanic.domain.entities.passenger_jack_trainer_entity import PassengerEntity
+from titanic.domain.value_objects.age_vo import Age
+from titanic.domain.value_objects.gender_vo import Gender, GenderType
+from titanic.domain.value_objects.family_relation_vo import FamilyRelation
+from titanic.domain.value_objects.survived_vo import Survived
 
 
 def _make_orm(**overrides):
@@ -41,12 +36,12 @@ def _make_entity(
 ) -> PassengerEntity:
     return PassengerEntity(
         id=id,
-        passenger_id=PassengerId(passenger_id),
-        name=PassengerName(name),
+        passenger_id=passenger_id,
+        name=name,
         gender=Gender.from_raw(gender_raw),
         age=Age(age_value),
         family_relation=FamilyRelation(sib_sp=sib_sp, parch=parch),
-        survival_status=SurvivalStatus(survived=survived),
+        survival_status=Survived(survived=survived),
     )
 
 
@@ -57,11 +52,11 @@ class TestToEntity:
 
     def test_maps_passenger_id(self):
         entity = JackTrainerMapper.to_entity(_make_orm(passenger_id="P099"))
-        assert str(entity.passenger_id) == "P099"
+        assert entity.passenger_id == "P099"
 
     def test_maps_name(self):
         entity = JackTrainerMapper.to_entity(_make_orm(name="Smith, Mr. John"))
-        assert entity.name.full_name == "Smith, Mr. John"
+        assert entity.name == "Smith, Mr. John"
 
     def test_maps_gender_male(self):
         entity = JackTrainerMapper.to_entity(_make_orm(gender="male"))
