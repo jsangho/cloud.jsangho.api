@@ -11,7 +11,10 @@ REAL_TITLE_ACQUISITIONS: dict[str, list[tuple[str, str]]] = {
         ("WWE Divas Championship", "Payback — June 16, 2013"),
         ("WWE Divas Championship", "Raw — June 30, 2014"),
         ("WWE Divas Championship", "Night of Champions — September 21, 2014"),
-        ("Women's Intercontinental Championship", "Elimination Chamber — February 28, 2026"),
+        (
+            "Women's Intercontinental Championship",
+            "Elimination Chamber — February 28, 2026",
+        ),
     ],
     "AJ Styles": [
         ("WWE Championship", "SmackDown Live — September 11, 2016"),
@@ -89,8 +92,14 @@ REAL_TITLE_ACQUISITIONS: dict[str, list[tuple[str, str]]] = {
         ("SmackDown Women's Championship", "Raw — April 22, 2024"),
         ("Women's Tag Team Championship", "WrestleMania 41 Night 1 — April 19, 2025"),
         ("Women's Intercontinental Championship", "Money in the Bank — June 7, 2025"),
-        ("Women's Intercontinental Championship", "Raw on Netflix Anniversary Show — January 5, 2026"),
-        ("Women's Intercontinental Championship", "WrestleMania 42 Night 1 — April 18, 2026"),
+        (
+            "Women's Intercontinental Championship",
+            "Raw on Netflix Anniversary Show — January 5, 2026",
+        ),
+        (
+            "Women's Intercontinental Championship",
+            "WrestleMania 42 Night 1 — April 18, 2026",
+        ),
     ],
     "Bo Dallas": [
         ("WWE Tag Team Championship", "Bash in Berlin — August 31, 2024"),
@@ -130,7 +139,10 @@ REAL_TITLE_ACQUISITIONS: dict[str, list[tuple[str, str]]] = {
         ("World Heavyweight Championship", "Raw — November 25, 2013"),
         ("World Tag Team Championship", "ECW — August 4, 2008"),
         ("Intercontinental Championship", "Raw — November 8, 2024"),
-        ("World Heavyweight Championship", "Saturday Night's Main Event — December 7, 2024"),
+        (
+            "World Heavyweight Championship",
+            "Saturday Night's Main Event — December 7, 2024",
+        ),
     ],
     "Charlotte Flair": [
         ("NXT Women's Championship", "NXT TakeOver: Charlotte — May 29, 2014"),
@@ -230,14 +242,20 @@ REAL_TITLE_ACQUISITIONS: dict[str, list[tuple[str, str]]] = {
     ],
     "Jey Uso": [
         ("WWE Tag Team Championship", "Raw — March 3, 2014"),
-        ("SmackDown Tag Team Championship", "Money in the Bank Kickoff — July 18, 2021"),
+        (
+            "SmackDown Tag Team Championship",
+            "Money in the Bank Kickoff — July 18, 2021",
+        ),
         ("Raw Tag Team Championship", "SmackDown — May 20, 2022"),
         ("Intercontinental Championship", "Raw — September 23, 2024"),
         ("World Heavyweight Championship", "WrestleMania 41 Night 2 — April 20, 2025"),
     ],
     "Jimmy Uso": [
         ("WWE Tag Team Championship", "Raw — March 3, 2014"),
-        ("SmackDown Tag Team Championship", "Money in the Bank Kickoff — July 18, 2021"),
+        (
+            "SmackDown Tag Team Championship",
+            "Money in the Bank Kickoff — July 18, 2021",
+        ),
         ("Raw Tag Team Championship", "SmackDown — May 20, 2022"),
     ],
     "Joe Gacy": [
@@ -249,13 +267,19 @@ REAL_TITLE_ACQUISITIONS: dict[str, list[tuple[str, str]]] = {
         ("United States Championship", "Night of Champions — September 19, 2010"),
         ("United States Championship", "WrestleMania 29 — April 7, 2013"),
         ("United States Championship", "WrestleMania 31 — March 29, 2015"),
-        ("Intercontinental Championship", "Saturday Night's Main Event — November 8, 2025"),
+        (
+            "Intercontinental Championship",
+            "Saturday Night's Main Event — November 8, 2025",
+        ),
         ("World Tag Team Championship", "Raw — January 29, 2006"),
         ("World Tag Team Championship", "ECW — April 1, 2007"),
         ("WWE Tag Team Championship", "SmackDown — October 3, 2010"),
         ("WWE Tag Team Championship", "Raw — April 28, 2019"),
         ("World Heavyweight Championship", "Survivor Series — November 18, 2013"),
-        ("World Heavyweight Championship", "Tables, Ladders & Chairs — December 15, 2013"),
+        (
+            "World Heavyweight Championship",
+            "Tables, Ladders & Chairs — December 15, 2013",
+        ),
         ("World Heavyweight Championship", "Royal Rumble — January 27, 2014"),
         ("WWE Championship", "WrestleMania 21 — April 3, 2005"),
         ("WWE Championship", "Royal Rumble — January 29, 2006"),
@@ -277,7 +301,10 @@ REAL_TITLE_ACQUISITIONS: dict[str, list[tuple[str, str]]] = {
         ("WWE Tag Team Championship", "SmackDown — July 5, 2024"),
         ("WWE Tag Team Championship", "SmackDown — December 6, 2024"),
         ("NXT Championship", "NXT TakeOver: Philadelphia — January 27, 2018"),
-        ("NXT North American Championship", "NXT TakeOver: New Orleans — April 7, 2018"),
+        (
+            "NXT North American Championship",
+            "NXT TakeOver: New Orleans — April 7, 2018",
+        ),
     ],
     "Karrion Kross": [
         ("NXT Championship", "NXT TakeOver: XXX — August 22, 2020"),
@@ -383,7 +410,10 @@ REAL_TITLE_ACQUISITIONS: dict[str, list[tuple[str, str]]] = {
         ("SmackDown Tag Team Championship", "WrestleMania 39 Night 2 — April 2, 2023"),
     ],
     "Rhea Ripley": [
-        ("NXT UK Women's Championship", "NXT UK TakeOver: Blackpool — January 12, 2019"),
+        (
+            "NXT UK Women's Championship",
+            "NXT UK TakeOver: Blackpool — January 12, 2019",
+        ),
         ("NXT Women's Championship", "NXT TakeOver: New York — April 10, 2019"),
         ("WWE Women's Championship", "WrestleMania 37 Night 2 — April 11, 2021"),
         ("Women's Tag Team Championship", "Raw — July 18, 2021"),
@@ -418,7 +448,10 @@ REAL_TITLE_ACQUISITIONS: dict[str, list[tuple[str, str]]] = {
         ("Intercontinental Championship", "WrestleMania XL Night 1 — April 6, 2024"),
         ("United States Championship", "WrestleMania 38 Night 1 — April 2, 2022"),
         ("United States Championship", "WrestleMania 40 Night 2 — April 7, 2024"),
-        ("Undisputed WWE Tag Team Championship", "WrestleMania 39 Night 1 — April 1, 2023"),
+        (
+            "Undisputed WWE Tag Team Championship",
+            "WrestleMania 39 Night 1 — April 1, 2023",
+        ),
     ],
     "Seth Rollins": [
         ("NXT Championship", "NXT — July 26, 2012"),
@@ -448,7 +481,10 @@ REAL_TITLE_ACQUISITIONS: dict[str, list[tuple[str, str]]] = {
         ("United States Championship", "WrestleMania 39 Night 2 — April 2, 2023"),
     ],
     "Stephanie Vaquer": [
-        ("NXT Women's North American Championship", "NXT Vengeance Day — February 15, 2025"),
+        (
+            "NXT Women's North American Championship",
+            "NXT Vengeance Day — February 15, 2025",
+        ),
         ("NXT Women's Championship", "NXT Roadblock — March 11, 2025"),
         ("Women's World Championship", "Wrestlepalooza — September 20, 2025"),
     ],
@@ -502,4 +538,6 @@ REAL_TITLE_ACQUISITIONS: dict[str, list[tuple[str, str]]] = {
 
 def individual_title_acquisitions() -> dict[str, list[tuple[str, str]]]:
     """개인 링네임 기준 획득 이력."""
-    return {name: list(reigns) for name, reigns in REAL_TITLE_ACQUISITIONS.items() if reigns}
+    return {
+        name: list(reigns) for name, reigns in REAL_TITLE_ACQUISITIONS.items() if reigns
+    }

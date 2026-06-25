@@ -1,9 +1,9 @@
 # Titanic 앱 에이전트 규칙 — 메인
 
-상위 메인: [sangho `.cursorrules`](../../../.cursorrules) · [루트 `.cursorrules`](../../../../.cursorrules)  
+상위 메인: [fastapi `.cursorrules`](../../../.cursorrules) · [루트 `.cursorrules`](../../../../.cursorrules)  
 행동 보조: [`CLAUDE.md`](CLAUDE.md) (필요 시 · 충돌 시 본 파일 우선)
 
-**패키지:** `titanic` (`sangho/apps/titanic/`)  
+**패키지:** `titanic` (`fastapi/apps/titanic/`)  
 **API prefix:** `/titanic` — [`adapter/inbound/api/__init__.py`](../adapter/inbound/api/__init__.py)
 
 > **시블링 템플릿:** kayfabe, friday13th 등 새 앱은 동일한 `_docs/.cursorrules` + 헥사고날 폴더 구조를 복제한다.  

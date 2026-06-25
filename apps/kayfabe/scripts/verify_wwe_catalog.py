@@ -181,12 +181,16 @@ def parse_career_highlights(page_html: str) -> list[tuple[str, int]]:
         )
         if cm:
             count = int(cm.group(1))
-            part = re.sub(r"\(x\d+[^)]*\)|\(\d+x\)|Champion\s*\(\d+\)\s*$", "", part, flags=re.I).strip()
+            part = re.sub(
+                r"\(x\d+[^)]*\)|\(\d+x\)|Champion\s*\(\d+\)\s*$", "", part, flags=re.I
+            ).strip()
         # "2023 and 2024 Royal Rumble" 등 비챔피언십 문구 오인 방지
         if re.search(r"\d{4}\s+and\s+\d{4}", part) and "champion" in part.lower():
             count = max(count, 2)
         # "2024 WWE Women's Crown Jewel Champion" 등 연도 접두 유지
-        part = re.sub(r"\b\d{4}\s+and\s+\d{4}\s+royal rumble.*$", "", part, flags=re.I).strip()
+        part = re.sub(
+            r"\b\d{4}\s+and\s+\d{4}\s+royal rumble.*$", "", part, flags=re.I
+        ).strip()
         if "tna" in part.lower():
             continue
         part = re.sub(r"\band\b.*$", "", part, flags=re.I).strip()
@@ -208,7 +212,7 @@ def parse_career_highlights(page_html: str) -> list[tuple[str, int]]:
                 i += 2
                 continue
             if "wwe tag team champion" in nl or "tag team champion" in nl:
-                merged.append((f"Undisputed WWE Tag Team Champion", nxt_count))
+                merged.append(("Undisputed WWE Tag Team Champion", nxt_count))
                 i += 2
                 continue
         merged.append((label, count))
@@ -227,7 +231,9 @@ def label_to_key(label: str) -> str:
     if "women's" in s and "united states" in s:
         return "women's united states"
     # 긴(구체적) 패턴을 먼저 매칭해 세부 벨트명 오분류 방지
-    for needle, key in sorted(LABEL_TO_KEY, key=lambda item: len(item[0]), reverse=True):
+    for needle, key in sorted(
+        LABEL_TO_KEY, key=lambda item: len(item[0]), reverse=True
+    ):
         if needle in s:
             return key
     return s
@@ -309,13 +315,17 @@ def main() -> int:
                 mismatches.append({"name": name, "error": str(exc)})
                 continue
         if not wwe_titles:
-            mismatches.append({"name": name, "slug": slug, "error": "no Career Highlights parsed"})
+            mismatches.append(
+                {"name": name, "slug": slug, "error": "no Career Highlights parsed"}
+            )
             continue
 
         cat_counts = catalog_count_map(catalog[name])
         if cat_counts.get("ecw"):
             cat_counts = dict(cat_counts)
-            cat_counts["world heavyweight"] = cat_counts.get("world heavyweight", 0) + cat_counts.pop("ecw")
+            cat_counts["world heavyweight"] = cat_counts.get(
+                "world heavyweight", 0
+            ) + cat_counts.pop("ecw")
         if name == "Bo Dallas" and cat_counts.get("wwe tag"):
             # Wyatt Sicks 태그는 WWE.com Bo Dallas Career Highlights 미표기
             cat_counts = dict(cat_counts)
@@ -338,7 +348,9 @@ def main() -> int:
             # Payback 2023 등: Undisputed + WWE Tag 동시 표기
             pass
         # 파서가 Women's IC를 intercontinental으로 쪼개는 경우 보정
-        if "women's intercontinental" in cat_counts and wwe_counts.get("intercontinental"):
+        if "women's intercontinental" in cat_counts and wwe_counts.get(
+            "intercontinental"
+        ):
             wwe_counts["women's intercontinental"] = wwe_counts.pop("intercontinental")
         if "women's united states" in cat_counts and wwe_counts.get("united states"):
             wwe_counts["women's united states"] = wwe_counts.pop("united states")
@@ -354,8 +366,14 @@ def main() -> int:
         if "wwe crown jewel" in cat_counts and wwe_counts.get("2024 wwe women's"):
             wwe_counts["wwe crown jewel"] = wwe_counts.pop("2024 wwe women's")
         for garbled in list(wwe_counts):
-            if "women" in garbled and "champion" in garbled and cat_counts.get("wwe women's"):
-                wwe_counts["wwe women's"] = max(wwe_counts.get("wwe women's", 0), wwe_counts.pop(garbled))
+            if (
+                "women" in garbled
+                and "champion" in garbled
+                and cat_counts.get("wwe women's")
+            ):
+                wwe_counts["wwe women's"] = max(
+                    wwe_counts.get("wwe women's", 0), wwe_counts.pop(garbled)
+                )
         for garbled in list(wwe_counts):
             if cat_counts.get("wwe crown jewel") and (
                 "crown jewel" in garbled or garbled.startswith("2024 wwe")
@@ -387,9 +405,15 @@ def main() -> int:
         else:
             ok.append(name)
 
-    report = {"ok_count": len(ok), "mismatches": mismatches, "missing_slug": missing_slug}
+    report = {
+        "ok_count": len(ok),
+        "mismatches": mismatches,
+        "missing_slug": missing_slug,
+    }
     payload = json.dumps(report, ensure_ascii=False, indent=2)
-    out_path = Path(__file__).resolve().parents[1] / "reports" / "wwe_verify_report.json"
+    out_path = (
+        Path(__file__).resolve().parents[1] / "reports" / "wwe_verify_report.json"
+    )
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(payload, encoding="utf-8")
     sys.stdout.buffer.write(payload.encode("utf-8"))

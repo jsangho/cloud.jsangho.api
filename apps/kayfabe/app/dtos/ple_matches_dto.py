@@ -4,10 +4,10 @@ from dataclasses import dataclass
 from typing import Literal
 
 from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import (
-    CompetitorListResponseSchema, 
-    CompetitorMatchRecordSchema, 
-    CompetitorProfileResponseSchema, 
-    CompetitorSummarySchema
+    CompetitorListResponseSchema,
+    CompetitorMatchRecordSchema,
+    CompetitorProfileResponseSchema,
+    CompetitorSummarySchema,
 )
 
 MatchResultKind = Literal["win", "loss", "no-contest", "pending"]

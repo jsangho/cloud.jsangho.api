@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-from sqlalchemy import ForeignKey, Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
 from core.matrix.grid_oracle_database_manager import Base
-
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
@@ -15,6 +12,10 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
+from sqlalchemy import ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column
+
+
 class XGBoostStrategy:
     """1위: XGBoost — 그래디언트 부스팅 기반 고성능 모델 (강력한 규제로 과적합 방지)"""
 
@@ -28,7 +29,6 @@ class XGBoostStrategy:
 
     def __init__(self) -> None:
         self._model = GradientBoostingClassifier(n_estimators=100, random_state=42)
-            
 
     def fit(self, X, y) -> None:
         self._model.fit(X, y)
@@ -77,7 +77,6 @@ class LightGBMStrategy:
 
     def __init__(self) -> None:
         self._model = GradientBoostingClassifier(n_estimators=100, random_state=42)
-            
 
     def fit(self, X, y) -> None:
         self._model.fit(X, y)
@@ -103,7 +102,6 @@ class CatBoostStrategy:
     def __init__(self) -> None:
         self._model = GradientBoostingClassifier(n_estimators=100, random_state=42)
 
-            
     def fit(self, X, y) -> None:
         self._model.fit(X, y)
 
@@ -256,6 +254,7 @@ class PCAKMeansStrategy:
 
     def fit(self, X, y) -> None:
         import numpy as np
+
         X_reduced = self._pca.fit_transform(self._scaler.fit_transform(X))
         self._kmeans.fit(X_reduced)
         y_arr = np.array(y)
@@ -266,7 +265,10 @@ class PCAKMeansStrategy:
 
     def predict(self, X) -> list[int]:
         X_reduced = self._pca.transform(self._scaler.transform(X))
-        return [self._cluster_to_label.get(int(c), 0) for c in self._kmeans.predict(X_reduced)]
+        return [
+            self._cluster_to_label.get(int(c), 0)
+            for c in self._kmeans.predict(X_reduced)
+        ]
 
     def predict_proba(self, X) -> list[float]:
         return [float(p) for p in self.predict(X)]
@@ -284,14 +286,16 @@ def build_all_strategies() -> dict:
         "knn": KNNStrategy,
         "naive_bayes": NaiveBayesStrategy,
         "pca_kmeans": PCAKMeansStrategy,
-    }    
+    }
 
 
 class RoseModelOrm(Base):
     __tablename__ = "bookings"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    passenger_id: Mapped[str | None] = mapped_column(String,ForeignKey("passengers.passenger_id"), nullable=True)
+    passenger_id: Mapped[str | None] = mapped_column(
+        String, ForeignKey("passengers.passenger_id"), nullable=True
+    )
     pclass: Mapped[str | None] = mapped_column(String, nullable=True)
     ticket: Mapped[str | None] = mapped_column(String, nullable=True)
     fare: Mapped[str | None] = mapped_column(String, nullable=True)

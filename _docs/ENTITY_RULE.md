@@ -1,7 +1,7 @@
 # 엔티티·테이블 PK 규칙 (Cursor)
 
-`sangho/` 아래 **DB 테이블·ORM 엔티티**를 정의·마이그레이션할 때 이 문서를 따른다.  
-레이어 구조 등 일반 백엔드 규칙은 `sangho/.cursorrules`를 본다.
+`fastapi/` 아래 **DB 테이블·ORM 엔티티**를 정의·마이그레이션할 때 이 문서를 따른다.  
+레이어 구조 등 일반 백엔드 규칙은 `fastapi/.cursorrules`를 본다.
 
 ---
 

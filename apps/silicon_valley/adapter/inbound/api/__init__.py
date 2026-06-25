@@ -1,10 +1,17 @@
 from fastapi import APIRouter
-
-from silicon_valley.adapter.inbound.api.v1.piper_hendricks_ceo_router import hendricks_ceo_router
-from silicon_valley.adapter.inbound.api.v1.piper_bighetti_hr_router import bighetti_hr_router
-from silicon_valley.adapter.inbound.api.v1.piper_dinesh_dash_router import dinesh_dash_router
+from silicon_valley.adapter.inbound.api.v1.piper_bighetti_hr_router import (
+    bighetti_hr_router,
+)
+from silicon_valley.adapter.inbound.api.v1.piper_dinesh_dash_router import (
+    dinesh_dash_router,
+)
 from silicon_valley.adapter.inbound.api.v1.piper_dunn_coo_router import dunn_coo_router
-from silicon_valley.adapter.inbound.api.v1.piper_gilfoyle_sys_router import gilfoyle_sys_router
+from silicon_valley.adapter.inbound.api.v1.piper_gilfoyle_sys_router import (
+    gilfoyle_sys_router,
+)
+from silicon_valley.adapter.inbound.api.v1.piper_hendricks_ceo_router import (
+    hendricks_ceo_router,
+)
 
 silicon_valley_router = APIRouter(prefix="/silicon_valley", tags=["silicon_valley"])
 silicon_valley_router.include_router(hendricks_ceo_router)

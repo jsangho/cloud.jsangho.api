@@ -1,8 +1,6 @@
 import sys
 from pathlib import Path
 
-import pytest
-
 _here = Path(__file__).parent
 
 
@@ -11,6 +9,7 @@ def pytest_configure(config):
         "markers",
         "ollama: 로컬 Ollama(qwen2.5:3b)가 필요한 통합 테스트",
     )
+
 
 # tailor/apps/ → "titanic.*" 임포트 활성화
 _apps_dir = str(_here.parent.parent)

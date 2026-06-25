@@ -1,27 +1,34 @@
 from __future__ import annotations
+
 import logging
 from typing import Any
 
 from kiwipiepy import Kiwi
 from sqlalchemy.ext.asyncio import AsyncSession
-from titanic.domain.constants.intent_map import INTENT_MAP
-from titanic.app.dtos.crew_andrews_architect_dto import AndrewsArchitectQuery, AndrewsArchitectResponse
+
+from titanic.app.dtos.crew_andrews_architect_dto import (
+    AndrewsArchitectQuery,
+    AndrewsArchitectResponse,
+)
 from titanic.app.ports.output.crew_andrews_architect_port import AndrewsArchitectPort
+from titanic.domain.constants.intent_map import INTENT_MAP
 
 logger = logging.getLogger(__name__)
 
-class AndrewsArchitectRepository(AndrewsArchitectPort):
 
+class AndrewsArchitectRepository(AndrewsArchitectPort):
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
         self.kiwi = Kiwi()
 
     def analyze_intent(self, question: str) -> dict[str, Any]:
-        '''Kiwi 형태소 분석으로 질문 의도를 파악하는 레포지토리 구현 메소드'''
+        """Kiwi 형태소 분석으로 질문 의도를 파악하는 레포지토리 구현 메소드"""
         tokens = self.kiwi.tokenize(question)
-        keywords = [t.form for t in tokens if str(t.tag).startswith(("NN", "VV", "VA", "XR"))]
+        keywords = [
+            t.form for t in tokens if str(t.tag).startswith(("NN", "VV", "VA", "XR"))
+        ]
 
-        scores: dict[str, int] = {intent: 0 for intent in INTENT_MAP}
+        scores: dict[str, int] = dict.fromkeys(INTENT_MAP, 0)
         for keyword in keywords:
             for intent, kw_set in INTENT_MAP.items():
                 if keyword in kw_set:
@@ -41,12 +48,12 @@ class AndrewsArchitectRepository(AndrewsArchitectPort):
             "tokens": [(t.form, str(t.tag)) for t in tokens],
         }
 
-    async def introduce_myself(self, query: AndrewsArchitectQuery) -> AndrewsArchitectResponse:
-
-        '''앤드류 설계자의 자기 소개 레포지토리 구현 메소드'''
+    async def introduce_myself(
+        self, query: AndrewsArchitectQuery
+    ) -> AndrewsArchitectResponse:
+        """앤드류 설계자의 자기 소개 레포지토리 구현 메소드"""
 
         response: AndrewsArchitectResponse = AndrewsArchitectResponse(
-            id= query.id * 10000,
-            name= query.name + "가 레포지토리에 다녀옴"
+            id=query.id * 10000, name=query.name + "가 레포지토리에 다녀옴"
         )
         return response

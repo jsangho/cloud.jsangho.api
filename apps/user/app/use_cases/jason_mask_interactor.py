@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 from fastapi import HTTPException
-
-from user.app.ports.input.jason_mask_schema import JasonMaskSchema
 from user.app.ports.input.jason_mask import JasonMaskUseCase
+from user.app.ports.input.jason_mask_schema import JasonMaskSchema
 from user.app.ports.output.jason_mask_repository import JasonMaskRepository
 from user.domain.services.password import hash_password
 

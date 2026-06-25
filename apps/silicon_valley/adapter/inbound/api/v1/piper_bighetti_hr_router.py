@@ -1,14 +1,18 @@
 from fastapi import APIRouter, Depends
-
-from silicon_valley.adapter.inbound.api.schemas.piper_bighetti_hr_schema import BighettiHrSchema
-from silicon_valley.app.dtos.piper_bighetti_hr_dto import BighettiHrQuery, BighettiHrResponse
+from silicon_valley.adapter.inbound.api.schemas.piper_bighetti_hr_schema import (
+    BighettiHrSchema,
+)
+from silicon_valley.app.dtos.piper_bighetti_hr_dto import (
+    BighettiHrQuery,
+    BighettiHrResponse,
+)
 from silicon_valley.app.ports.input.piper_bighetti_hr_use_case import BighettiHrUseCase
 from silicon_valley.dependencies.piper_bighetti_hr_provider import get_bighetti_hr
 
-'''
+"""
 넬슨 빅헤드 비게티 (Nelson Bighetti)
 Pied Piper HR. 빅헤드라는 별명으로 불림. 우연한 행운으로 스탠퍼드 AI Lab 공동소장이 됨
-'''
+"""
 bighetti_hr_router = APIRouter(prefix="/bighetti", tags=["bighetti"])
 
 

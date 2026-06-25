@@ -1,5 +1,4 @@
-﻿import asyncio
-import json
+import asyncio
 import logging
 import os
 import sys
@@ -16,29 +15,26 @@ _APPS_DIR = os.path.join(os.path.dirname(__file__), "apps")
 if _APPS_DIR not in sys.path:
     sys.path.insert(0, _APPS_DIR)
 
-from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from imitation_game.adapter.db_health_adapter import DbHealthAdapter
 from core.matrix.grid_oracle_database_manager import (
-    AsyncSessionLocal,
     attach_neon_sql_logging,
     configure_db_logging,
     dispose_engine,
     engine,
     get_db,
     init_db,
-    rollback_readonly,
 )
-from social_network.app.doro_director import DoroDirector
 from core.matrix.vault_keymaker_secret_manager import get_keymaker
-from user.adapter.inbound.api import user_router
+from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from imitation_game.adapter.db_health_adapter import DbHealthAdapter
 from kayfabe.adapter.inbound.api import kayfabe_router
-from titanic.adapter.inbound.api import titanic_router
 from silicon_valley.adapter.inbound.api import silicon_valley_router
+from titanic.adapter.inbound.api import titanic_router
+from user.adapter.inbound.api import user_router
+
 keymaker = get_keymaker()
 logger = logging.getLogger("uvicorn.error")
 
@@ -103,6 +99,7 @@ async def log_auth_requests(request: Request, call_next):
 def read_root():
     return {"message": "FAST API 메인 페이지 ", "docs": "/docs"}
 
+
 @app.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest) -> ChatResponse:
     """
@@ -127,7 +124,11 @@ def chat(req: ChatRequest) -> ChatResponse:
         response = model.generate_content(req.message)
     except Exception as e:
         err = str(e)
-        if "429" in err or "quota" in err.lower() or "ResourceExhausted" in type(e).__name__:
+        if (
+            "429" in err
+            or "quota" in err.lower()
+            or "ResourceExhausted" in type(e).__name__
+        ):
             raise HTTPException(
                 status_code=429,
                 detail=(

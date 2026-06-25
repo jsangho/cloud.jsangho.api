@@ -4,12 +4,16 @@ from __future__ import annotations
 
 import time
 
+from core.matrix.grid_oracle_database_manager import LAYER_LOG
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.grid_oracle_database_manager import LAYER_LOG
 from kayfabe.adapter.outbound.orm.ple_orm import PleEventModel, PleMatchModel
-from kayfabe.app.dtos.ple_events_dto import MatchSnapshotQuery, MyselfQuery, MyselfRepository, MyselfResponse
+from kayfabe.app.dtos.ple_events_dto import (
+    MatchSnapshotQuery,
+    MyselfQuery,
+    MyselfResponse,
+)
 from kayfabe.app.ports.output.ple_matches_repository import PleMatchesRepository
 from kayfabe.app.services.records_scoring import names_from_card_json, normalize_name
 
@@ -39,7 +43,9 @@ class PleMatchesPgRepository(PleMatchesRepository):
             for name in names_from_card_json(card_json):
                 names.add(normalize_name(name))
         rows = sorted(names)
-        logger.info("[PleMatchesPgRepository] list_competitor_names <- Neon count=%d", len(rows))
+        logger.info(
+            "[PleMatchesPgRepository] list_competitor_names <- Neon count=%d", len(rows)
+        )
         _names_cache = (now, rows)
         return rows
 
@@ -70,10 +76,12 @@ class PleMatchesPgRepository(PleMatchesRepository):
             )
             for event, match in result.all()
         ]
-        logger.info("[PleMatchesPgRepository] list_match_snapshots <- Neon count=%d", len(rows))
+        logger.info(
+            "[PleMatchesPgRepository] list_match_snapshots <- Neon count=%d", len(rows)
+        )
         _snapshots_cache = (now, rows)
         return rows
-    
+
     async def introduce_myself(self, query: MyselfQuery) -> MyselfResponse:
         return MyselfResponse(
             id=query.id * 10000,

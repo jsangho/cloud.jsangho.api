@@ -20,7 +20,6 @@ class ChatSchema(BaseModel):
     }
 
 
-
 class SmithCaptainChatResponseSchema(BaseModel):
     reply: str
 

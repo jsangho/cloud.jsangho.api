@@ -1,2 +1,1 @@
-﻿"""User output ports package."""
-
+"""User output ports package."""

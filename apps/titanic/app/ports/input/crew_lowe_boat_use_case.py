@@ -12,7 +12,7 @@ class LoweBoatUseCase(ABC):
 
     @abstractmethod
     def feature_engineering(self, train_set) -> pd.DataFrame:
-        ''''''
+        """"""
         pass
 
     @abstractmethod

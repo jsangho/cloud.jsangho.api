@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from core.matrix.grid_oracle_database_manager import LAYER_LOG
+
 from kayfabe.app.dtos.ple_events_dto import MyselfQuery, MyselfResponse
 from kayfabe.app.dtos.ple_matches_dto import (
     CompetitorListResponse,
@@ -30,24 +31,33 @@ class PleMatchesInteractor(PleMatchesUseCase):
         self._records = records_repository
 
     async def list_competitors(self, *, q: str | None = None) -> CompetitorListResponse:
-        logger.info("[PleMatchesInteractor] list_competitors -> Repository q=%s", q or "-")
+        logger.info(
+            "[PleMatchesInteractor] list_competitors -> Repository q=%s", q or "-"
+        )
         names = await self._records.list_competitor_names()
         if q:
             needle = q.strip().lower()
             names = [n for n in names if needle in n.lower()]
-        logger.info("[PleMatchesInteractor] list_competitors <- Repository count=%d", len(names))
+        logger.info(
+            "[PleMatchesInteractor] list_competitors <- Repository count=%d", len(names)
+        )
         return CompetitorListResponse(names=names)
 
     async def get_competitor_profile(self, name: str) -> CompetitorProfileResponse:
         normalized = normalize_name(name)
-        logger.info("[PleMatchesInteractor] get_competitor_profile -> Repository name=%s", normalized)
+        logger.info(
+            "[PleMatchesInteractor] get_competitor_profile -> Repository name=%s",
+            normalized,
+        )
 
         matches: list[CompetitorMatchRecordResponse] = []
         snapshots = await self._records.list_match_snapshots()
         for snap in snapshots:
             if not snap.card_json:
                 continue
-            if not competitor_name_in_card_json(card_json=snap.card_json, name=normalized):
+            if not competitor_name_in_card_json(
+                card_json=snap.card_json, name=normalized
+            ):
                 continue
             rec = derive_match_record_from_orm(
                 event_slug=snap.event_slug,
@@ -96,7 +106,9 @@ class PleMatchesInteractor(PleMatchesUseCase):
             normalized,
             len(matches),
         )
-        return CompetitorProfileResponse(name=normalized, matches=matches, summary=summary)
+        return CompetitorProfileResponse(
+            name=normalized, matches=matches, summary=summary
+        )
 
     async def introduce_myself(self, query: MyselfQuery) -> MyselfResponse:
         return await self._records.introduce_myself(query)

@@ -18,9 +18,7 @@ from kayfabe.app.dtos.ple_events_dto import (
     MatchResultResponse,
     MatchResultUpdateCommand,
     MyselfQuery,
-    MyselfRepository,
     MyselfResponse,
-    MyselfUseCase,
     PleAiStatsResponse,
     PleBoardResponse,
     PleEventSummaryResponse,
@@ -39,8 +37,11 @@ logger = logging.getLogger("uvicorn.error")
 
 
 class PleEventsInteractor(PleEventsUseCase):
-    def __init__(self, repository: PleEventsRepository,
-                 info_use_case: PleEventsUseCase | None = None) -> None:
+    def __init__(
+        self,
+        repository: PleEventsRepository,
+        info_use_case: PleEventsUseCase | None = None,
+    ) -> None:
         self._repo = repository
         self._info: PleEventsUseCase = info_use_case or self
 
@@ -100,14 +101,18 @@ class PleEventsInteractor(PleEventsUseCase):
                 if row.format == "multi":
                     try:
                         result = MatchResultResponse(
-                            winner_index=int(row.winner_pick) if row.winner_pick else None,
+                            winner_index=int(row.winner_pick)
+                            if row.winner_pick
+                            else None,
                             winner_name=row.winner_name,
                         )
                     except ValueError:
                         result = MatchResultResponse(winner_name=row.winner_name)
                 else:
                     result = MatchResultResponse(
-                        winner_side=row.winner_pick if row.winner_pick in ("left", "right") else None,
+                        winner_side=row.winner_pick
+                        if row.winner_pick in ("left", "right")
+                        else None,
                         winner_name=row.winner_name,
                     )
 
@@ -128,9 +133,8 @@ class PleEventsInteractor(PleEventsUseCase):
                     format=row.format,
                     left=_competitor(card.get("left")),
                     right=_competitor(card.get("right")),
-                    competitors=[
-                        _competitor(c) for c in card.get("competitors") or []
-                    ] or None,
+                    competitors=[_competitor(c) for c in card.get("competitors") or []]
+                    or None,
                     bookmaker_decimal=card.get("bookmakerDecimal"),
                     status=row.status,
                     result=result,
@@ -219,15 +223,21 @@ class PleEventsInteractor(PleEventsUseCase):
             if row is None:
                 raise LookupError(item.match_key)
             if row.status == PleMatchStatus.FINISHED:
-                raise ValueError(f"종료된 경기({item.match_key})에는 예측할 수 없습니다.")
-            await self._repo.upsert_prediction(row.id, body.client_id, item.pick, body.user_id)
+                raise ValueError(
+                    f"종료된 경기({item.match_key})에는 예측할 수 없습니다."
+                )
+            await self._repo.upsert_prediction(
+                row.id, body.client_id, item.pick, body.user_id
+            )
 
         logger.info(
             "[PleInteractor] record_predictions_batch | slug=%s count=%d",
             slug,
             len(body.predictions),
         )
-        return await self._info.get_board(slug=slug, client_id=body.client_id, user_id=body.user_id)
+        return await self._info.get_board(
+            slug=slug, client_id=body.client_id, user_id=body.user_id
+        )
 
     async def set_match_results_batch(
         self, *, slug: str, body: BatchResultsCommand
@@ -238,7 +248,9 @@ class PleEventsInteractor(PleEventsUseCase):
                 winner_index=item.winner_index,
                 winner_name=item.winner_name,
             )
-            ok = await self._repo.set_match_result(slug, item.match_key, result, status=item.status)
+            ok = await self._repo.set_match_result(
+                slug, item.match_key, result, status=item.status
+            )
             if not ok:
                 raise LookupError(
                     f"경기 '{item.match_key}'를 찾을 수 없습니다. PLE 카드 동기화를 다시 시도해 주세요."
@@ -271,8 +283,12 @@ class PleEventsInteractor(PleEventsUseCase):
             body.user_id,
             body.pick,
         )
-        await self._repo.upsert_prediction(match.id, body.client_id, body.pick, body.user_id)
-        return await self._info.get_board(slug=slug, client_id=body.client_id, user_id=body.user_id)
+        await self._repo.upsert_prediction(
+            match.id, body.client_id, body.pick, body.user_id
+        )
+        return await self._info.get_board(
+            slug=slug, client_id=body.client_id, user_id=body.user_id
+        )
 
     async def set_match_result(
         self, *, slug: str, match_key: str, body: MatchResultUpdateCommand
@@ -284,15 +300,21 @@ class PleEventsInteractor(PleEventsUseCase):
         )
         event = await self._repo.get_event_by_slug(slug)
         if event is None:
-            raise LookupError(f"PLE '{slug}'를 찾을 수 없습니다. 먼저 카드를 동기화해 주세요.")
+            raise LookupError(
+                f"PLE '{slug}'를 찾을 수 없습니다. 먼저 카드를 동기화해 주세요."
+            )
 
-        ok = await self._repo.set_match_result(slug, match_key, result, status=body.status)
+        ok = await self._repo.set_match_result(
+            slug, match_key, result, status=body.status
+        )
         if not ok:
             raise LookupError(
                 f"경기 '{match_key}'를 찾을 수 없습니다. PLE 카드 동기화를 다시 시도해 주세요."
             )
-        logger.info("[PleInteractor] set_match_result | slug=%s match=%s", slug, match_key)
+        logger.info(
+            "[PleInteractor] set_match_result | slug=%s match=%s", slug, match_key
+        )
         return await self._info.get_board(slug=slug)
-    
+
     async def introduce_myself(self, query: MyselfQuery) -> MyselfResponse:
         return await self.repository.introduce_myself(query)

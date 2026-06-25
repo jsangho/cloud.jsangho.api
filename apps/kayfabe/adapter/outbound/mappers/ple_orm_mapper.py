@@ -1,13 +1,10 @@
-﻿"""ORM ↔ app DTO 변환 (outbound 전용)."""
+"""ORM ↔ app DTO 변환 (outbound 전용)."""
 
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING
 
 from kayfabe.app.dtos.ple_events_dto import (
-    PleAiRecordResponse,
-    PleAiStatsResponse,
     PleEventReadQuery,
     PleEventSnapshotQuery,
     PleMatchReadQuery,
@@ -59,7 +56,9 @@ def event_to_read(event: PleEventModel) -> PleEventReadQuery:
         status=event.status,
         finished_at=event.finished_at,
         updated_at=event.updated_at,
-        matches=[match_to_read(m) for m in sorted(event.matches, key=lambda x: x.sort_order)],
+        matches=[
+            match_to_read(m) for m in sorted(event.matches, key=lambda x: x.sort_order)
+        ],
     )
 
 

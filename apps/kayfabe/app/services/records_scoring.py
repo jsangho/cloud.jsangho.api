@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import re
 
-from kayfabe.adapter.inbound.api.schemas.ple_events_schema import CompetitorSchema, MatchBoardSchema
+from kayfabe.adapter.inbound.api.schemas.ple_events_schema import (
+    CompetitorSchema,
+    MatchBoardSchema,
+)
 from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import (
     CompetitorMatchRecordSchema,
     MatchResultKind,
 )
 from kayfabe.app.services.competitor_roster import (
-    expand_roster_name,
     individual_in_roster_entry,
     unique_individuals,
 )
@@ -52,7 +54,9 @@ def match_includes_competitor(match: MatchBoardSchema, name: str) -> bool:
 
 
 def _was_champion(competitor: CompetitorSchema, name: str) -> bool:
-    return normalize_name(competitor.name) == normalize_name(name) and bool(competitor.is_champion)
+    return normalize_name(competitor.name) == normalize_name(name) and bool(
+        competitor.is_champion
+    )
 
 
 def was_champion_in_match(match: MatchBoardSchema, name: str) -> bool:
@@ -183,7 +187,9 @@ def _find_individual_side(
     target = normalize_name(individual)
     for side_id, side in _card_sides(card, fmt):
         roster_name = side.get("name")
-        if isinstance(roster_name, str) and individual_in_roster_entry(roster_name, target):
+        if isinstance(roster_name, str) and individual_in_roster_entry(
+            roster_name, target
+        ):
             return side_id, side, normalize_name(roster_name)
     return None
 
@@ -266,11 +272,7 @@ def derive_match_record_from_orm(
     elif not derived_winner:
         outcome = "no-contest"
     else:
-        outcome = (
-            "win"
-            if individual_in_roster_entry(derived_winner, name)
-            else "loss"
-        )
+        outcome = "win" if individual_in_roster_entry(derived_winner, name) else "loss"
 
     # If DB status says finished but we can't derive a winner, treat as no-contest
     st = (status or "").strip().lower()

@@ -2,10 +2,8 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, Depends
 import fastapi
-
-
+from fastapi import APIRouter, Depends
 from kayfabe.adapter.inbound.api.schemas.ple_events_schema import MyselfSchema
 from kayfabe.adapter.inbound.api.schemas.ple_matches_schema import (
     BatchResultsRequestSchema,
@@ -30,12 +28,13 @@ logger = logging.getLogger("uvicorn.error")
 ple_matches_router = APIRouter(prefix="/ple-matches", tags=["ple-matches"])
 
 
-
 def _ple_http_error(exc: Exception) -> fastapi.HTTPException:
     if isinstance(exc, LookupError):
         return fastapi.HTTPException(status_code=404, detail=str(exc) or "Not found")
     if isinstance(exc, ValueError):
-        return fastapi.HTTPException(status_code=400, detail=str(exc) or "잘못된 요청입니다.")
+        return fastapi.HTTPException(
+            status_code=400, detail=str(exc) or "잘못된 요청입니다."
+        )
     raise exc
 
 
@@ -93,7 +92,11 @@ async def set_ple_results_batch(
     body: BatchResultsRequestSchema,
     use_case: PleEventsUseCase = fastapi.Depends(get_ple_events),
 ):
-    logger.info("[PleMatchesRouter] set_ple_results_batch | slug=%s count=%d", slug, len(body.results))
+    logger.info(
+        "[PleMatchesRouter] set_ple_results_batch | slug=%s count=%d",
+        slug,
+        len(body.results),
+    )
     try:
         board = await use_case.set_match_results_batch(
             slug=slug,
@@ -115,7 +118,9 @@ async def set_ple_match_result(
     body: MatchResultUpdateSchema,
     use_case: PleEventsUseCase = fastapi.Depends(get_ple_events),
 ):
-    logger.info("[PleMatchesRouter] set_ple_match_result | slug=%s match=%s", slug, match_key)
+    logger.info(
+        "[PleMatchesRouter] set_ple_match_result | slug=%s match=%s", slug, match_key
+    )
     try:
         board = await use_case.set_match_result(
             slug=slug,

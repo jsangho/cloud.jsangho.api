@@ -11,9 +11,10 @@ from titanic.app.dtos.crew_james_director_dto import (
 
 
 class JamesDirectorPort(ABC):
-
     @abstractmethod
-    async def introduce_myself(self, query: JamesDirectorQuery) -> JamesDirectorResponse:
+    async def introduce_myself(
+        self, query: JamesDirectorQuery
+    ) -> JamesDirectorResponse:
         pass
 
     @abstractmethod
@@ -23,5 +24,4 @@ class JamesDirectorPort(ABC):
         person_commands: list[PersonCommand],
         booking_commands: list[BookingCommand],
         filename: str,
-    ) -> int:
-        ...
+    ) -> int: ...

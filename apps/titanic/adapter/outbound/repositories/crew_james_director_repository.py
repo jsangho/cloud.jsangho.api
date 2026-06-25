@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from core.matrix.grid_oracle_database_manager import AsyncSessionLocal, Base, engine
-from fastapi import HTTPException
 from sqlalchemy import text
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from fastapi import HTTPException
 from titanic.adapter.outbound.orm.passenger_jack_trainer_orm import JackTrainerOrm
 from titanic.adapter.outbound.orm.passenger_rose_model_strategies import RoseModelOrm
 from titanic.app.dtos.crew_james_director_dto import (
@@ -13,8 +13,6 @@ from titanic.app.dtos.crew_james_director_dto import (
     JamesDirectorQuery,
     JamesDirectorResponse,
     PersonCommand,
-    format_preview_booking_command,
-    format_preview_person_command,
 )
 from titanic.app.ports.output.crew_james_director_port import JamesDirectorPort
 
@@ -83,13 +81,13 @@ class JamesDirectorRepository(JamesDirectorPort):
     def __init__(self, session: AsyncSession | None) -> None:
         self._session = session
 
-    async def introduce_myself(self, query: JamesDirectorQuery) -> JamesDirectorResponse:
-
-        '''제임스 디렉터의 자기 소개 레포지토리 구현 메소드'''
+    async def introduce_myself(
+        self, query: JamesDirectorQuery
+    ) -> JamesDirectorResponse:
+        """제임스 디렉터의 자기 소개 레포지토리 구현 메소드"""
 
         response: JamesDirectorResponse = JamesDirectorResponse(
-            id=query.id * 10000,
-            name=query.name + "이 레포지토리에 다녀옴"
+            id=query.id * 10000, name=query.name + "이 레포지토리에 다녀옴"
         )
         return response
 
@@ -109,14 +107,14 @@ class JamesDirectorRepository(JamesDirectorPort):
 
         if self._session is None:
             async with AsyncSessionLocal() as session:
-                saved = await self._save_person_and_booking_commands(
+                await self._save_person_and_booking_commands(
                     session=session,
                     person_commands=person_commands,
                     booking_commands=booking_commands,
                 )
                 await session.commit()
         else:
-            saved = await self._save_person_and_booking_commands(
+            await self._save_person_and_booking_commands(
                 session=self._session,
                 person_commands=person_commands,
                 booking_commands=booking_commands,
@@ -133,7 +131,9 @@ class JamesDirectorRepository(JamesDirectorPort):
         booking_commands: list[BookingCommand],
     ) -> int:
         pairs: list[tuple[str, dict[str, object], dict[str, object]]] = []
-        for person_cmd, booking_cmd in zip(person_commands, booking_commands):
+        for person_cmd, booking_cmd in zip(
+            person_commands, booking_commands, strict=False
+        ):
             passenger_id = (person_cmd.passenger_id or "").strip()
             if not passenger_id:
                 continue

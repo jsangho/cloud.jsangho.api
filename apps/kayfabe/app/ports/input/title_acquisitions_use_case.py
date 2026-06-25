@@ -2,15 +2,19 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from kayfabe.app.dtos.title_acquisitions_dto import ChampionshipBoardResponse, CompetitorTitleHistoryResponse
+from kayfabe.app.dtos.title_acquisitions_dto import (
+    ChampionshipBoardResponse,
+    CompetitorTitleHistoryResponse,
+)
 
 
 class TitleAcquisitionsUseCase(ABC):
     """`/title-acquisitions/*` inbound(title_acquisitions_router) 입력 포트."""
 
     @abstractmethod
-    async def get_competitor_title_history(self, name: str) -> CompetitorTitleHistoryResponse:
-        ...
+    async def get_competitor_title_history(
+        self, name: str
+    ) -> CompetitorTitleHistoryResponse: ...
 
     @abstractmethod
     async def sync_from_real_catalog(self) -> int:

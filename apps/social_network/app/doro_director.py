@@ -3,6 +3,7 @@ from social_network.app.doro_reader import DoroReader
 
 app = FastAPI(title="Doro(DoroDirector)")
 
+
 class DoroDirector:
     def __init__(self):
         pass

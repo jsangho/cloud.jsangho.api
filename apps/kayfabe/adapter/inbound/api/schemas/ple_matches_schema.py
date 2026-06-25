@@ -4,7 +4,9 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from kayfabe.adapter.inbound.api.schemas.ple_events_schema import PleBoardSchema  # noqa: F401
+from kayfabe.adapter.inbound.api.schemas.ple_events_schema import (
+    PleBoardSchema,  # noqa: F401
+)
 
 __all__ = [
     "PleBoardSchema",
@@ -23,7 +25,9 @@ MatchResultKind = Literal["win", "loss", "no-contest", "pending"]
 
 class BatchResultItemSchema(BaseModel):
     match_key: str = Field(..., alias="matchKey")
-    winner_side: Literal["left", "right"] | None = Field(default=None, alias="winnerSide")
+    winner_side: Literal["left", "right"] | None = Field(
+        default=None, alias="winnerSide"
+    )
     winner_index: int | None = Field(default=None, alias="winnerIndex")
     winner_name: str | None = Field(default=None, alias="winnerName")
     status: Literal["scheduled", "live", "finished"] | None = "finished"
@@ -38,7 +42,9 @@ class BatchResultsRequestSchema(BaseModel):
 
 
 class MatchResultUpdateSchema(BaseModel):
-    winner_side: Literal["left", "right"] | None = Field(default=None, alias="winnerSide")
+    winner_side: Literal["left", "right"] | None = Field(
+        default=None, alias="winnerSide"
+    )
     winner_index: int | None = Field(default=None, alias="winnerIndex")
     winner_name: str | None = Field(default=None, alias="winnerName")
     status: Literal["scheduled", "live", "finished"] | None = None

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from fastapi import HTTPException
-
 from user.app.ports.input.murder_list import MurderListUseCase
 from user.app.ports.output.murder_list_repository import MurderListRepository
 from user.domain.entities.user_model import UserModel

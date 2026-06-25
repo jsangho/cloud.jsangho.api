@@ -1,0 +1,77 @@
+[importlinter]
+root_packages =
+    star_craft
+    titanic
+    kayfabe
+    user
+    silicon_valley
+    imitation_game
+    inception
+    social_network
+
+# 하네스 계약 목록 — 위반 시 CI 차단
+include_extra_contracts = True
+contracts =
+    star_topology_hub_only
+    clean_architecture_layers
+    no_spoke_to_spoke
+
+
+# ────────────────────────────────────────────
+# 계약 1: 스포크 간 직접 import 금지
+# 스타 토폴로지의 핵심 규칙 — 스포크는 반드시 허브(star_craft)를 통해서만 연결된다.
+# ────────────────────────────────────────────
+[importlinter:contract:no_spoke_to_spoke]
+name = Spoke modules must not import each other directly
+type = forbidden
+source_modules =
+    titanic
+    kayfabe
+    user
+    silicon_valley
+    imitation_game
+    inception
+    social_network
+forbidden_modules =
+    titanic
+    kayfabe
+    user
+    silicon_valley
+    imitation_game
+    inception
+    social_network
+exclude_type_checking_imports = True
+
+
+# ────────────────────────────────────────────
+# 계약 2: 허브(star_craft)만 스포크를 import할 수 있다
+# 스포크가 허브를 import하는 것은 허용 (허브의 공통 유틸/컨텍스트 사용)
+# ────────────────────────────────────────────
+[importlinter:contract:star_topology_hub_only]
+name = Only hub (star_craft) may import spoke modules
+type = layers
+layers =
+    star_craft
+    titanic | kayfabe | user | silicon_valley | imitation_game | inception | social_network
+
+
+# ────────────────────────────────────────────
+# 계약 3: 클린 아키텍처 계층 의존성 방향
+# adapter → app → domain. 역방향 즉시 차단.
+# 각 앱 내부에서 동일하게 적용된다.
+# ────────────────────────────────────────────
+[importlinter:contract:clean_architecture_layers]
+name = Clean Architecture layer ordering within each app
+type = layers
+containers =
+    titanic
+    kayfabe
+    user
+    silicon_valley
+    imitation_game
+    inception
+    social_network
+layers =
+    adapter
+    app
+    domain

@@ -1,14 +1,20 @@
 from fastapi import APIRouter, Depends
-
-from silicon_valley.adapter.inbound.api.schemas.piper_hendricks_ceo_schema import HendricksCeoSchema
-from silicon_valley.app.dtos.piper_hendricks_ceo_dto import HendricksCeoQuery, HendricksCeoResponse
-from silicon_valley.app.ports.input.piper_hendricks_ceo_use_case import HendricksCeoUseCase
+from silicon_valley.adapter.inbound.api.schemas.piper_hendricks_ceo_schema import (
+    HendricksCeoSchema,
+)
+from silicon_valley.app.dtos.piper_hendricks_ceo_dto import (
+    HendricksCeoQuery,
+    HendricksCeoResponse,
+)
+from silicon_valley.app.ports.input.piper_hendricks_ceo_use_case import (
+    HendricksCeoUseCase,
+)
 from silicon_valley.dependencies.piper_hendricks_ceo_provider import get_hendricks_ceo
 
-'''
+"""
 리처드 헨드릭스 (Richard Hendricks)
 Pied Piper CEO. 미들아웃 압축 알고리즘 발명자
-'''
+"""
 hendricks_ceo_router = APIRouter(prefix="/hendricks", tags=["hendricks"])
 
 

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import ClassVar, Optional
 
 
 class TitleCategory(str, Enum):
@@ -20,7 +19,7 @@ _RARE_RAW: frozenset[str] = frozenset(
 )
 _ROYAL_RAW: frozenset[str] = frozenset(["Countess", "Lady", "Sir"])
 _ALIAS: dict[str, TitleCategory] = {
-    "Mlle": TitleCategory.MR,    # crew_lowe_boat_interactor 정의에 따름
+    "Mlle": TitleCategory.MR,  # crew_lowe_boat_interactor 정의에 따름
     "Ms": TitleCategory.MISS,
 }
 _ENCODING: dict[TitleCategory, int] = {
@@ -39,7 +38,7 @@ class Title:
     value: TitleCategory
 
     @classmethod
-    def from_raw(cls, raw: Optional[str]) -> "Title":
+    def from_raw(cls, raw: str | None) -> Title:
         if raw is None or not raw.strip():
             return cls(value=TitleCategory.UNKNOWN)
 

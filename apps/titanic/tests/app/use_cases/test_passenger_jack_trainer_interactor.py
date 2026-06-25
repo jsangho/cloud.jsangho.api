@@ -4,15 +4,20 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from titanic.app.use_cases.passenger_jack_trainer_interactor import JackTrainerInteractor
-from titanic.app.dtos.passenger_jack_trainer_dto import JackTrainerQuery, JackTrainerResponse
+from titanic.app.dtos.passenger_jack_trainer_dto import (
+    JackTrainerQuery,
+    JackTrainerResponse,
+)
+from titanic.app.use_cases.passenger_jack_trainer_interactor import (
+    JackTrainerInteractor,
+)
 
 _MODULE = "titanic.app.use_cases.passenger_jack_trainer_interactor"
 
 
 @pytest.fixture
 def mock_kiwi():
-    with patch(f"{_MODULE}.Kiwi") as MockKiwi:
+    with patch(f"{_MODULE}.Kiwi") as mock_kiwi_cls:
         instance = MagicMock()
         instance.space.return_value = "cleaned text"
         instance.tokenize.return_value = [
@@ -20,7 +25,7 @@ def mock_kiwi():
             SimpleNamespace(form="생존자", tag="NNG"),
             SimpleNamespace(form="몇", tag="MM"),
         ]
-        MockKiwi.return_value = instance
+        mock_kiwi_cls.return_value = instance
         yield instance
 
 
@@ -56,12 +61,16 @@ class TestIntroduceMyself:
 
 class TestAnalayzeMessageIntent:
     def test_returns_cleaned_text(self, interactor, mock_kiwi):
-        result = asyncio.run(interactor.analayze_message_intent("타이타닉의  생존자는 몇명이야."))
+        result = asyncio.run(
+            interactor.analayze_message_intent("타이타닉의  생존자는 몇명이야.")
+        )
 
         assert result["cleaned_text"] == "cleaned text"
 
     def test_extracts_nouns_as_keywords(self, interactor, mock_kiwi):
-        result = asyncio.run(interactor.analayze_message_intent("타이타닉의  생존자는 몇명이야."))
+        result = asyncio.run(
+            interactor.analayze_message_intent("타이타닉의  생존자는 몇명이야.")
+        )
 
         assert result["keywords"] == ["타이타닉", "생존자"]
 

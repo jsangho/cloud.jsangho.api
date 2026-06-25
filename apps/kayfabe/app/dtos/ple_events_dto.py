@@ -251,7 +251,9 @@ class PleResultRowResponse:
     finished_at: datetime | None
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.ple_events_schema import PleResultRowSchema
+        from kayfabe.adapter.inbound.api.schemas.ple_events_schema import (
+            PleResultRowSchema,
+        )
 
         return PleResultRowSchema(
             slug=self.slug,
@@ -270,6 +272,10 @@ class PleResultsResponse:
     results: list[PleResultRowResponse]
 
     def to_schema(self):
-        from kayfabe.adapter.inbound.api.schemas.ple_events_schema import PleResultsResponseSchema
+        from kayfabe.adapter.inbound.api.schemas.ple_events_schema import (
+            PleResultsResponseSchema,
+        )
 
-        return PleResultsResponseSchema(year=self.year, results=[r.to_schema() for r in self.results])
+        return PleResultsResponseSchema(
+            year=self.year, results=[r.to_schema() for r in self.results]
+        )

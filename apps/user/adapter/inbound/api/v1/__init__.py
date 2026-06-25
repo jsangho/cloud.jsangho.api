@@ -1,2 +1,1 @@
-﻿"""User inbound API v1 package."""
-
+"""User inbound API v1 package."""

@@ -1,14 +1,15 @@
 from fastapi import APIRouter, Depends
-
-from titanic.adapter.inbound.api.schemas.passenger_rose_model_schema import RoseModelSchema
+from titanic.adapter.inbound.api.schemas.passenger_rose_model_schema import (
+    RoseModelSchema,
+)
 from titanic.app.dtos.passenger_rose_model_dto import RoseModelQuery, RoseModelResponse
 from titanic.app.ports.input.passenger_rose_model_use_case import RoseModelUseCase
 from titanic.dependencies.passenger_rose_model_provider import get_rose_model
 
-'''
+"""
 로즈 드윗 부카터 (Rose DeWitt Bukater)
 ML 모델 결과 분석·조회 담당자
-'''
+"""
 rose_model_router = APIRouter(prefix="/rose", tags=["rose"])
 
 

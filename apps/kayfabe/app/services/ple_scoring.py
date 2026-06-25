@@ -42,8 +42,10 @@ def derive_match_point_value(
     key = match_key.casefold()
     n = competitor_count
 
-    if "royal rumble" in t or " rumble match" in t or (
-        "rumble" in key and ("-rumble" in key or key.endswith("rumble"))
+    if (
+        "royal rumble" in t
+        or " rumble match" in t
+        or ("rumble" in key and ("-rumble" in key or key.endswith("rumble")))
     ):
         return POINTS_ROYAL_RUMBLE
 
@@ -99,4 +101,3 @@ def derive_match_point_value(
 
 def points_for_prediction(is_correct: bool | None, match_point_value: int) -> int:
     return match_point_value if is_correct is True else 0
-

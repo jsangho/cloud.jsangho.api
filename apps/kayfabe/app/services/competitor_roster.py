@@ -8,6 +8,7 @@ import re
 def normalize_name(name: str) -> str:
     return re.sub(r"\s+", " ", name.strip())
 
+
 # frontend/lib/wrestler-info.ts WRESTLER_REGISTRY 와 동기화
 TEAM_MEMBERS: dict[str, list[str]] = {
     "#DIY": ["Johnny Gargano", "Tommaso Ciampa"],
@@ -47,7 +48,13 @@ TEAM_MEMBERS: dict[str, list[str]] = {
         "EK Prosper",
         "Shiloh Hill",
     ],
-    "IShowSpeed & The Vision": ["IShowSpeed", "Bron Breakker", "Bronson Reed", "Logan Paul", "Austin Theory"],
+    "IShowSpeed & The Vision": [
+        "IShowSpeed",
+        "Bron Breakker",
+        "Bronson Reed",
+        "Logan Paul",
+        "Austin Theory",
+    ],
 }
 
 

@@ -1,4 +1,7 @@
-﻿from kayfabe.adapter.inbound.api.schemas.ple_match_pick_schema import RankingRowSchema, RankingsResponseSchema
+from kayfabe.adapter.inbound.api.schemas.ple_match_pick_schema import (
+    RankingRowSchema,
+    RankingsResponseSchema,
+)
 from kayfabe.app.dtos.ple_match_pick_dto import RankingsResponse
 
 

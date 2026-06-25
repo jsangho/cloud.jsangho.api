@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from core.matrix.grid_oracle_database_manager import get_db
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.grid_oracle_database_manager import get_db
-from user.adapter.inbound.api.schemas.user_preview import (
-    format_preview_signup,
-)
-from user.app.ports.input.jason_mask_schema import JasonMaskSchema
+from fastapi import APIRouter, Depends
 from user.app.ports.input.jason_mask import JasonMaskUseCase
+from user.app.ports.input.jason_mask_schema import JasonMaskSchema
 from user.domain.value_objects.role import UserRole
 
 jason_mask_router = APIRouter(tags=["jason-mask"])

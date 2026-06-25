@@ -2,10 +2,7 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter
-
-from fastapi import Depends, HTTPException
-
+from fastapi import APIRouter, Depends, HTTPException
 from kayfabe.adapter.inbound.api.schemas.ple_events_schema import MyselfSchema
 from kayfabe.adapter.inbound.api.schemas.ple_match_pick_schema import (
     BatchPredictionRequestSchema,
@@ -24,12 +21,15 @@ from kayfabe.app.dtos.ple_events_dto import MyselfQuery, MyselfResponse, MyselfU
 from kayfabe.app.exceptions import PleAuthRequiredError
 from kayfabe.app.ports.input.ple_events_use_case import PleEventsUseCase
 from kayfabe.app.ports.input.ple_match_pick_use_case import PleMatchPickUseCase
-from kayfabe.dependencies.ple_events_provider import get_ple_events, get_ple_events_repository
+from kayfabe.dependencies.ple_events_provider import (
+    get_ple_events,
+)
 from kayfabe.dependencies.ple_match_pick_provider import get_ple_match_pick
 
 logger = logging.getLogger("uvicorn.error")
 
 ple_match_pick_router = APIRouter(prefix="/ple-match-picks", tags=["ple-match-picks"])
+
 
 def _ple_http_error(exc: Exception) -> HTTPException:
     if isinstance(exc, LookupError):
@@ -60,8 +60,14 @@ async def list_rankings(
     nickname: str | None = None,
     use_case: PleMatchPickUseCase = Depends(get_ple_match_pick),
 ):
-    logger.info("[PleMatchPickRouter] list_rankings | limit=%d nickname=%s", limit, nickname or "-")
-    return rankings_to_schema(await use_case.list_rankings(limit=limit, nickname=nickname))
+    logger.info(
+        "[PleMatchPickRouter] list_rankings | limit=%d nickname=%s",
+        limit,
+        nickname or "-",
+    )
+    return rankings_to_schema(
+        await use_case.list_rankings(limit=limit, nickname=nickname)
+    )
 
 
 @ple_match_pick_router.post("/link-predictions", response_model_by_alias=True)
@@ -82,7 +88,11 @@ async def predict_ple_batch(
     body: BatchPredictionRequestSchema,
     use_case: PleEventsUseCase = Depends(get_ple_events),
 ):
-    logger.info("[PleMatchPickRouter] predict_ple_batch | slug=%s count=%d", slug, len(body.predictions))
+    logger.info(
+        "[PleMatchPickRouter] predict_ple_batch | slug=%s count=%d",
+        slug,
+        len(body.predictions),
+    )
     try:
         board = await use_case.record_predictions_batch(
             slug=slug,
@@ -104,7 +114,9 @@ async def predict_ple_match(
     body: PredictionRequestSchema,
     use_case: PleEventsUseCase = Depends(get_ple_events),
 ):
-    logger.info("[PleMatchPickRouter] predict_ple_match | slug=%s match=%s", slug, match_key)
+    logger.info(
+        "[PleMatchPickRouter] predict_ple_match | slug=%s match=%s", slug, match_key
+    )
     try:
         board = await use_case.record_prediction(
             slug=slug,

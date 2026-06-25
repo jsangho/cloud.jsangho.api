@@ -4,12 +4,15 @@ import asyncio
 import json
 import logging
 
+from core.matrix.grid_oracle_database_manager import (
+    AsyncSessionLocal,
+    rollback_readonly,
+)
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
-
-from core.matrix.grid_oracle_database_manager import AsyncSessionLocal, rollback_readonly
-from kayfabe.adapter.inbound.api.schemas.ple_events_schema import MyselfSchema
 from kayfabe.adapter.inbound.api.schemas.ple_events_schema import (
+    MyselfSchema,
     PleAiStatsSchema,
     PleBoardSchema,
     PleEventSummarySchema,
@@ -25,7 +28,10 @@ from kayfabe.adapter.outbound.mappers.ple_schema_mapper import (
 from kayfabe.app.dtos.ple_events_dto import MyselfQuery, MyselfResponse, MyselfUseCase
 from kayfabe.app.exceptions import PleAuthRequiredError
 from kayfabe.app.ports.input.ple_events_use_case import PleEventsUseCase
-from kayfabe.dependencies.ple_events_provider import get_ple_events, get_ple_events_repository
+from kayfabe.dependencies.ple_events_provider import (
+    get_ple_events,
+    get_ple_events_repository,
+)
 
 logger = logging.getLogger("uvicorn.error")
 
@@ -41,6 +47,7 @@ def _ple_http_error(exc: Exception) -> HTTPException:
         return HTTPException(status_code=400, detail=str(exc) or "잘못된 요청입니다.")
     raise exc
 
+
 @ple_events_router.get("/myself", response_model=None)
 async def introduce_ple_events_myself(
     use_case: MyselfUseCase = Depends(get_ple_events),
@@ -48,6 +55,7 @@ async def introduce_ple_events_myself(
     schema = MyselfSchema(id=2, name="ple_events_router")
     query = MyselfQuery(id=schema.id, name=schema.name)
     return await use_case.introduce_myself(query)
+
 
 @ple_events_router.get(
     "/events",
@@ -89,7 +97,9 @@ async def sync_ple_from_client(
     use_case: PleEventsUseCase = Depends(get_ple_events),
 ):
     if payload.slug != slug:
-        raise HTTPException(status_code=400, detail="URL slug와 본문 slug가 일치하지 않습니다.")
+        raise HTTPException(
+            status_code=400, detail="URL slug와 본문 slug가 일치하지 않습니다."
+        )
     logger.info(
         "[PleEventsRouter] sync_ple_from_client | slug=%s matches=%d",
         slug,

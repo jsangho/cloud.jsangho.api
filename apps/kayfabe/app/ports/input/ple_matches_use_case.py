@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from kayfabe.app.dtos.ple_matches_dto import CompetitorListResponse, CompetitorProfileResponse
+from kayfabe.app.dtos.ple_matches_dto import (
+    CompetitorListResponse,
+    CompetitorProfileResponse,
+)
 
 
 class PleMatchesUseCase(ABC):

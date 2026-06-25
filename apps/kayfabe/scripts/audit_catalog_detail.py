@@ -109,7 +109,10 @@ def main() -> int:
     print(f"wrote {OUT}")
     print(f"total={len(rows)} issues={len(issues)} manual={len(MANUAL_WWE_HIGHLIGHTS)}")
     for item in issues[:20]:
-        print(item["name"], item.get("count_diff") or item.get("fetch_error") or item["wwe_source"])
+        print(
+            item["name"],
+            item.get("count_diff") or item.get("fetch_error") or item["wwe_source"],
+        )
     return 0
 
 

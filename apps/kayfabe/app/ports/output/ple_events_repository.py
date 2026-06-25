@@ -16,20 +16,20 @@ class PleEventsRepository(ABC):
     """PLE 조회 출력 포트."""
 
     @abstractmethod
-    async def list_events(self) -> list[PleEventReadQuery]:
-        ...
+    async def list_events(self) -> list[PleEventReadQuery]: ...
 
     @abstractmethod
-    async def get_event_by_slug(self, slug: str) -> PleEventReadQuery | None:
-        ...
+    async def get_event_by_slug(self, slug: str) -> PleEventReadQuery | None: ...
 
     @abstractmethod
-    async def get_prediction_pick_by_user(self, match_id: int, user_id: int) -> str | None:
-        ...
+    async def get_prediction_pick_by_user(
+        self, match_id: int, user_id: int
+    ) -> str | None: ...
 
     @abstractmethod
-    async def get_prediction_pick(self, match_id: int, client_id: str) -> str | None:
-        ...
+    async def get_prediction_pick(
+        self, match_id: int, client_id: str
+    ) -> str | None: ...
 
     @abstractmethod
     async def aggregate_votes_for_match(
@@ -39,8 +39,7 @@ class PleEventsRepository(ABC):
         ...
 
     @abstractmethod
-    async def get_ai_stats(self) -> PleAiStatsResponse:
-        ...
+    async def get_ai_stats(self) -> PleAiStatsResponse: ...
 
     @abstractmethod
     async def list_events_by_year(self, year: int) -> list[PleEventSummaryResponse]:
@@ -58,7 +57,9 @@ class PleEventsRepository(ABC):
         ...
 
     @abstractmethod
-    async def upsert_event_from_sync(self, payload: PleEventSyncCommand) -> PleEventSnapshotQuery:
+    async def upsert_event_from_sync(
+        self, payload: PleEventSyncCommand
+    ) -> PleEventSnapshotQuery:
         """프론트 매치 카드를 Neon에 upsert."""
         ...
 

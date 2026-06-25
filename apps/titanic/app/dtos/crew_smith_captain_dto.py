@@ -30,4 +30,3 @@ class SmithCaptainChatCommand:
 @dataclass(frozen=True)
 class ChatResponse(BaseModel):
     text: str
- 

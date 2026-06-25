@@ -1,26 +1,26 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-
 from titanic.adapter.inbound.api.schemas.crew_james_director_schema import (
     JamesDirectorFileuploadResponse,
     JamesDirectorMyselfSchema,
     JamesDirectorSchema,
 )
-from titanic.app.ports.input.crew_james_director_use_case import JamesDirectorUseCase
-from titanic.dependencies.crew_james_director_provider import get_james_director
 from titanic.app.dtos.crew_james_director_dto import (
     JamesDirectorQuery,
     JamesDirectorResponse,
     TitanicRecordCommand,
 )
-'''
+from titanic.app.ports.input.crew_james_director_use_case import JamesDirectorUseCase
+from titanic.dependencies.crew_james_director_provider import get_james_director
+
+"""
  감독: 제임스 카메론 (James Cameron)
  전설적인 흥행작 <타이타닉>을 연출하여
  "내가 세상의 왕이다!"를 외친 제임스 카메론 감독의 라우터
  완벽주의 성향으로 타이타닉의 모든 세트와 디테일을
  고증한 아키텍처의 총괄 디렉터 역할 수행
-'''
+"""
 
 james_director_router = APIRouter(prefix="/james", tags=["james"])
 
@@ -58,23 +58,22 @@ def _to_record_commands(records: list) -> list[TitanicRecordCommand]:
         for record in records
     ]
 
+
 @james_director_router.get("/myself")
 async def introduce_myself(
     james: JamesDirectorUseCase = Depends(get_james_director),
 ) -> JamesDirectorResponse:
-    schema = JamesDirectorMyselfSchema(
-        id=2,
-        name="James Cameron"
-    )
+    schema = JamesDirectorMyselfSchema(id=2, name="James Cameron")
     query = JamesDirectorQuery(id=schema.id, name=schema.name)
     return await james.introduce_myself(query)
+
 
 @james_director_router.post(
     "/fileupload",
     response_model=JamesDirectorFileuploadResponse,
     summary="타이타닉 승객 데이터 CSV 파일 업로드",
 )
-async def upload_titanic_file( 
+async def upload_titanic_file(
     file: UploadFile = File(...),
     james: JamesDirectorUseCase = Depends(get_james_director),
 ):

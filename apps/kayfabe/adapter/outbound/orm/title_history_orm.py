@@ -2,10 +2,9 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from core.matrix.grid_oracle_database_manager import Base
 from sqlalchemy import DateTime, ForeignKey, String, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
-
-from core.matrix.grid_oracle_database_manager import Base
 
 
 class TitleAcquisitionModel(Base):
@@ -21,7 +20,9 @@ class TitleAcquisitionModel(Base):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    competitor_name: Mapped[str] = mapped_column(String(200), nullable=False, index=True)
+    competitor_name: Mapped[str] = mapped_column(
+        String(200), nullable=False, index=True
+    )
     belt_name: Mapped[str] = mapped_column(String(200), nullable=False)
     won_at: Mapped[str] = mapped_column(String(200), nullable=False)
     won_at_slug: Mapped[str | None] = mapped_column(String(64), nullable=True)

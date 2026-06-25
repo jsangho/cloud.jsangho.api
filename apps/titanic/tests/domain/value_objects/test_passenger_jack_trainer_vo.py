@@ -1,8 +1,8 @@
 import pytest
 
 from titanic.domain.value_objects.age_vo import Age
-from titanic.domain.value_objects.gender_vo import Gender, GenderType
 from titanic.domain.value_objects.family_relation_vo import FamilyRelation
+from titanic.domain.value_objects.gender_vo import Gender, GenderType
 from titanic.domain.value_objects.survived_vo import Survived
 
 

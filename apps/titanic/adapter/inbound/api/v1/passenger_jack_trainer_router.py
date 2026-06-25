@@ -1,18 +1,22 @@
 from typing import Any
 
 from fastapi import APIRouter, Depends
-
-from titanic.adapter.inbound.api.schemas.passenger_jack_trainer_schema import JackTrainerSchema
-from titanic.app.dtos.passenger_jack_trainer_dto import JackTrainerQuery, JackTrainerResponse
-from titanic.app.ports.input.passenger_jack_trainer_use_case import JackTrainerUseCase
+from titanic.adapter.inbound.api.schemas.passenger_jack_trainer_schema import (
+    JackTrainerSchema,
+)
+from titanic.app.dtos.passenger_jack_trainer_dto import (
+    JackTrainerQuery,
+    JackTrainerResponse,
+)
 from titanic.app.ports.input.crew_walter_roaster_use_case import WalterRoasterUseCase
-from titanic.dependencies.passenger_jack_trainer_provider import get_jack_trainer
+from titanic.app.ports.input.passenger_jack_trainer_use_case import JackTrainerUseCase
 from titanic.dependencies.crew_walter_roaster_provider import get_walter_roaster
+from titanic.dependencies.passenger_jack_trainer_provider import get_jack_trainer
 
-'''
+"""
 잭 도슨 (Jack Dawson)
 생존 예측 모델의 핵심 인터페이스를 담당합니다.
-'''
+"""
 jack_trainer_router = APIRouter(prefix="/jack", tags=["jack"])
 
 

@@ -1,4 +1,4 @@
-﻿"""Neon(Postgres) 비동기 연결 · FastAPI Depends(get_db)."""
+"""Neon(Postgres) 비동기 연결 · FastAPI Depends(get_db)."""
 
 from __future__ import annotations
 
@@ -10,7 +10,6 @@ from collections.abc import AsyncGenerator
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from dotenv import load_dotenv
-from fastapi import HTTPException
 from sqlalchemy import event, text
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -18,6 +17,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase
+
+from fastapi import HTTPException
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -100,7 +101,11 @@ def _strip_unsupported_asyncpg_query_params(url: str) -> str:
 
 
 _raw_url = os.getenv("DATABASE_URL", "").strip()
-DATABASE_URL = _strip_unsupported_asyncpg_query_params(_async_database_url(_raw_url)) if _raw_url else ""
+DATABASE_URL = (
+    _strip_unsupported_asyncpg_query_params(_async_database_url(_raw_url))
+    if _raw_url
+    else ""
+)
 
 engine = (
     create_async_engine(DATABASE_URL, echo=_neon_sql_log_enabled(), pool_pre_ping=True)
@@ -124,12 +129,18 @@ def attach_neon_sql_logging(async_engine) -> None:
     log = APP_LOG
 
     @event.listens_for(sync_engine, "before_cursor_execute")
-    def _before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
-        conn.info.setdefault("query_start_time", []).append(asyncio.get_event_loop().time())
+    def _before_cursor_execute(
+        conn, cursor, statement, parameters, context, executemany
+    ):
+        conn.info.setdefault("query_start_time", []).append(
+            asyncio.get_event_loop().time()
+        )
         log.info("[Neon SQL] %s", statement)
 
     @event.listens_for(sync_engine, "after_cursor_execute")
-    def _after_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+    def _after_cursor_execute(
+        conn, cursor, statement, parameters, context, executemany
+    ):
         conn.info.setdefault("query_start_time", []).pop()
 
 

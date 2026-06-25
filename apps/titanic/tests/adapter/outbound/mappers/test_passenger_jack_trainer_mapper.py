@@ -1,25 +1,28 @@
-import pytest
 from types import SimpleNamespace
 
-from titanic.adapter.outbound.mappers.passenger_jack_trainer_mapper import JackTrainerMapper
+import pytest
+
+from titanic.adapter.outbound.mappers.passenger_jack_trainer_mapper import (
+    JackTrainerMapper,
+)
 from titanic.domain.entities.passenger_jack_trainer_entity import PassengerEntity
 from titanic.domain.value_objects.age_vo import Age
-from titanic.domain.value_objects.gender_vo import Gender, GenderType
 from titanic.domain.value_objects.family_relation_vo import FamilyRelation
+from titanic.domain.value_objects.gender_vo import Gender, GenderType
 from titanic.domain.value_objects.survived_vo import Survived
 
 
 def _make_orm(**overrides):
-    defaults = dict(
-        id=1,
-        passenger_id="P001",
-        name="Dawson, Mr. Jack",
-        gender="male",
-        age="30.0",
-        sib_sp="0",
-        parch="0",
-        survived="0",
-    )
+    defaults = {
+        "id": 1,
+        "passenger_id": "P001",
+        "name": "Dawson, Mr. Jack",
+        "gender": "male",
+        "age": "30.0",
+        "sib_sp": "0",
+        "parch": "0",
+        "survived": "0",
+    }
     defaults.update(overrides)
     return SimpleNamespace(**defaults)
 

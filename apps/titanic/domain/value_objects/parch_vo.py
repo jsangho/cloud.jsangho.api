@@ -17,8 +17,8 @@ class Parch:
             return cls(value=0)
         try:
             return cls(value=int(raw.strip()))
-        except ValueError:
-            raise ValueError(f"Parch 파싱 실패: '{raw}'")
+        except ValueError as e:
+            raise ValueError(f"Parch 파싱 실패: '{raw}'") from e
 
     def __str__(self) -> str:
         return str(self.value)

@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from core.matrix.grid_oracle_database_manager import get_db
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.grid_oracle_database_manager import get_db
-from user.adapter.inbound.api.schemas.user_preview import format_preview_login
+from fastapi import APIRouter, Depends
 from user.app.ports.input.pamela_cook import PamelaCookUseCase
 from user.domain.value_objects.role import UserRole
 
@@ -31,13 +30,17 @@ class LoginResponse(BaseModel):
 
 
 def get_pamela_cook(db: AsyncSession = Depends(get_db)) -> PamelaCookUseCase:
-    from user.adapter.outbound.pg.pamela_cook_pg_repository import PamelaCookPgRepository
+    from user.adapter.outbound.pg.pamela_cook_pg_repository import (
+        PamelaCookPgRepository,
+    )
     from user.app.use_cases.pamela_cook_interactor import PamelaCookInteractor
 
     return PamelaCookInteractor(PamelaCookPgRepository(db))
 
 
-@pamela_cook_router.post("/login", response_model=LoginResponse, response_model_by_alias=True)
+@pamela_cook_router.post(
+    "/login", response_model=LoginResponse, response_model_by_alias=True
+)
 async def login(
     req: LoginRequest,
     use_case: PamelaCookUseCase = Depends(get_pamela_cook),

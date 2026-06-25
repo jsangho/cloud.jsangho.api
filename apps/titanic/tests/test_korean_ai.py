@@ -11,6 +11,7 @@ Ollama 통합 테스트:
 Ollama 실제 호출 (스크립트):
     python apps/titanic/tests/test_korean_ai.py
 """
+
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -80,7 +81,9 @@ class TestRunKoreanAi:
         result = run_korean_ai("raw user text")
         assert result == "mocked ai response"
 
-    def test_preprocesses_text_with_kiwi_before_ollama(self, mock_kiwi, mock_ollama_chat):
+    def test_preprocesses_text_with_kiwi_before_ollama(
+        self, mock_kiwi, mock_ollama_chat
+    ):
         user_text = "raw user text"
 
         run_korean_ai(user_text)

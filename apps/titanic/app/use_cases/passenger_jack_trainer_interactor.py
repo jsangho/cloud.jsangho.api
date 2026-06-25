@@ -3,31 +3,38 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import numpy as np
 import pandas as pd
 
-from titanic.adapter.outbound.orm.passenger_rose_model_strategies import build_all_strategies
-from titanic.adapter.inbound.api.schemas.passenger_jack_trainer_schema import JackTrainerSchema
-from titanic.app.dtos.passenger_jack_trainer_dto import JackTrainerQuery, JackTrainerResponse
+from titanic.adapter.inbound.api.schemas.passenger_jack_trainer_schema import (
+    JackTrainerSchema,
+)
+from titanic.adapter.outbound.orm.passenger_rose_model_strategies import (
+    build_all_strategies,
+)
+from titanic.app.dtos.passenger_jack_trainer_dto import (
+    JackTrainerQuery,
+    JackTrainerResponse,
+)
 from titanic.app.ports.output.passenger_jack_trainer_port import JackTrainerPort
 
 logger = logging.getLogger(__name__)
 
 
 class JackTrainerInteractor:
-
     _trained_strategies: dict = {}  # 클래스 변수 — 인스턴스 간 공유
 
     def __init__(self, repository: JackTrainerPort):
         self.repository = repository
 
     async def train_model(self, train_set: pd.DataFrame) -> dict[str, Any]:
-        '''로즈가 제안한 모델들을 훈련시키는 메소드'''
+        """로즈가 제안한 모델들을 훈련시키는 메소드"""
         logger.info("[JackTrainerInteractor] 학습 파이프라인 시작")
 
         df = train_set.copy()
         survived_col = "survived" if "survived" in df.columns else "Survived"
-        gender_col = next((c for c in ("gender", "sex", "Sex") if c in df.columns), None)
+        gender_col = next(
+            (c for c in ("gender", "sex", "Sex") if c in df.columns), None
+        )
 
         # feature engineering
         df[survived_col] = df[survived_col].astype(float)
@@ -35,11 +42,21 @@ class JackTrainerInteractor:
             df["gender_enc"] = (df[gender_col].isin(["female", "Female"])).astype(float)
         else:
             df["gender_enc"] = 0.0
-        df["embarked_enc"] = df.get("embarked", df.get("Embarked", "S")).map(
-            {"S": 0.0, "C": 1.0, "Q": 2.0}
-        ).fillna(0.0)
+        df["embarked_enc"] = (
+            df.get("embarked", df.get("Embarked", "S"))
+            .map({"S": 0.0, "C": 1.0, "Q": 2.0})
+            .fillna(0.0)
+        )
 
-        feature_cols = ["pclass", "gender_enc", "age", "sibsp", "parch", "fare", "embarked_enc"]
+        feature_cols = [
+            "pclass",
+            "gender_enc",
+            "age",
+            "sibsp",
+            "parch",
+            "fare",
+            "embarked_enc",
+        ]
         for col in feature_cols:
             if col in df.columns:
                 df[col] = pd.to_numeric(df[col], errors="coerce")
@@ -70,11 +87,11 @@ class JackTrainerInteractor:
             "trained_strategies": JackTrainerInteractor._trained_strategies,
         }
 
-    
-
     async def introduce_myself(self, schema: JackTrainerSchema) -> JackTrainerResponse:
-        '''잭 트레이너의 자기소개 인터렉트'''
-        return await self.repository.introduce_myself(JackTrainerQuery(
-            id=schema.id,
-            name=schema.name,
-        ))
+        """잭 트레이너의 자기소개 인터렉트"""
+        return await self.repository.introduce_myself(
+            JackTrainerQuery(
+                id=schema.id,
+                name=schema.name,
+            )
+        )

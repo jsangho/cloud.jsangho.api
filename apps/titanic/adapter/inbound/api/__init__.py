@@ -1,17 +1,34 @@
 from fastapi import APIRouter
-
-from titanic.adapter.inbound.api.v1.crew_andrews_architect_router import andrews_architect_router
-from titanic.adapter.inbound.api.v1.crew_hartley_violin_router import hartley_violin_router
-from titanic.adapter.inbound.api.v1.crew_james_director_router import james_director_router
+from titanic.adapter.inbound.api.v1.crew_andrews_architect_router import (
+    andrews_architect_router,
+)
+from titanic.adapter.inbound.api.v1.crew_hartley_violin_router import (
+    hartley_violin_router,
+)
+from titanic.adapter.inbound.api.v1.crew_james_director_router import (
+    james_director_router,
+)
 from titanic.adapter.inbound.api.v1.crew_lowe_boat_router import lowe_boat_router
-from titanic.adapter.inbound.api.v1.crew_smith_captain_router import smith_captain_router
-from titanic.adapter.inbound.api.v1.crew_walter_roaster_router import walter_roaster_router
+from titanic.adapter.inbound.api.v1.crew_smith_captain_router import (
+    smith_captain_router,
+)
+from titanic.adapter.inbound.api.v1.crew_walter_roaster_router import (
+    walter_roaster_router,
+)
 from titanic.adapter.inbound.api.v1.passenger_cal_tester_router import cal_tester_router
-from titanic.adapter.inbound.api.v1.passenger_isidor_couple_router import isidor_couple_router
-from titanic.adapter.inbound.api.v1.passenger_jack_trainer_router import jack_trainer_router
-from titanic.adapter.inbound.api.v1.passenger_molly_scaler_router import molly_scaler_router
+from titanic.adapter.inbound.api.v1.passenger_isidor_couple_router import (
+    isidor_couple_router,
+)
+from titanic.adapter.inbound.api.v1.passenger_jack_trainer_router import (
+    jack_trainer_router,
+)
+from titanic.adapter.inbound.api.v1.passenger_molly_scaler_router import (
+    molly_scaler_router,
+)
 from titanic.adapter.inbound.api.v1.passenger_rose_model_router import rose_model_router
-from titanic.adapter.inbound.api.v1.passenger_ruth_validation_router import ruth_validation_router
+from titanic.adapter.inbound.api.v1.passenger_ruth_validation_router import (
+    ruth_validation_router,
+)
 
 titanic_router = APIRouter(prefix="/titanic", tags=["titanic"])
 titanic_router.include_router(andrews_architect_router)

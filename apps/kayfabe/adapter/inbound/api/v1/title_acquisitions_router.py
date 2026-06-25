@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging
 
 from fastapi import APIRouter, Depends
-
 from kayfabe.adapter.inbound.api.schemas.ple_events_schema import MyselfSchema
 from kayfabe.adapter.inbound.api.schemas.title_acquisitions_schema import (
     ChampionshipBoardResponseSchema,
@@ -15,7 +14,9 @@ from kayfabe.dependencies.title_acquisitions_provider import get_title_acquisiti
 
 logger = logging.getLogger("uvicorn.error")
 
-title_acquisitions_router = APIRouter(prefix="/title-acquisitions", tags=["title-acquisitions"])
+title_acquisitions_router = APIRouter(
+    prefix="/title-acquisitions", tags=["title-acquisitions"]
+)
 
 
 @title_acquisitions_router.get("/myself", response_model=None)
@@ -47,6 +48,7 @@ async def sync_title_history_from_catalog(
     """실제 WWE 타이틀 획득 카탈로그로 NeonDB를 재생성."""
     count = await use_case.sync_from_real_catalog()
     return {"synced": count}
+
 
 @title_acquisitions_router.get(
     "/",

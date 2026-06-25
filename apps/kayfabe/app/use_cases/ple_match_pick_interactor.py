@@ -5,7 +5,11 @@ from __future__ import annotations
 import logging
 
 from kayfabe.app.dtos.ple_events_dto import MyselfQuery, MyselfResponse
-from kayfabe.app.dtos.ple_match_pick_dto import LeaderboardQuery, RankingRowResponse, RankingsResponse
+from kayfabe.app.dtos.ple_match_pick_dto import (
+    LeaderboardQuery,
+    RankingRowResponse,
+    RankingsResponse,
+)
 from kayfabe.app.ports.input.ple_match_pick_use_case import PleMatchPickUseCase
 from kayfabe.app.ports.output.ple_events_repository import PleEventsRepository
 from kayfabe.app.ports.output.ple_match_pick_repository import PleMatchPickRepository

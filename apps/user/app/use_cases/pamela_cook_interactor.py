@@ -3,8 +3,6 @@ from __future__ import annotations
 import asyncio
 
 from fastapi import HTTPException
-
-from user.adapter.inbound.api.schemas.user_preview import format_preview_login
 from user.app.ports.input.pamela_cook import PamelaCookUseCase
 from user.app.ports.output.pamela_cook_repository import PamelaCookRepository
 from user.domain.entities.user_model import UserModel

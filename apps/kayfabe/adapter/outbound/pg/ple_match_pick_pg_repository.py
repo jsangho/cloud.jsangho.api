@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+from core.matrix.grid_oracle_database_manager import LAYER_LOG
 from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.grid_oracle_database_manager import LAYER_LOG
-from kayfabe.adapter.outbound.orm.ple_orm import PleMatchModel, PleMatchStatus, PlePredictionModel
+from kayfabe.adapter.outbound.orm.ple_orm import (
+    PleMatchModel,
+    PleMatchStatus,
+    PlePredictionModel,
+)
 from kayfabe.app.dtos.ple_events_dto import MyselfQuery, MyselfResponse
 from kayfabe.app.dtos.ple_match_pick_dto import LeaderboardQuery
 from kayfabe.app.ports.output.ple_match_pick_repository import PleMatchPickRepository
@@ -59,9 +63,17 @@ class PleMatchPickPgRepository(PleMatchPickRepository):
 
     async def list_ranked(self, limit: int) -> list[LeaderboardQuery]:
         agg = self._aggregated_subquery()
-        rank_col = func.rank().over(
-            order_by=(agg.c.score.desc(), agg.c.correct.desc(), agg.c.nickname.asc())
-        ).label("rank")
+        rank_col = (
+            func.rank()
+            .over(
+                order_by=(
+                    agg.c.score.desc(),
+                    agg.c.correct.desc(),
+                    agg.c.nickname.asc(),
+                )
+            )
+            .label("rank")
+        )
 
         stmt = (
             select(
@@ -86,14 +98,24 @@ class PleMatchPickPgRepository(PleMatchPickRepository):
             )
             for rank, nickname, score, correct, graded in result.all()
         ]
-        logger.info("[PleMatchPickPgRepository] list_ranked <- Neon count=%d", len(rows))
+        logger.info(
+            "[PleMatchPickPgRepository] list_ranked <- Neon count=%d", len(rows)
+        )
         return rows
 
     async def get_ranked_by_nickname(self, nickname: str) -> LeaderboardQuery | None:
         agg = self._aggregated_subquery()
-        rank_col = func.rank().over(
-            order_by=(agg.c.score.desc(), agg.c.correct.desc(), agg.c.nickname.asc())
-        ).label("rank")
+        rank_col = (
+            func.rank()
+            .over(
+                order_by=(
+                    agg.c.score.desc(),
+                    agg.c.correct.desc(),
+                    agg.c.nickname.asc(),
+                )
+            )
+            .label("rank")
+        )
 
         stmt = (
             select(

@@ -2,9 +2,9 @@
 
 > **본 문서가 메인 규칙이다.** 충돌 시 이 문서가 우선한다.
 
-상위 메인: `sangho/CLAUDE.md` · `CLAUDE.md` (루트)
+상위 메인: `fastapi/CLAUDE.md` · `CLAUDE.md` (루트)
 
-**패키지:** `titanic` (`sangho/apps/titanic/`)  
+**패키지:** `titanic` (`fastapi/apps/titanic/`)  
 **API prefix:** `/titanic` — `adapter/inbound/api/__init__.py`
 
 > **시블링 템플릿:** kayfabe 등 새 앱은 동일한 헥사고날 폴더 구조를 복제한다.  
@@ -14,7 +14,7 @@
 
 ## 0. 구현 전
 
-1. `sangho/CLAUDE.md` — 백엔드 공통 원칙
+1. `fastapi/CLAUDE.md` — 백엔드 공통 원칙
 2. `_claude/ENTITY_RULE.md` — DB 엔티티 규칙
 3. 기존 **가장 가까운 형제 리소스**를 Read한다. (예: crew 추가 시 `crew_smith_captain_*` 세트 복제)
 

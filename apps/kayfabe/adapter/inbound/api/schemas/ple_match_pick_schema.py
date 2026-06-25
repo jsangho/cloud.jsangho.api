@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from kayfabe.adapter.inbound.api.schemas.ple_events_schema import PleBoardSchema  # noqa: F401
+from kayfabe.adapter.inbound.api.schemas.ple_events_schema import (
+    PleBoardSchema,  # noqa: F401
+)
 
 __all__ = [
     "PleBoardSchema",

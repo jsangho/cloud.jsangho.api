@@ -3,7 +3,7 @@
 > **본 문서가 메인 규칙이다.** 충돌 시 `CLAUDE.md`가 우선한다.  
 > `.cursorrules`는 보조 참고용이다.
 
-상위 메인: `sangho/CLAUDE.md` · `CLAUDE.md` (루트)
+상위 메인: `fastapi/CLAUDE.md` · `CLAUDE.md` (루트)
 
 **패키지:** `kayfabe` · **API prefix:** `/ple`, `/rankings`, `/records`, `/title-history`, `/championship`
 

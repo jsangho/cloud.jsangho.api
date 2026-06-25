@@ -50,4 +50,3 @@ def grade_ai_correct(ai_pick: str | None, winner_pick: str | None) -> bool | Non
     if not ai_pick or not winner_pick:
         return None
     return ai_pick == winner_pick
-

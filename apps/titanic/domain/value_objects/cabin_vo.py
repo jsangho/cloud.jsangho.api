@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
 
 _PASSENGER_DECKS = frozenset("ABCDEFG")
 
@@ -11,7 +10,7 @@ class Cabin:
     value: str | None
 
     @classmethod
-    def from_raw(cls, raw: Optional[str]) -> "Cabin":
+    def from_raw(cls, raw: str | None) -> Cabin:
         if raw is None or not str(raw).strip():
             return cls(value=None)
         return cls(value=str(raw).strip())

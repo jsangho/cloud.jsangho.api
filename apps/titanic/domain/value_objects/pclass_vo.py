@@ -2,13 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 
 class PClassType(int, Enum):
-    FIRST = 1   # 상류층
+    FIRST = 1  # 상류층
     SECOND = 2  # 중산층
-    THIRD = 3   # 하류층
+    THIRD = 3  # 하류층
 
 
 @dataclass(frozen=True)
@@ -16,7 +15,7 @@ class PClass:
     value: PClassType
 
     @classmethod
-    def from_raw(cls, raw: Optional[int | str]) -> "PClass":
+    def from_raw(cls, raw: int | str | None) -> PClass:
         if raw is None:
             raise ValueError("PClass는 필수 값입니다.")
         raw_str = str(raw).strip()
@@ -24,8 +23,8 @@ class PClass:
             raise ValueError("PClass는 필수 값입니다.")
         try:
             return cls(value=PClassType(int(raw_str)))
-        except (ValueError, KeyError):
-            raise ValueError(f"PClass 유효하지 않은 값: '{raw}'")
+        except (ValueError, KeyError) as e:
+            raise ValueError(f"PClass 유효하지 않은 값: '{raw}'") from e
 
     @property
     def has_rescue_priority(self) -> bool:

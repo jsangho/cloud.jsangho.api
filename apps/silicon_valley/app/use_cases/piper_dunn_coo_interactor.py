@@ -6,7 +6,6 @@ from silicon_valley.app.ports.output.piper_dunn_coo_port import DunnCooPort
 
 
 class DunnCooInteractor(DunnCooUseCase):
-
     def __init__(self, repository: DunnCooPort):
         self.repository = repository
 

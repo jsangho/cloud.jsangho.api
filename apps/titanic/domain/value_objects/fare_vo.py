@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass(frozen=True)
@@ -13,13 +12,13 @@ class Fare:
             raise ValueError(f"Fare는 0 이상이어야 합니다: {self.value}")
 
     @classmethod
-    def from_raw(cls, raw: Optional[str | float]) -> "Fare":
+    def from_raw(cls, raw: str | float | None) -> Fare:
         if raw is None or not str(raw).strip():
             return cls(value=None)
         try:
             return cls(value=float(str(raw).strip()))
-        except ValueError:
-            raise ValueError(f"Fare 파싱 실패: '{raw}'")
+        except ValueError as e:
+            raise ValueError(f"Fare 파싱 실패: '{raw}'") from e
 
     @property
     def is_unknown(self) -> bool:

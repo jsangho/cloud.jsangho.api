@@ -1,19 +1,21 @@
 from fastapi import APIRouter, Depends
-
 from titanic.adapter.inbound.api.schemas.crew_walter_roaster_schema import (
     WalterRoasterOpenfileResponse,
     WalterRoasterPassengerItem,
     WalterRoasterSchema,
 )
-from titanic.app.dtos.crew_walter_roaster_dto import WalterRoasterQuery, WalterRoasterResponse
+from titanic.app.dtos.crew_walter_roaster_dto import (
+    WalterRoasterQuery,
+    WalterRoasterResponse,
+)
 from titanic.app.ports.input.crew_walter_roaster_use_case import WalterRoasterUseCase
 from titanic.dependencies.crew_walter_roaster_provider import get_walter_roaster
 
-'''
+"""
 윌터 와일딩 (Walter Nichols)
 영화 <타이타닉>에서 승객 명단을 관리하는
 일등 항해사. 승객 명단 관리 담당자
-'''
+"""
 walter_roaster_router = APIRouter(prefix="/walter", tags=["walter"])
 
 _DEFAULT_WALTER = {

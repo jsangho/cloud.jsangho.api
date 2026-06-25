@@ -1,13 +1,10 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends
+from core.matrix.grid_oracle_database_manager import get_db
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.grid_oracle_database_manager import get_db
-from user.adapter.inbound.api.schemas.user_preview import (
-    format_preview_profile_request,
-)
+from fastapi import APIRouter, Depends
 from user.app.ports.input.murder_list import MurderListUseCase
 from user.domain.value_objects.role import UserRole
 
@@ -25,7 +22,9 @@ class UserProfileResponse(BaseModel):
 
 
 def get_murder_list(db: AsyncSession = Depends(get_db)) -> MurderListUseCase:
-    from user.adapter.outbound.pg.murder_list_pg_repository import MurderListPgRepository
+    from user.adapter.outbound.pg.murder_list_pg_repository import (
+        MurderListPgRepository,
+    )
     from user.app.use_cases.murder_list_interactor import MurderListInteractor
 
     return MurderListInteractor(MurderListPgRepository(db))

@@ -1,2 +1,1 @@
-﻿"""User app ports package."""
-
+"""User app ports package."""

@@ -1,4 +1,4 @@
-﻿"""Pydantic Schema ↔ app DTO 변환 (HTTP 경계)."""
+"""Pydantic Schema ↔ app DTO 변환 (HTTP 경계)."""
 
 from __future__ import annotations
 
@@ -37,7 +37,6 @@ from kayfabe.app.dtos.ple_events_dto import (
     PleEventSyncCommand,
     PredictionCommand,
     PredictionItemCommand,
-    VoteTotalsResponse,
 )
 
 
@@ -49,7 +48,9 @@ def _competitor_to_schema(dto: CompetitorResponse) -> CompetitorSchema:
     return CompetitorSchema(name=dto.name, isChampion=dto.is_champion)
 
 
-def _match_result_from_schema(schema: MatchResultSchema | None) -> MatchResultResponse | None:
+def _match_result_from_schema(
+    schema: MatchResultSchema | None,
+) -> MatchResultResponse | None:
     if schema is None:
         return None
     return MatchResultResponse(
@@ -59,7 +60,9 @@ def _match_result_from_schema(schema: MatchResultSchema | None) -> MatchResultRe
     )
 
 
-def _match_result_to_schema(dto: MatchResultResponse | None) -> MatchResultSchema | None:
+def _match_result_to_schema(
+    dto: MatchResultResponse | None,
+) -> MatchResultSchema | None:
     if dto is None:
         return None
     return MatchResultSchema(
@@ -88,7 +91,9 @@ def _match_card_from_schema(schema: MatchCardSyncSchema) -> MatchCardSyncCommand
         format=schema.format,
         left=_competitor_from_schema(schema.left) if schema.left else None,
         right=_competitor_from_schema(schema.right) if schema.right else None,
-        competitors=[_competitor_from_schema(c) for c in schema.competitors] if schema.competitors else None,
+        competitors=[_competitor_from_schema(c) for c in schema.competitors]
+        if schema.competitors
+        else None,
         bookmaker_decimal=schema.bookmaker_decimal,
         result=_match_result_from_schema(schema.result),
     )
@@ -102,7 +107,9 @@ def prediction_from_schema(schema: PredictionRequestSchema) -> PredictionCommand
     )
 
 
-def batch_prediction_from_schema(schema: BatchPredictionRequestSchema) -> BatchPredictionCommand:
+def batch_prediction_from_schema(
+    schema: BatchPredictionRequestSchema,
+) -> BatchPredictionCommand:
     return BatchPredictionCommand(
         client_id=schema.client_id,
         user_id=schema.user_id,
@@ -128,7 +135,9 @@ def batch_results_from_schema(schema: BatchResultsRequestSchema) -> BatchResults
     )
 
 
-def match_result_update_from_schema(schema: MatchResultUpdateSchema) -> MatchResultUpdateCommand:
+def match_result_update_from_schema(
+    schema: MatchResultUpdateSchema,
+) -> MatchResultUpdateCommand:
     return MatchResultUpdateCommand(
         winner_side=schema.winner_side,
         winner_index=schema.winner_index,
@@ -159,7 +168,9 @@ def _match_board_to_schema(dto: MatchBoardResponse) -> MatchBoardSchema:
         format=dto.format,
         left=_competitor_to_schema(dto.left) if dto.left else None,
         right=_competitor_to_schema(dto.right) if dto.right else None,
-        competitors=[_competitor_to_schema(c) for c in dto.competitors] if dto.competitors else None,
+        competitors=[_competitor_to_schema(c) for c in dto.competitors]
+        if dto.competitors
+        else None,
         bookmakerDecimal=dto.bookmaker_decimal,
         status=dto.status,
         result=_match_result_to_schema(dto.result),
@@ -209,7 +220,9 @@ def ai_stats_to_schema(dto: PleAiStatsResponse) -> PleAiStatsSchema:
     )
 
 
-def match_result_from_command(cmd: MatchResultUpdateCommand | BatchResultItemCommand) -> MatchResultResponse:
+def match_result_from_command(
+    cmd: MatchResultUpdateCommand | BatchResultItemCommand,
+) -> MatchResultResponse:
     return MatchResultResponse(
         winner_side=cmd.winner_side,
         winner_index=cmd.winner_index,

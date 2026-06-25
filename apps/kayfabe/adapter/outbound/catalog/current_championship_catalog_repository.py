@@ -1,11 +1,13 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from kayfabe.app.dtos.title_acquisitions_dto import (
     BrandRosterResponse,
     ChampionshipBoardResponse,
     TitleReignResponse,
 )
-from kayfabe.app.ports.output.title_acquisitions_repository import ChampionshipRepository
+from kayfabe.app.ports.output.title_acquisitions_repository import (
+    ChampionshipRepository,
+)
 from kayfabe.app.services.current_championship_catalog import (
     CHAMPIONSHIP_AS_OF,
     WWE_BRAND_CHAMPIONS,

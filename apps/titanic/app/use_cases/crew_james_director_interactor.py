@@ -8,10 +8,10 @@ from titanic.app.dtos.crew_james_director_dto import (
     JamesDirectorResponse,
     PersonCommand,
     TitanicRecordCommand,
-    format_preview_record,
 )
 from titanic.app.ports.input.crew_james_director_use_case import JamesDirectorUseCase
 from titanic.app.ports.output.crew_james_director_port import JamesDirectorPort
+
 
 class JamesDirectorInteractor(JamesDirectorUseCase):
     """James Director CSV 업로드 유스케이스."""
@@ -19,8 +19,10 @@ class JamesDirectorInteractor(JamesDirectorUseCase):
     def __init__(self, repository: JamesDirectorPort) -> None:
         self.repository = repository
 
-    async def introduce_myself(self, query: JamesDirectorQuery) -> JamesDirectorResponse:
-        '''제임스 감독의 자기소개 인터렉트'''
+    async def introduce_myself(
+        self, query: JamesDirectorQuery
+    ) -> JamesDirectorResponse:
+        """제임스 감독의 자기소개 인터렉트"""
 
         return await self.repository.introduce_myself(query)
 
@@ -35,10 +37,6 @@ class JamesDirectorInteractor(JamesDirectorUseCase):
         *,
         filename: str = "",
     ) -> dict[str, Any]:
-        preview_blocks = [
-            format_preview_record(index, record)
-            for index, record in enumerate(records[:5], start=1)
-        ]
         person_commands: list[PersonCommand] = []
         booking_commands: list[BookingCommand] = []
 

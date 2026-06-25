@@ -19,12 +19,10 @@ class PleEventsUseCase(ABC):
     """`/ple/*` GET inbound(ple_events_router) 조회 입력 포트."""
 
     @abstractmethod
-    async def list_events(self) -> list[PleEventSummaryResponse]:
-        ...
+    async def list_events(self) -> list[PleEventSummaryResponse]: ...
 
     @abstractmethod
-    async def get_ai_stats(self) -> PleAiStatsResponse:
-        ...
+    async def get_ai_stats(self) -> PleAiStatsResponse: ...
 
     @abstractmethod
     async def get_board(
@@ -33,37 +31,30 @@ class PleEventsUseCase(ABC):
         slug: str,
         client_id: str | None = None,
         user_id: int | None = None,
-    ) -> PleBoardResponse:
-        ...
+    ) -> PleBoardResponse: ...
 
     @abstractmethod
-    async def list_results(self, year: int) -> PleResultsResponse:
-        ...
+    async def list_results(self, year: int) -> PleResultsResponse: ...
 
     @abstractmethod
-    async def sync_event(self, *, payload: PleEventSyncCommand) -> PleBoardResponse:
-        ...
+    async def sync_event(self, *, payload: PleEventSyncCommand) -> PleBoardResponse: ...
 
     @abstractmethod
     async def record_predictions_batch(
         self, *, slug: str, body: BatchPredictionCommand
-    ) -> PleBoardResponse:
-        ...
+    ) -> PleBoardResponse: ...
 
     @abstractmethod
     async def set_match_results_batch(
         self, *, slug: str, body: BatchResultsCommand
-    ) -> PleBoardResponse:
-        ...
+    ) -> PleBoardResponse: ...
 
     @abstractmethod
     async def record_prediction(
         self, *, slug: str, match_key: str, body: PredictionCommand
-    ) -> PleBoardResponse:
-        ...
+    ) -> PleBoardResponse: ...
 
     @abstractmethod
     async def set_match_result(
         self, *, slug: str, match_key: str, body: MatchResultUpdateCommand
-    ) -> PleBoardResponse:
-        ...
+    ) -> PleBoardResponse: ...

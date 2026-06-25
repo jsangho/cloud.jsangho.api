@@ -2,7 +2,10 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 
-from silicon_valley.app.dtos.piper_hendricks_ceo_dto import HendricksCeoQuery, HendricksCeoResponse
+from silicon_valley.app.dtos.piper_hendricks_ceo_dto import (
+    HendricksCeoQuery,
+    HendricksCeoResponse,
+)
 
 
 class HendricksCeoUseCase(ABC):

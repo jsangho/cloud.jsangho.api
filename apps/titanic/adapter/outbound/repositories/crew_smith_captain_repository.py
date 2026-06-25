@@ -2,17 +2,16 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
-from fastapi import HTTPException
+from core.matrix.vault_keymaker_secret_manager import Keymaker
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.vault_keymaker_secret_manager import Keymaker
+from fastapi import HTTPException
 from titanic.app.dtos.crew_smith_captain_dto import (
+    ChatResponse,
     SmithCaptainChatCommand,
-    SmithCaptainResponse,
     SmithCaptainChatTurnDto,
     SmithCaptainQuery,
     SmithCaptainResponse,
-    ChatResponse
 )
 from titanic.app.ports.output.crew_smith_captain_port import SmithCaptainPort
 
@@ -24,7 +23,6 @@ MAX_PROMPT_MESSAGES = 8
 
 
 class SmithCaptainRepository(SmithCaptainPort):
-
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
@@ -108,7 +106,11 @@ class SmithCaptainRepository(SmithCaptainPort):
 
     def _to_http_exception(self, error: Exception) -> HTTPException:
         err = str(error)
-        if "429" in err or "quota" in err.lower() or "ResourceExhausted" in type(error).__name__:
+        if (
+            "429" in err
+            or "quota" in err.lower()
+            or "ResourceExhausted" in type(error).__name__
+        ):
             return HTTPException(
                 status_code=429,
                 detail=(

@@ -1,14 +1,15 @@
 from fastapi import APIRouter, Depends
-
-from silicon_valley.adapter.inbound.api.schemas.piper_dunn_coo_schema import DunnCooSchema
+from silicon_valley.adapter.inbound.api.schemas.piper_dunn_coo_schema import (
+    DunnCooSchema,
+)
 from silicon_valley.app.dtos.piper_dunn_coo_dto import DunnCooQuery, DunnCooResponse
 from silicon_valley.app.ports.input.piper_dunn_coo_use_case import DunnCooUseCase
 from silicon_valley.dependencies.piper_dunn_coo_provider import get_dunn_coo
 
-'''
+"""
 재러드 던 (Jared Dunn)
 Pied Piper COO. 본명은 도널드 던. Richard의 충직한 조력자. Hooli 출신
-'''
+"""
 dunn_coo_router = APIRouter(prefix="/dunn", tags=["dunn"])
 
 

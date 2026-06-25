@@ -18,7 +18,8 @@ for path in (_BACKEND_DIR, _APPS_DIR):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from core.matrix.grid_oracle_database_manager import Base, DATABASE_URL  # noqa: E402
+from core.matrix.grid_oracle_database_manager import DATABASE_URL, Base  # noqa: E402
+
 import titanic.adapter.outbound.orm.booking_orm  # noqa: E402, F401
 import titanic.adapter.outbound.orm.person_orm  # noqa: E402, F401
 

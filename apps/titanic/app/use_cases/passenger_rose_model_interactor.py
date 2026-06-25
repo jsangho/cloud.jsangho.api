@@ -14,19 +14,27 @@ from titanic.app.ports.input.passenger_rose_model_use_case import (
 )
 from titanic.app.ports.output.passenger_rose_model_port import RoseModelPort
 
-
 # ── 피처 인코딩 ───────────────────────────────────────────────────────────────
+
 
 def _encode(f: PassengerFeaturesQuery) -> list[float]:
     sex = 1.0 if f.sex.lower() == "female" else 0.0
     embarked = {"s": 0.0, "c": 1.0, "q": 2.0}.get(f.embarked.lower(), 0.0)
-    return [float(f.pclass), sex, float(f.age), float(f.sibsp), float(f.parch), float(f.fare), embarked]
+    return [
+        float(f.pclass),
+        sex,
+        float(f.age),
+        float(f.sibsp),
+        float(f.parch),
+        float(f.fare),
+        embarked,
+    ]
 
 
 # ── sklearn 기반 공통 베이스 ──────────────────────────────────────────────────
 
-class _SklearnStrategy(SurvivalPredictionStrategy):
 
+class _SklearnStrategy(SurvivalPredictionStrategy):
     def __init__(self) -> None:
         self._model = self._build_model()
         self._fitted = False
@@ -40,7 +48,9 @@ class _SklearnStrategy(SurvivalPredictionStrategy):
 
     def _require_fit(self) -> None:
         if not self._fitted:
-            raise ValueError(f"{self.algorithm_name} 모델이 학습되지 않았습니다. train()을 먼저 호출하세요.")
+            raise ValueError(
+                f"{self.algorithm_name} 모델이 학습되지 않았습니다. train()을 먼저 호출하세요."
+            )
 
     def predict(self, features: PassengerFeaturesQuery) -> SurvivalPredictionResponse:
         self._require_fit()
@@ -58,6 +68,7 @@ class _SklearnStrategy(SurvivalPredictionStrategy):
 
 # ── 10대 알고리즘 전략 ─────────────────────────────────────────────────────────
 
+
 class XGBoostStrategy(_SklearnStrategy):
     """1위: 그래디언트 부스팅. 강력한 규제로 과적합 방지."""
 
@@ -67,6 +78,7 @@ class XGBoostStrategy(_SklearnStrategy):
 
     def _build_model(self):
         from xgboost import XGBClassifier
+
         return XGBClassifier(n_estimators=100, random_state=42, eval_metric="logloss")
 
 
@@ -79,6 +91,7 @@ class RandomForestStrategy(_SklearnStrategy):
 
     def _build_model(self):
         from sklearn.ensemble import RandomForestClassifier
+
         return RandomForestClassifier(n_estimators=100, random_state=42)
 
 
@@ -91,6 +104,7 @@ class LightGBMStrategy(_SklearnStrategy):
 
     def _build_model(self):
         from lightgbm import LGBMClassifier
+
         return LGBMClassifier(n_estimators=100, random_state=42, verbose=-1)
 
 
@@ -103,6 +117,7 @@ class CatBoostStrategy(_SklearnStrategy):
 
     def _build_model(self):
         from catboost import CatBoostClassifier
+
         return CatBoostClassifier(iterations=100, random_state=42, verbose=False)
 
 
@@ -115,6 +130,7 @@ class LogisticRegressionStrategy(_SklearnStrategy):
 
     def _build_model(self):
         from sklearn.linear_model import LogisticRegression
+
         return LogisticRegression(max_iter=1000, random_state=42)
 
 
@@ -127,6 +143,7 @@ class DecisionTreeStrategy(_SklearnStrategy):
 
     def _build_model(self):
         from sklearn.tree import DecisionTreeClassifier
+
         return DecisionTreeClassifier(max_depth=5, random_state=42)
 
 
@@ -139,6 +156,7 @@ class SVMStrategy(_SklearnStrategy):
 
     def _build_model(self):
         from sklearn.svm import SVC
+
         return SVC(probability=True, random_state=42)
 
 
@@ -151,6 +169,7 @@ class KNNStrategy(_SklearnStrategy):
 
     def _build_model(self):
         from sklearn.neighbors import KNeighborsClassifier
+
         return KNeighborsClassifier(n_neighbors=5)
 
 
@@ -163,6 +182,7 @@ class NaiveBayesStrategy(_SklearnStrategy):
 
     def _build_model(self):
         from sklearn.naive_bayes import GaussianNB
+
         return GaussianNB()
 
 
@@ -177,6 +197,7 @@ class KMeansPCAStrategy(SurvivalPredictionStrategy):
         from sklearn.cluster import KMeans
         from sklearn.decomposition import PCA
         from sklearn.preprocessing import StandardScaler
+
         self._scaler = StandardScaler()
         self._pca = PCA(n_components=3)
         self._kmeans = KMeans(n_clusters=2, random_state=42, n_init=10)
@@ -185,6 +206,7 @@ class KMeansPCAStrategy(SurvivalPredictionStrategy):
 
     def fit(self, X: list[list[float]], y: list[int]) -> None:
         import numpy as np
+
         arr = np.array(X)
         scaled = self._scaler.fit_transform(arr)
         reduced = self._pca.fit_transform(scaled)
@@ -196,10 +218,13 @@ class KMeansPCAStrategy(SurvivalPredictionStrategy):
 
     def _require_fit(self) -> None:
         if not self._fitted:
-            raise ValueError("KMeans+PCA 모델이 학습되지 않았습니다. train()을 먼저 호출하세요.")
+            raise ValueError(
+                "KMeans+PCA 모델이 학습되지 않았습니다. train()을 먼저 호출하세요."
+            )
 
     def _transform(self, X):
         import numpy as np
+
         scaled = self._scaler.transform(np.array(X))
         return self._pca.transform(scaled)
 
@@ -222,23 +247,23 @@ class KMeansPCAStrategy(SurvivalPredictionStrategy):
 # ── 전략 레지스트리 ────────────────────────────────────────────────────────────
 
 _REGISTRY: dict[str, type[SurvivalPredictionStrategy]] = {
-    "xgboost":            XGBoostStrategy,
-    "random_forest":      RandomForestStrategy,
-    "lightgbm":           LightGBMStrategy,
-    "catboost":           CatBoostStrategy,
+    "xgboost": XGBoostStrategy,
+    "random_forest": RandomForestStrategy,
+    "lightgbm": LightGBMStrategy,
+    "catboost": CatBoostStrategy,
     "logistic_regression": LogisticRegressionStrategy,
-    "decision_tree":      DecisionTreeStrategy,
-    "svm":                SVMStrategy,
-    "knn":                KNNStrategy,
-    "naive_bayes":        NaiveBayesStrategy,
-    "kmeans_pca":         KMeansPCAStrategy,
+    "decision_tree": DecisionTreeStrategy,
+    "svm": SVMStrategy,
+    "knn": KNNStrategy,
+    "naive_bayes": NaiveBayesStrategy,
+    "kmeans_pca": KMeansPCAStrategy,
 }
 
 
 # ── Interactor (Context) ──────────────────────────────────────────────────────
 
-class RoseModelInteractor(RoseModelUseCase):
 
+class RoseModelInteractor(RoseModelUseCase):
     def __init__(self, repository: RoseModelPort) -> None:
         self.repository = repository
         self._strategies: dict[str, SurvivalPredictionStrategy] = {}
@@ -256,7 +281,9 @@ class RoseModelInteractor(RoseModelUseCase):
         return self._strategies[key]
 
     async def introduce_myself(self, query: RoseModelQuery) -> RoseModelResponse:
-        return await self.repository.introduce_myself(RoseModelQuery(id=query.id, name=query.name))
+        return await self.repository.introduce_myself(
+            RoseModelQuery(id=query.id, name=query.name)
+        )
 
     def list_algorithms(self) -> list[str]:
         return list(_REGISTRY.keys())

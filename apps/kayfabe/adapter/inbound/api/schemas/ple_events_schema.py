@@ -19,7 +19,9 @@ class CompetitorSchema(BaseModel):
 
 
 class MatchResultSchema(BaseModel):
-    winner_side: Literal["left", "right"] | None = Field(default=None, alias="winnerSide")
+    winner_side: Literal["left", "right"] | None = Field(
+        default=None, alias="winnerSide"
+    )
     winner_index: int | None = Field(default=None, alias="winnerIndex")
     winner_name: str | None = Field(default=None, alias="winnerName")
 

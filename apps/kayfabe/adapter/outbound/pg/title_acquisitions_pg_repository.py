@@ -16,13 +16,19 @@ from kayfabe.app.dtos.title_acquisitions_dto import (
     ChampionshipBoardResponse,
     TitleReignResponse,
 )
-from kayfabe.app.ports.output.title_acquisitions_repository import TitleAcquisitionsRepository, TitleAcquisitionRow
+from kayfabe.app.ports.output.title_acquisitions_repository import (
+    TitleAcquisitionRow,
+    TitleAcquisitionsRepository,
+)
 from kayfabe.app.services.competitor_roster import is_team_roster_name
 from kayfabe.app.services.current_championship_catalog import (
     CHAMPIONSHIP_AS_OF,
     WWE_BRAND_CHAMPIONS,
 )
-from kayfabe.app.services.real_title_catalog import CATALOG_REVISION, individual_title_acquisitions
+from kayfabe.app.services.real_title_catalog import (
+    CATALOG_REVISION,
+    individual_title_acquisitions,
+)
 
 _sync_lock = asyncio.Lock()
 
@@ -35,7 +41,9 @@ class TitleAcquisitionsPgRepository(TitleAcquisitionsRepository):
         self.db = db
 
     async def count(self) -> int:
-        result = await self.db.execute(select(func.count()).select_from(TitleAcquisitionModel))
+        result = await self.db.execute(
+            select(func.count()).select_from(TitleAcquisitionModel)
+        )
         return int(result.scalar_one())
 
     async def needs_real_resync(self) -> bool:
@@ -63,7 +71,9 @@ class TitleAcquisitionsPgRepository(TitleAcquisitionsRepository):
                 return True
         return False
 
-    async def list_by_competitor(self, *, competitor_name: str) -> list[TitleAcquisitionRow]:
+    async def list_by_competitor(
+        self, *, competitor_name: str
+    ) -> list[TitleAcquisitionRow]:
         result = await self.db.execute(
             select(TitleAcquisitionModel)
             .where(TitleAcquisitionModel.competitor_name == competitor_name)
@@ -151,7 +161,9 @@ class TitleAcquisitionsPgRepository(TitleAcquisitionsRepository):
             for brand_id, titles in brands_map.items()
         ]
         brands.sort(
-            key=lambda b: _BRAND_ORDER.index(b.id) if b.id in _BRAND_ORDER else len(_BRAND_ORDER)
+            key=lambda b: _BRAND_ORDER.index(b.id)
+            if b.id in _BRAND_ORDER
+            else len(_BRAND_ORDER)
         )
 
         as_of = rows[0].as_of if rows else CHAMPIONSHIP_AS_OF
@@ -168,7 +180,9 @@ class TitleAcquisitionsPgRepository(TitleAcquisitionsRepository):
                     ChampionshipTitleModel(
                         brand_id=brand["id"],
                         belt_name=title["belt_name"],
-                        champions_json=json.dumps(list(title["champions"]), ensure_ascii=False),
+                        champions_json=json.dumps(
+                            list(title["champions"]), ensure_ascii=False
+                        ),
                         team_name=title.get("team_name"),
                         won_at=title["won_at"],
                         won_event=title.get("won_event"),

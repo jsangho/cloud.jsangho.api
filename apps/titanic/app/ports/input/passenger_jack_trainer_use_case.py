@@ -3,7 +3,10 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
 
-from titanic.app.dtos.passenger_jack_trainer_dto import JackTrainerQuery, JackTrainerResponse
+from titanic.app.dtos.passenger_jack_trainer_dto import (
+    JackTrainerQuery,
+    JackTrainerResponse,
+)
 
 
 class JackTrainerUseCase(ABC):
@@ -18,4 +21,3 @@ class JackTrainerUseCase(ABC):
     async def train_model(self, train_set) -> dict[str, Any]:
         """로즈가 제안한 모델들을 훈련시키는 메소드."""
         ...
-

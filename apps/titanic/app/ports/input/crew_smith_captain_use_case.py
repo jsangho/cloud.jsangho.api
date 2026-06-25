@@ -7,8 +7,6 @@ from titanic.app.dtos.crew_smith_captain_dto import (
     SmithCaptainQuery,
     SmithCaptainResponse,
 )
-from titanic.app.ports.input.passenger_jack_trainer_use_case import JackTrainerUseCase
-from titanic.app.ports.input.passenger_rose_model_use_case import RoseModelUseCase
 
 
 class SmithCaptainUseCase(ABC):

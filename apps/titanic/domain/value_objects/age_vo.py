@@ -23,8 +23,8 @@ class Age:
             return cls(value=None)
         try:
             return cls(value=float(raw.strip()))
-        except ValueError:
-            raise ValueError(f"Age 파싱 실패: '{raw}'")
+        except ValueError as e:
+            raise ValueError(f"Age 파싱 실패: '{raw}'") from e
 
     @property
     def is_unknown(self) -> bool:

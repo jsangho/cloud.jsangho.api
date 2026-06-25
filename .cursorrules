@@ -1,19 +1,19 @@
-# 백엔드 에이전트 규칙 (sangho) — 메인
+# 백엔드 에이전트 규칙 (fastapi) — 메인
 
 상위 메인: [루트 `.cursorrules`](../.cursorrules)  
 행동 보조: [`CLAUDE.md`](CLAUDE.md) (필요 시 · 충돌 시 본 파일 우선)
 
-**스택:** FastAPI · SQLAlchemy(async) · PostgreSQL · `sangho/main.py` 진입점
+**스택:** FastAPI · SQLAlchemy(async) · PostgreSQL · `fastapi/main.py` 진입점
 
 ---
 
 ## 0. 코딩 규칙 — `vault/` 필수 (구현 전)
 
-`sangho/`에서 코드를 **작성·수정·리팩터링하기 전에** 아래를 수행한다.
+`fastapi/`에서 코드를 **작성·수정·리팩터링하기 전에** 아래를 수행한다.
 
 1. **본 파일** — 백엔드 공통 패턴
-2. **`sangho/_claude/ENTITY_RULE.md`** — 엔티티·테이블·PK 규칙
-3. **앱 도메인 ERD·명세** (해당 시) — 예: [`sangho/apps/kayfabe/_docs/KAYFABE_ERD.md`](apps/kayfabe/_docs/KAYFABE_ERD.md)
+2. **`fastapi/_claude/ENTITY_RULE.md`** — 엔티티·테이블·PK 규칙
+3. **앱 도메인 ERD·명세** (해당 시) — 예: [`fastapi/apps/kayfabe/_docs/KAYFABE_ERD.md`](apps/kayfabe/_docs/KAYFABE_ERD.md)
 4. **작업 중인 앱의 `_docs/.cursorrules`** — 예: [Titanic](apps/titanic/_docs/.cursorrules)
 
 규칙에 없는 패턴을 추측으로 도입하지 않는다.
@@ -25,7 +25,7 @@
 ## 1. 저장소 구조
 
 ```
-sangho/
+fastapi/
 ├── main.py              # FastAPI 앱 · 라우터 등록 · lifespan
 ├── apps/                # sys.path에 추가 — 최상위 패키지로 import
 │   ├── titanic/         # → titanic.*
@@ -77,7 +77,7 @@ sangho/
 
 ```bash
 # 로컬
-cd sangho && python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+cd fastapi && python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 # Docker (저장소 루트)
 docker compose up --build -d backend

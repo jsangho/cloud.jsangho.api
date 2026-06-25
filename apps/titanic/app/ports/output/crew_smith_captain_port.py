@@ -4,15 +4,14 @@ from abc import ABC, abstractmethod
 from collections.abc import Iterator
 
 from titanic.app.dtos.crew_smith_captain_dto import (
-    SmithCaptainChatCommand,
     ChatResponse,
+    SmithCaptainChatCommand,
     SmithCaptainQuery,
     SmithCaptainResponse,
 )
 
 
 class SmithCaptainPort(ABC):
-
     @abstractmethod
     async def introduce_myself(self, query: SmithCaptainQuery) -> SmithCaptainResponse:
         pass
