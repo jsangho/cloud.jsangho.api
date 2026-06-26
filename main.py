@@ -3,7 +3,7 @@ import logging
 import os
 import sys
 from contextlib import asynccontextmanager
-
+# 테스트 커밋용
 if sys.platform == "win32":
     # Anaconda(numpy/scipy) + uvicorn --reload 종료 시 forrtl error (200) 방지
     os.environ.setdefault("FOR_DISABLE_CONSOLE_CTRL_HANDLER", "1")
