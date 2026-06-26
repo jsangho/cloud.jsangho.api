@@ -3,7 +3,12 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from kiwipiepy import Kiwi
+try:
+    from kiwipiepy import Kiwi as _Kiwi
+
+    _kiwi_instance = _Kiwi()
+except ImportError:
+    _kiwi_instance = None
 
 from titanic.app.dtos.crew_andrews_architect_dto import (
     AndrewsArchitectQuery,
@@ -21,7 +26,7 @@ logger = logging.getLogger(__name__)
 class AndrewsArchitectInteractor(AndrewsArchitectUseCase):
     def __init__(self, repository: AndrewsArchitectPort):
         self.repository = repository
-        self.kiwi = Kiwi()
+        self.kiwi = _kiwi_instance
 
     def analyze_intent(self, question: str) -> dict[str, Any]:
         """Kiwi 형태소 분석으로 질문 의도를 파악하는 추상 메소드
@@ -32,6 +37,8 @@ class AndrewsArchitectInteractor(AndrewsArchitectUseCase):
             scores   : 의도별 매칭 점수
             tokens   : Kiwi가 분석한 전체 (형태소, 품사) 쌍 목록
         """
+        if self.kiwi is None:
+            raise RuntimeError("kiwipiepy가 설치되지 않아 형태소 분석을 사용할 수 없습니다.")
         # 명사(NN*), 동사 어간(VV/VA), 파생어근(XR)만 의도 판별에 사용
         tokens = self.kiwi.tokenize(question)
         keywords = [

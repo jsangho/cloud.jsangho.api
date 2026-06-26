@@ -108,19 +108,6 @@ class LightGBMStrategy(_SklearnStrategy):
         return LGBMClassifier(n_estimators=100, random_state=42, verbose=-1)
 
 
-class CatBoostStrategy(_SklearnStrategy):
-    """4위: 범주형 피처 최적화. 별도 인코딩 없이 처리."""
-
-    @property
-    def algorithm_name(self) -> str:
-        return "CatBoost"
-
-    def _build_model(self):
-        from catboost import CatBoostClassifier
-
-        return CatBoostClassifier(iterations=100, random_state=42, verbose=False)
-
-
 class LogisticRegressionStrategy(_SklearnStrategy):
     """5위: 선형 이진 분류. 피처별 영향력 해석에 최적."""
 
@@ -250,7 +237,6 @@ _REGISTRY: dict[str, type[SurvivalPredictionStrategy]] = {
     "xgboost": XGBoostStrategy,
     "random_forest": RandomForestStrategy,
     "lightgbm": LightGBMStrategy,
-    "catboost": CatBoostStrategy,
     "logistic_regression": LogisticRegressionStrategy,
     "decision_tree": DecisionTreeStrategy,
     "svm": SVMStrategy,
