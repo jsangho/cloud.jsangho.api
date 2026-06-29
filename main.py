@@ -25,15 +25,16 @@ from core.matrix.grid_oracle_database_manager import (
 )
 from core.matrix.vault_keymaker_secret_manager import get_keymaker
 from pydantic import BaseModel, Field
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from imitation_game.adapter.db_health_adapter import DbHealthAdapter
 from kayfabe.adapter.inbound.api import kayfabe_router
+from manager.adapter.inbound.api import manager_router
 from silicon_valley.adapter.inbound.api import silicon_valley_router
 from titanic.adapter.inbound.api import titanic_router
-from user.adapter.inbound.api import user_router
+from superstar.adapter.inbound.api import user_router
 
 keymaker = get_keymaker()
 logger = logging.getLogger("uvicorn.error")
@@ -85,6 +86,7 @@ app.include_router(titanic_router, prefix="/api")
 app.include_router(user_router, prefix="/api")
 app.include_router(kayfabe_router, prefix="/api")
 app.include_router(silicon_valley_router, prefix="/api")
+app.include_router(manager_router, prefix="/api")
 
 
 @app.middleware("http")
@@ -189,7 +191,8 @@ def read_seoul_weather() -> SeoulWeatherResponse:
 
 @app.get("/db-check")
 async def check_db(db: AsyncSession = Depends(get_db)):
-    return await DbHealthAdapter.neon_time_check(db)
+    result = await db.execute(text("SELECT NOW()"))
+    return {"db_time": str(result.scalar())}
 
 
 @app.get("/doro/data")

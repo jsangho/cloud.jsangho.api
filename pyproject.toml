@@ -38,11 +38,12 @@ known-first-party = [
     "star_craft",
     "titanic",
     "kayfabe",
-    "user",
+    "superstar",
     "silicon_valley",
     "imitation_game",
     "inception",
     "social_network",
+    "manager",
 ]
 
 [tool.mypy]

@@ -40,7 +40,7 @@ from kayfabe.app.services.ple_scoring import (
     competitor_count_from_card,
     derive_match_point_value,
 )
-from user.domain.entities.user_model import UserModel
+from superstar.domain.entities.user_model import UserModel
 
 logger = LAYER_LOG
 

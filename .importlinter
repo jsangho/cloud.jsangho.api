@@ -8,6 +8,7 @@ root_packages =
     imitation_game
     inception
     social_network
+    manager
 
 # 하네스 계약 목록 — 위반 시 CI 차단
 include_extra_contracts = True
@@ -32,6 +33,7 @@ source_modules =
     imitation_game
     inception
     social_network
+    manager
 forbidden_modules =
     titanic
     kayfabe
@@ -40,6 +42,7 @@ forbidden_modules =
     imitation_game
     inception
     social_network
+    manager
 exclude_type_checking_imports = True
 
 
@@ -52,7 +55,7 @@ name = Only hub (star_craft) may import spoke modules
 type = layers
 layers =
     star_craft
-    titanic | kayfabe | user | silicon_valley | imitation_game | inception | social_network
+    titanic | kayfabe | user | silicon_valley | imitation_game | inception | social_network | manager
 
 
 # ────────────────────────────────────────────
@@ -71,6 +74,7 @@ containers =
     imitation_game
     inception
     social_network
+    manager
 layers =
     adapter
     app

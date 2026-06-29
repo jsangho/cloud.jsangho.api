@@ -14,7 +14,7 @@ from kayfabe.adapter.outbound.orm.ple_orm import (
 from kayfabe.app.dtos.ple_events_dto import MyselfQuery, MyselfResponse
 from kayfabe.app.dtos.ple_match_pick_dto import LeaderboardQuery
 from kayfabe.app.ports.output.ple_match_pick_repository import PleMatchPickRepository
-from user.domain.entities.user_model import UserModel
+from superstar.domain.entities.user_model import UserModel
 
 logger = LAYER_LOG
 

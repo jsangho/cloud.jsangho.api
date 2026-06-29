@@ -61,8 +61,8 @@ CQRS 분리는 **UseCase 레이어**에서 유지한다 (`PleUseCase` vs `PleInf
 | Title History | Neon DB (`title_history` 테이블) | `adapter/outbound/pg/title_history_pg_repository.py` |
 
 ### UserModel 출처
-`from user.domain.entities.user_model import UserModel`  
-(구 `friday13th` → `user` 앱으로 이전됨)
+`from superstar.domain.entities.user_model import UserModel`  
+(구 `friday13th` → `superstar` 앱으로 이전됨)
 
 ### Provider 멱등성 패턴
 ```python
