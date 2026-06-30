@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from core.lol.t1_mid_faker_orchestrator import FakerOrchestrator
+import os
 
+from core.lol.t1_mid_faker_orchestrator import FakerOrchestrator
 from manager.app.dtos.notification_dto import NotificationDto
 from manager.app.ports.input.notification_use_case import NotificationUseCase
 from manager.app.ports.output.notification_gateway import NotificationGateway
@@ -17,7 +18,8 @@ _SUBJECT = "[T1] 페이커 미드라이너 활약 보고서"
 class NotificationInteractor(NotificationUseCase):
     def __init__(self, gateway: NotificationGateway) -> None:
         self._gateway = gateway
-        self._orchestrator = FakerOrchestrator()
+        ollama_host = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+        self._orchestrator = FakerOrchestrator(host=ollama_host)
 
     async def send_faker_report(self, to: str) -> dict:
         body = await self._orchestrator.generate(_FAKER_PROMPT)

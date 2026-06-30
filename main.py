@@ -1,4 +1,4 @@
-import asyncio
+﻿import asyncio
 import logging
 import os
 import sys
@@ -32,7 +32,9 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from kayfabe.adapter.inbound.api import kayfabe_router
 from manager.adapter.inbound.api import manager_router
-from silicon_valley.adapter.inbound.api import silicon_valley_router
+from ontology.adapter.inbound.api import ontology_router
+from ontology.dependencies.spam_classifier_provider import get_spam_classifier_use_case
+from human_resource.adapter.inbound.api import human_resource_router
 from titanic.adapter.inbound.api import titanic_router
 from superstar.adapter.inbound.api import user_router
 
@@ -64,6 +66,10 @@ async def lifespan(app: FastAPI):
         attach_neon_sql_logging(engine)
     try:
         await init_db()
+        try:
+            await get_spam_classifier_use_case().initialize()
+        except Exception as e:
+            logger.warning("온톨로지 시드 실패 (Neo4j 미준비): %s", e)
         yield
     finally:
         await dispose_engine()
@@ -85,8 +91,9 @@ app.add_middleware(
 app.include_router(titanic_router, prefix="/api")
 app.include_router(user_router, prefix="/api")
 app.include_router(kayfabe_router, prefix="/api")
-app.include_router(silicon_valley_router, prefix="/api")
+app.include_router(human_resource_router, prefix="/api")
 app.include_router(manager_router, prefix="/api")
+app.include_router(ontology_router, prefix="/api")
 
 
 @app.middleware("http")

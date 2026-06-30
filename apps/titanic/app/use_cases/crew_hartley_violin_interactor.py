@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import io
 
-import matplotlib.pyplot as plt
-import seaborn as sns
 from pandas import DataFrame
 
 from titanic.app.dtos.crew_hartley_violin_dto import (
@@ -130,6 +128,9 @@ class HartleyViolinInteractor(HartleyViolinUseCase):
             }
         )
 
+        import matplotlib.pyplot as plt
+        import seaborn as sns
+
         corr = df[self._FEATURES].corr()
         fig, ax = plt.subplots(figsize=(13, 11))
         sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f", linewidths=0.5, ax=ax)
@@ -148,6 +149,8 @@ class HartleyViolinInteractor(HartleyViolinUseCase):
     }
 
     def get_survival_rate_chart(self, df: DataFrame) -> bytes:
+        import matplotlib.pyplot as plt
+
         features = ["pclass", "gender", "embarked"]
         valid = [f for f in features if f in df.columns and "survived" in df.columns]
         fig, axes = plt.subplots(1, len(valid), figsize=(14, 5))

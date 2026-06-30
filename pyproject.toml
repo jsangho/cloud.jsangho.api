@@ -1,4 +1,4 @@
-[tool.ruff]
+﻿[tool.ruff]
 line-length = 88
 target-version = "py313"
 exclude = [
@@ -35,11 +35,11 @@ ignore = [
 [tool.ruff.lint.isort]
 known-first-party = [
     "jsangho",
-    "star_craft",
+    "ontology",
     "titanic",
     "kayfabe",
     "superstar",
-    "silicon_valley",
+    "human_resource",
     "imitation_game",
     "inception",
     "social_network",

@@ -10,6 +10,7 @@ from collections.abc import AsyncGenerator
 from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
 from dotenv import load_dotenv
+from fastapi import HTTPException
 from sqlalchemy import event, text
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -17,8 +18,6 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase
-
-from fastapi import HTTPException
 
 if sys.platform == "win32":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
@@ -79,11 +78,11 @@ def _async_database_url(url: str) -> str:
     if url.startswith("postgresql+asyncpg://"):
         return url
     if url.startswith("postgresql+psycopg://"):
-        return url.replace("postgresql+psycopg://", "postgresql+asyncpg://", 1)
+        return url  # psycopg3은 async 기본 지원 — 드라이버 변환 불필요
     if url.startswith("postgresql://"):
-        return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return url.replace("postgresql://", "postgresql+psycopg://", 1)
     if url.startswith("postgres://"):
-        return url.replace("postgres://", "postgresql+asyncpg://", 1)
+        return url.replace("postgres://", "postgresql+psycopg://", 1)
     return url
 
 
@@ -164,6 +163,11 @@ async def init_db() -> None:
     import titanic.adapter.outbound.orm.passenger_rose_model_strategies  # noqa: F401
 
     try:
+        import manager.adapter.outbound.orm.juso_contact_orm  # noqa: F401
+    except ImportError:
+        pass
+
+    try:
         import secom.app.models.user_model  # noqa: F401
     except ImportError:
         pass
@@ -190,7 +194,7 @@ async def dispose_engine() -> None:
         await engine.dispose()
 
 
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
+async def get_db() -> AsyncGenerator[AsyncSession]:
     if AsyncSessionLocal is None:
         raise HTTPException(
             status_code=503,

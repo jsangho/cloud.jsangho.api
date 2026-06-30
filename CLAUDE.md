@@ -1,4 +1,4 @@
-# 백엔드 행동 지침 (fastapi)
+﻿# 백엔드 행동 지침 (fastapi)
 
 > **메인 규칙.** 충돌 시 이 문서가 `fastapi/.cursorrules`보다 우선한다.  
 > 루트 `CLAUDE.md`가 최상위다.
@@ -78,32 +78,32 @@ dependencies/     ← FastAPI Depends 팩토리
 | 모드 | 설명 |
 |------|------|
 | **선형 (클린 아키텍처)** | 각 앱 내부 계층 의존성. `adapter → app → domain` 단방향 |
-| **비선형 (스타 토폴로지)** | 앱 간 관계. `star_craft`(허브) ↔ 나머지 앱(스포크) |
+| **비선형 (스타 토폴로지)** | 앱 간 관계. `ontology`(허브) ↔ 나머지 앱(스포크) |
 
 ### 6-2. 스타 토폴로지 규칙 (Harness Engineering)
 
 ```
-              [star_craft] ← HUB (중앙 허브)
+              [ontology] ← HUB (중앙 허브)
              /      |      \
-     [kayfabe] [silicon_valley] [titanic] ···  ← SPOKE
+     [kayfabe] [human_resource] [titanic] ···  ← SPOKE
 ```
 
-- **허브(`star_craft`)**: 온톨로지 인덱스, 컨텍스트 라우팅, 전역 지식 조정.  
+- **허브(`ontology`)**: 온톨로지 인덱스, 컨텍스트 라우팅, 전역 지식 조정.  
   다른 스포크 앱을 import할 수 있는 **유일한** 모듈.
 - **스포크**: 허브에만 연결. 스포크 ↔ 스포크 직접 import **엄격 금지**.
 - 위반 시 `import-linter` + `scripts/validate_harness.py` 가 CI에서 차단.
 
-> **판단 기준**: 두 앱 사이에 의존성이 필요하면, 그 로직은 `star_craft` 허브로 올린다.
+> **판단 기준**: 두 앱 사이에 의존성이 필요하면, 그 로직은 `ontology` 허브로 올린다.
 
 ### 6-3. 앱 목록
 
 | 앱 | 역할 | 토폴로지 | API Prefix | 상태 |
 |----|------|---------|-----------|------|
-| `star_craft` | 온톨로지 허브 · 컨텍스트 라우터 | **HUB** | `/star-craft` | 개발 중 |
+| `ontology` | 온톨로지 허브 · 컨텍스트 라우터 | **HUB** | `/star-craft` | 개발 중 |
 | `titanic` | ML 학습 실습 (crew/passenger) | spoke | `/titanic` | 안정 (구조 템플릿) |
 | `kayfabe` | WWE 예측 · 랭킹 · 챔피언십 · 타이틀 히스토리 | spoke | `/ple`, `/rankings`, `/records`, `/championship`, `/title-history` | 운영 |
 | `user` | 인증 · 프로필 | spoke | `/users` | 운영 |
-| `silicon_valley` | 페르소나 AI 에이전트 | spoke | `/silicon-valley` | 개발 중 |
+| `human_resource` | 페르소나 AI 에이전트 | spoke | `/silicon-valley` | 개발 중 |
 | `imitation_game` | 학습용 | spoke | — | 최소 |
 | `inception` | 학습용 | spoke | — | 최소 |
 | `social_network` | 소셜 | spoke | — | 플레이스홀더 |
