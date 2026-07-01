@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from manager.adapter.inbound.api.shemas.discord_schema import DiscordMyselfSchema
+from manager.adapter.inbound.api.schemas.discord_schema import DiscordMyselfSchema
 from manager.app.dtos.discord_dto import DiscordQuery, DiscordResponse
 from manager.app.ports.input.discord_use_case import DiscordUseCase
 from manager.dependencies.discord_provider import get_discord_use_case

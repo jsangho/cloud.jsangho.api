@@ -30,7 +30,9 @@ class AndrewsArchitectRepository(AndrewsArchitectPort):
     def analyze_intent(self, question: str) -> dict[str, Any]:
         """Kiwi 형태소 분석으로 질문 의도를 파악하는 레포지토리 구현 메소드"""
         if self.kiwi is None:
-            raise RuntimeError("kiwipiepy가 설치되지 않아 형태소 분석을 사용할 수 없습니다.")
+            raise RuntimeError(
+                "kiwipiepy가 설치되지 않아 형태소 분석을 사용할 수 없습니다."
+            )
         tokens = self.kiwi.tokenize(question)
         keywords = [
             t.form for t in tokens if str(t.tag).startswith(("NN", "VV", "VA", "XR"))

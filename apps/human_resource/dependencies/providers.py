@@ -1,4 +1,4 @@
-﻿import os
+import os
 
 from human_resource.adapter.outbound.client.n8n_client import N8nClient
 

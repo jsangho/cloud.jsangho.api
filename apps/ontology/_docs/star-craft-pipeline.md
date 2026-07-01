@@ -2,7 +2,7 @@
 
 ## 1. 목적
 
-`star_craft` 는 스타 토폴로지의 **허브** 앱이다.  
+`ontology` 는 스타 토폴로지의 **허브** 앱이다.  
 모든 스포크(titanic, kayfabe, user, human_resource …)의 도메인 지식을 중앙에서 조율하기 위해 두 가지 전문 DB가 필요하다.
 
 | DB 종류 | 역할 |
@@ -56,7 +56,7 @@ QDRANT_PORT=6333
 ## 3. 헥사고날 레이어 매핑
 
 ```
-star_craft/
+ontology/
 ├── domain/
 │   ├── entities/          ← 온톨로지 노드·엣지 엔티티 (순수 파이썬)
 │   └── value_objects/     ← NodeId, EdgeType, EmbeddingVector
@@ -137,7 +137,7 @@ class GraphRepository(Protocol):
 
 | 컬렉션 | 스포크 | 벡터 크기 |
 |--------|-------|-----------|
-| `star_craft_ontology` | hub | 모델 의존 |
+| `ontology_hub` | hub | 모델 의존 |
 | `titanic_docs` | titanic | 모델 의존 |
 | `kayfabe_docs` | kayfabe | 모델 의존 |
 
@@ -167,7 +167,7 @@ class VectorRepository(Protocol):
 사용자 질의
     │
     ▼
-[star_craft] ContextRouterUseCase
+[ontology] ContextRouterUseCase
     │
     ├─① VectorRepository.search()  ──→ Qdrant  ──→ 관련 청크 top-k
     │                                               │

@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends
 from human_resource.adapter.inbound.api.schemas.piper_dinesh_dash_schema import (
     DineshDashSchema,
 )

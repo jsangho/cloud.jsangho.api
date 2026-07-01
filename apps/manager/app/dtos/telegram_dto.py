@@ -12,3 +12,9 @@ class TelegramResponse:
     id: int
     name: str
     description: str
+
+
+@dataclass(frozen=True)
+class TelegramSendCommand:
+    chat_id: str
+    message: str

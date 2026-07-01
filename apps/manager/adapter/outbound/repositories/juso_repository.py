@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from fastapi import HTTPException
-from sqlalchemy import select
+from core.matrix.grid_oracle_database_manager import AsyncSessionLocal
+from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.grid_oracle_database_manager import AsyncSessionLocal
+from fastapi import HTTPException
 from manager.adapter.outbound.orm.juso_contact_orm import JusoContactOrm
 from manager.app.dtos.juso_dto import ContactListItem, ContactRecordCommand
 from manager.app.ports.output.juso_repository import JusoRepository
@@ -78,6 +78,19 @@ class JusoPgRepository(JusoRepository):
         if not rows:
             return 0
 
+        # 같은 배치 내 email_1_value 중복 시 PostgreSQL CardinalityViolation 방지
+        # email이 없는 행은 중복 허용, email이 있는 행은 마지막 값으로 deduplicate
+        seen_emails: set[str] = set()
+        deduped: list[dict] = []
+        for row in reversed(rows):
+            email = row.get("email_1_value")
+            if email:
+                if email in seen_emails:
+                    continue
+                seen_emails.add(email)
+            deduped.append(row)
+        rows = list(reversed(deduped))
+
         for chunk_start in range(0, len(rows), _BULK_CHUNK_SIZE):
             chunk = rows[chunk_start : chunk_start + _BULK_CHUNK_SIZE]
             stmt = pg_insert(JusoContactOrm).values(chunk)
@@ -112,6 +125,14 @@ class JusoPgRepository(JusoRepository):
             )
 
         return len(rows)
+
+    async def delete_all_contacts(self) -> int:
+        if AsyncSessionLocal is None:
+            return 0
+        async with AsyncSessionLocal() as session:
+            result = await session.execute(delete(JusoContactOrm))
+            await session.commit()
+        return result.rowcount
 
     async def list_contacts(self) -> list[ContactListItem]:
         if AsyncSessionLocal is None:

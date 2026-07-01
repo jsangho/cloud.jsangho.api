@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from core.matrix.grid_oracle_database_manager import LAYER_LOG
 from sqlalchemy import case, func, select, update
@@ -330,7 +330,7 @@ class PleEventsPgRepository(PleEventsRepository):
             row.winner_name = result.winner_name
         if result.winner_side or result.winner_index is not None or result.winner_name:
             row.status = PleMatchStatus.FINISHED
-            row.finished_at = datetime.now(timezone.utc)
+            row.finished_at = datetime.now(UTC)
         self._grade_ai_row(row)
 
     @staticmethod

@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from human_resource.app.dtos.piper_dunn_coo_dto import DunnCooQuery, DunnCooResponse
 from human_resource.app.ports.input.piper_dunn_coo_use_case import DunnCooUseCase

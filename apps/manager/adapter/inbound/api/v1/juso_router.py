@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from manager.adapter.inbound.api.shemas.juso_schema import (
+from manager.adapter.inbound.api.schemas.juso_schema import (
     JusoFileuploadResponse,
     JusoMyselfSchema,
     JusoSchema,
@@ -72,6 +72,13 @@ async def list_contacts(
     use_case: JusoUseCase = Depends(get_juso_use_case),
 ) -> list[ContactListItem]:
     return await use_case.list_contacts()
+
+
+@juso_router.delete("/contacts", summary="등록된 연락처 전체 삭제")
+async def delete_all_contacts(
+    use_case: JusoUseCase = Depends(get_juso_use_case),
+) -> dict[str, int]:
+    return await use_case.delete_all_contacts()
 
 
 @juso_router.get("/myself")

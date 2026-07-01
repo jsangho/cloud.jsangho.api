@@ -1,12 +1,11 @@
 from __future__ import annotations
 
+from core.matrix.grid_oracle_database_manager import Base
 from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from core.matrix.grid_oracle_database_manager import Base
 
-
-class NotificationOrm(Base):
+class EmailOrm(Base):
     __tablename__ = "notifications"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)

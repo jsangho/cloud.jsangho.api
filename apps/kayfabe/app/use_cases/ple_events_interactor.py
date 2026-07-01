@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from kayfabe.adapter.outbound.catalog.finished_event_results_catalog import (
     FINISHED_EVENT_RESULTS,
@@ -203,7 +203,7 @@ class PleEventsInteractor(PleEventsUseCase):
             if snapshot.status != PleEventStatus.FINISHED:
                 await self._repo.mark_event_finished(
                     event_id=snapshot.id,
-                    finished_at=datetime.now(timezone.utc),
+                    finished_at=datetime.now(UTC),
                 )
             await self._repo.flush()
 

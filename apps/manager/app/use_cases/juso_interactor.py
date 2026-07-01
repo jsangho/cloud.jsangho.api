@@ -29,3 +29,7 @@ class JusoInteractor(JusoUseCase):
 
     async def list_contacts(self) -> list[ContactListItem]:
         return await self._repository.list_contacts()
+
+    async def delete_all_contacts(self) -> dict[str, int]:
+        count = await self._repository.delete_all_contacts()
+        return {"deleted": count}

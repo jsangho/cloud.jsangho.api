@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends
 from human_resource.adapter.inbound.api.schemas.piper_gilfoyle_sys_schema import (
     GilfoyleSysSchema,
 )

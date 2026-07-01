@@ -20,8 +20,24 @@ for path in (_BACKEND_DIR, _APPS_DIR):
 
 from core.matrix.grid_oracle_database_manager import DATABASE_URL, Base  # noqa: E402
 
-import titanic.adapter.outbound.orm.booking_orm  # noqa: E402, F401
-import titanic.adapter.outbound.orm.person_orm  # noqa: E402, F401
+import kayfabe.adapter.outbound.orm.championship_orm  # noqa: E402, F401
+import kayfabe.adapter.outbound.orm.ple_orm  # noqa: E402, F401
+import kayfabe.adapter.outbound.orm.title_history_orm  # noqa: E402, F401
+import manager.adapter.outbound.orm.discord_message_orm  # noqa: E402, F401
+import manager.adapter.outbound.orm.email_orm  # noqa: E402, F401
+import manager.adapter.outbound.orm.juso_contact_orm  # noqa: E402, F401
+import manager.adapter.outbound.orm.telegram_message_orm  # noqa: E402, F401
+import titanic.adapter.outbound.orm.crew_andrews_architect_orm  # noqa: E402, F401
+import titanic.adapter.outbound.orm.crew_hartley_violin_orm  # noqa: E402, F401
+import titanic.adapter.outbound.orm.crew_james_director_orm  # noqa: E402, F401
+import titanic.adapter.outbound.orm.crew_lowe_boat_orm  # noqa: E402, F401
+import titanic.adapter.outbound.orm.crew_smith_captain_orm  # noqa: E402, F401
+import titanic.adapter.outbound.orm.crew_walter_roaster_orm  # noqa: E402, F401
+import titanic.adapter.outbound.orm.passenger_cal_tester_orm  # noqa: E402, F401
+import titanic.adapter.outbound.orm.passenger_isidor_couple_orm  # noqa: E402, F401
+import titanic.adapter.outbound.orm.passenger_jack_trainer_orm  # noqa: E402, F401
+import titanic.adapter.outbound.orm.passenger_molly_scaler_orm  # noqa: E402, F401
+import titanic.adapter.outbound.orm.passenger_ruth_validation_orm  # noqa: E402, F401
 
 target_metadata = Base.metadata
 

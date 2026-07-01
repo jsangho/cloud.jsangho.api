@@ -11,3 +11,6 @@ class JusoRepository(ABC):
 
     @abstractmethod
     async def list_contacts(self) -> list[ContactListItem]: ...
+
+    @abstractmethod
+    async def delete_all_contacts(self) -> int: ...

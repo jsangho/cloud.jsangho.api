@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from human_resource.app.dtos.piper_dinesh_dash_dto import (
     DineshDashQuery,

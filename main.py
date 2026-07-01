@@ -1,8 +1,20 @@
-﻿import asyncio
+import asyncio
+import json
 import logging
 import os
 import sys
 from contextlib import asynccontextmanager
+
+from fastapi.responses import JSONResponse as _BaseJSONResponse
+
+
+class JSONResponse(_BaseJSONResponse):
+    """ensure_ascii=True로 한글을 \\uXXXX escape 처리 — 모든 클라이언트 호환."""
+
+    def render(self, content) -> bytes:
+        return json.dumps(content, ensure_ascii=True, allow_nan=False).encode("utf-8")
+
+
 # 테스트 커밋용
 if sys.platform == "win32":
     # Anaconda(numpy/scipy) + uvicorn --reload 종료 시 forrtl error (200) 방지
@@ -30,13 +42,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from human_resource.adapter.inbound.api import human_resource_router
 from kayfabe.adapter.inbound.api import kayfabe_router
 from manager.adapter.inbound.api import manager_router
 from ontology.adapter.inbound.api import ontology_router
 from ontology.dependencies.spam_classifier_provider import get_spam_classifier_use_case
-from human_resource.adapter.inbound.api import human_resource_router
-from titanic.adapter.inbound.api import titanic_router
 from superstar.adapter.inbound.api import user_router
+from titanic.adapter.inbound.api import titanic_router
 
 keymaker = get_keymaker()
 logger = logging.getLogger("uvicorn.error")
@@ -75,7 +87,9 @@ async def lifespan(app: FastAPI):
         await dispose_engine()
 
 
-app = FastAPI(title="Jsangho Main Page", lifespan=lifespan)
+app = FastAPI(
+    title="Jsangho Main Page", lifespan=lifespan, default_response_class=JSONResponse
+)
 
 app.add_middleware(
     CORSMiddleware,

@@ -1,4 +1,4 @@
-﻿from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from human_resource.app.dtos.piper_dunn_coo_dto import DunnCooQuery, DunnCooResponse
 from human_resource.app.ports.output.piper_dunn_coo_port import DunnCooPort

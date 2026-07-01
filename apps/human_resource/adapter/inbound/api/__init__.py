@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter
+from fastapi import APIRouter
 from human_resource.adapter.inbound.api.v1.piper_bighetti_hr_router import (
     bighetti_hr_router,
 )

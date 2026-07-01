@@ -1,13 +1,10 @@
 [importlinter]
 root_packages =
-    star_craft
+    ontology
     titanic
     kayfabe
-    user
-    silicon_valley
-    imitation_game
-    inception
-    social_network
+    superstar
+    human_resource
     manager
 
 # 하네스 계약 목록 — 위반 시 CI 차단
@@ -20,7 +17,7 @@ contracts =
 
 # ────────────────────────────────────────────
 # 계약 1: 스포크 간 직접 import 금지
-# 스타 토폴로지의 핵심 규칙 — 스포크는 반드시 허브(star_craft)를 통해서만 연결된다.
+# 스타 토폴로지의 핵심 규칙 — 스포크는 반드시 허브(ontology)를 통해서만 연결된다.
 # ────────────────────────────────────────────
 [importlinter:contract:no_spoke_to_spoke]
 name = Spoke modules must not import each other directly
@@ -28,34 +25,28 @@ type = forbidden
 source_modules =
     titanic
     kayfabe
-    user
-    silicon_valley
-    imitation_game
-    inception
-    social_network
+    superstar
+    human_resource
     manager
 forbidden_modules =
     titanic
     kayfabe
-    user
-    silicon_valley
-    imitation_game
-    inception
-    social_network
+    superstar
+    human_resource
     manager
 exclude_type_checking_imports = True
 
 
 # ────────────────────────────────────────────
-# 계약 2: 허브(star_craft)만 스포크를 import할 수 있다
+# 계약 2: 허브(ontology)만 스포크를 import할 수 있다
 # 스포크가 허브를 import하는 것은 허용 (허브의 공통 유틸/컨텍스트 사용)
 # ────────────────────────────────────────────
 [importlinter:contract:star_topology_hub_only]
-name = Only hub (star_craft) may import spoke modules
+name = Only hub (ontology) may import spoke modules
 type = layers
 layers =
-    star_craft
-    titanic | kayfabe | user | silicon_valley | imitation_game | inception | social_network | manager
+    ontology
+    titanic | kayfabe | superstar | human_resource | manager
 
 
 # ────────────────────────────────────────────
@@ -69,11 +60,8 @@ type = layers
 containers =
     titanic
     kayfabe
-    user
-    silicon_valley
-    imitation_game
-    inception
-    social_network
+    superstar
+    human_resource
     manager
 layers =
     adapter

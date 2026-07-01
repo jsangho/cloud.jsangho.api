@@ -29,3 +29,8 @@ class JusoUseCase(ABC):
     async def list_contacts(self) -> list[ContactListItem]:
         """등록된 연락처 목록 조회."""
         ...
+
+    @abstractmethod
+    async def delete_all_contacts(self) -> dict[str, int]:
+        """등록된 연락처 전체 삭제."""
+        ...

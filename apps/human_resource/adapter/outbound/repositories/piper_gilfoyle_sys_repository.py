@@ -1,4 +1,4 @@
-﻿from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from human_resource.app.dtos.piper_gilfoyle_sys_dto import (
     GilfoyleSysQuery,

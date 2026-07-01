@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-CATALOG_REVISION = 18
+CATALOG_REVISION = 19
 
 # (belt_name, won_at) — won_at: 실제 획득 이벤트·방송·날짜
 # 키는 개인 링네임만 사용한다.
@@ -50,6 +50,7 @@ REAL_TITLE_ACQUISITIONS: dict[str, list[tuple[str, str]]] = {
         ("Raw Tag Team Championship", "WrestleMania 35 — April 7, 2019"),
         ("SmackDown Tag Team Championship", "WrestleMania 38 Night 1 — April 2, 2022"),
         ("WWE Tag Team Championship", "SmackDown — March 14, 2025"),
+        ("World Tag Team Championship", "Raw — June 22, 2026"),
     ],
     "Asuka": [
         ("NXT Women's Championship", "NXT TakeOver: Dallas — April 1, 2016"),
@@ -338,6 +339,7 @@ REAL_TITLE_ACQUISITIONS: dict[str, list[tuple[str, str]]] = {
         ("Raw Tag Team Championship", "WrestleMania 35 — April 7, 2019"),
         ("SmackDown Tag Team Championship", "WrestleMania 38 Night 1 — April 2, 2022"),
         ("WWE Tag Team Championship", "SmackDown — March 14, 2025"),
+        ("World Tag Team Championship", "Raw — June 22, 2026"),
     ],
     "Myles Borne": [
         ("NXT North American Championship", "NXT — February 24, 2026"),
@@ -452,6 +454,7 @@ REAL_TITLE_ACQUISITIONS: dict[str, list[tuple[str, str]]] = {
             "Undisputed WWE Tag Team Championship",
             "WrestleMania 39 Night 1 — April 1, 2023",
         ),
+        ("Undisputed WWE Championship", "Night of Champions — June 27, 2026"),
     ],
     "Seth Rollins": [
         ("NXT Championship", "NXT — July 26, 2012"),

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class Port(str, Enum):
+class Port(StrEnum):
     CHERBOURG = "C"  # 쉘부르 (프랑스) — 주로 1등석 탑승
     QUEENSTOWN = "Q"  # 퀸즈타운 (아일랜드)
     SOUTHAMPTON = "S"  # 사우샘프턴 (영국) — 출항지, 탑승객 최다

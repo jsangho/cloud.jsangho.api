@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from human_resource.app.dtos.piper_bighetti_hr_dto import (
     BighettiHrQuery,

@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends
 from human_resource.adapter.inbound.api.schemas.piper_bighetti_hr_schema import (
     BighettiHrSchema,
 )

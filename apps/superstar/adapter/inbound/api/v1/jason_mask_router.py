@@ -35,7 +35,9 @@ class SignupResponse(BaseModel):
 
 
 def get_jason_mask(db: AsyncSession = Depends(get_db)) -> JasonMaskUseCase:
-    from superstar.adapter.outbound.pg.jason_mask_pg_repository import JasonMaskPgRepository
+    from superstar.adapter.outbound.pg.jason_mask_pg_repository import (
+        JasonMaskPgRepository,
+    )
     from superstar.app.use_cases.jason_mask_interactor import JasonMaskInteractor
 
     return JasonMaskInteractor(JasonMaskPgRepository(db))

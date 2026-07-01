@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 
-class TitleCategory(str, Enum):
+class TitleCategory(StrEnum):
     MR = "Mr"
     MISS = "Miss"
     MRS = "Mrs"

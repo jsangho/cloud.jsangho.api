@@ -1,4 +1,4 @@
-﻿from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from human_resource.app.dtos.piper_dinesh_dash_dto import (
     DineshDashQuery,

@@ -1,4 +1,4 @@
-"""WWE 현역 챔피언 카탈로그 (thesmackdownhotel.com · 2026-06-11 기준)."""
+"""WWE 현역 챔피언 카탈로그 (thesmackdownhotel.com · 2026-06-28 기준)."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ ChampionshipTier = Literal["main", "secondary", "tag", "other"]
 BrandId = Literal["raw", "smackdown", "nxt", "global"]
 BrandAccent = Literal["red", "blue", "gold", "purple"]
 
-CHAMPIONSHIP_AS_OF = "2026-06-11"
+CHAMPIONSHIP_AS_OF = "2026-06-28"
 
 
 class _TitleReignEntry(TypedDict, total=False):
@@ -65,9 +65,9 @@ WWE_BRAND_CHAMPIONS: list[_BrandRosterEntry] = [
             },
             {
                 "belt_name": "World Tag Team Championship",
-                "team_name": "The Vision",
-                "champions": ["Logan Paul", "Austin Theory", "Bron Breakker"],
-                "won_at": "2026-03-30",
+                "team_name": "The Street Profits",
+                "champions": ["Angelo Dawkins", "Montez Ford"],
+                "won_at": "2026-06-22",
                 "won_event": "Raw",
                 "tier": "tag",
             },
@@ -81,9 +81,9 @@ WWE_BRAND_CHAMPIONS: list[_BrandRosterEntry] = [
         "titles": [
             {
                 "belt_name": "Undisputed WWE Championship",
-                "champions": ["Cody Rhodes"],
-                "won_at": "2026-03-06",
-                "won_event": "SmackDown",
+                "champions": ["Sami Zayn"],
+                "won_at": "2026-06-27",
+                "won_event": "Night of Champions",
                 "tier": "main",
             },
             {
@@ -196,15 +196,15 @@ WWE_BRAND_CHAMPIONS: list[_BrandRosterEntry] = [
             },
             {
                 "belt_name": "WWE Evolve Women's Championship",
-                "champions": ["Wendy Choo"],
-                "won_at": "2026-04-15",
-                "won_event": "Evolve",
+                "champions": ["Nikkita Lyons"],
+                "won_at": "2026-06-24",
+                "won_event": "Evolve Succession III",
                 "tier": "other",
             },
             {
                 "belt_name": "WWE ID Championship",
-                "champions": ['Chazz "Starboy" Hall'],
-                "won_at": "2026-03-23",
+                "champions": ["Max Abrams"],
+                "won_at": "2026-06-26",
                 "tier": "other",
             },
             {

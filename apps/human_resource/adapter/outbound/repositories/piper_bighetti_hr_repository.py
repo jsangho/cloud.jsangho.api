@@ -1,4 +1,4 @@
-﻿from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from human_resource.app.dtos.piper_bighetti_hr_dto import (
     BighettiHrQuery,

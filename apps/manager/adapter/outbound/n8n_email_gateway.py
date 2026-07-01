@@ -4,17 +4,17 @@ import os
 
 import httpx
 
-from manager.app.dtos.notification_dto import NotificationDto
-from manager.app.ports.output.notification_gateway import NotificationGateway
+from manager.app.dtos.email_dto import EmailDto
+from manager.app.ports.output.email_gateway import EmailGateway
 
 
-class N8nNotificationGateway(NotificationGateway):
+class N8nEmailGateway(EmailGateway):
     """n8n Webhook을 통해 Gmail로 이메일을 발송하는 아웃바운드 어댑터."""
 
     def __init__(self) -> None:
         self._webhook_url = os.environ["N8N_WEBHOOK_URL"]
 
-    async def send(self, dto: NotificationDto) -> None:
+    async def send(self, dto: EmailDto) -> None:
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 self._webhook_url,

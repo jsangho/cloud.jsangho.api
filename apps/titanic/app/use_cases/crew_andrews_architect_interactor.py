@@ -38,7 +38,9 @@ class AndrewsArchitectInteractor(AndrewsArchitectUseCase):
             tokens   : Kiwi가 분석한 전체 (형태소, 품사) 쌍 목록
         """
         if self.kiwi is None:
-            raise RuntimeError("kiwipiepy가 설치되지 않아 형태소 분석을 사용할 수 없습니다.")
+            raise RuntimeError(
+                "kiwipiepy가 설치되지 않아 형태소 분석을 사용할 수 없습니다."
+            )
         # 명사(NN*), 동사 어간(VV/VA), 파생어근(XR)만 의도 판별에 사용
         tokens = self.kiwi.tokenize(question)
         keywords = [

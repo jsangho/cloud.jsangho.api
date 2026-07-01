@@ -1,23 +1,22 @@
 from __future__ import annotations
 
-from fastapi import HTTPException
+from core.matrix.grid_oracle_database_manager import AsyncSessionLocal, Base, engine
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from core.matrix.grid_oracle_database_manager import AsyncSessionLocal, Base, engine
-from manager.adapter.outbound.orm.notification_orm import NotificationOrm
-from manager.app.dtos.notification_dto import NotificationDto
-from manager.app.ports.output.notification_repository import NotificationRepository
+from fastapi import HTTPException
+from manager.adapter.outbound.orm.email_orm import EmailOrm
+from manager.app.dtos.email_dto import EmailDto
+from manager.app.ports.output.email_repository import EmailRepository
 
 
-async def _ensure_notifications_table() -> None:
-    """Neon에 notifications 테이블이 없으면 생성."""
+async def _ensure_email_table() -> None:
     if engine is None:
         raise HTTPException(
             status_code=503,
             detail="DATABASE_URL이 .env 등에 설정되지 않았습니다.",
         )
-    import manager.adapter.outbound.orm.notification_orm  # noqa: F401
+    import manager.adapter.outbound.orm.email_orm  # noqa: F401
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -29,22 +28,20 @@ async def _ensure_notifications_table() -> None:
         )
 
 
-class NotificationPgRepository(NotificationRepository):
-    """Neon(Postgres) 알림 발송 이력 어댑터."""
-
+class EmailPgRepository(EmailRepository):
     def __init__(self, session: AsyncSession | None = None) -> None:
         self._session = session
 
-    async def save(self, dto: NotificationDto, status: str) -> int:
+    async def save(self, dto: EmailDto, status: str) -> int:
         if AsyncSessionLocal is None:
             raise HTTPException(
                 status_code=503,
                 detail="DATABASE_URL이 .env 등에 설정되지 않았습니다.",
             )
 
-        await _ensure_notifications_table()
+        await _ensure_email_table()
 
-        row = NotificationOrm(
+        row = EmailOrm(
             to_email=dto.to,
             subject=dto.subject,
             body=dto.body,

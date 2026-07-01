@@ -7,7 +7,25 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from fastapi import HTTPException
 
-CONTACTS_REQUIRED_COLUMNS = ("Name",)
+CONTACTS_REQUIRED_COLUMNS = ("Name", "First Name")  # 둘 중 하나면 통과
+
+
+def _normalize_new_format(row: dict) -> dict:
+    """구글 연락처 신규 포맷(First Name/Last Name)을 구버전 alias로 변환."""
+    first = row.get("First Name", "")
+    last = row.get("Last Name", "")
+    row["Name"] = f"{first} {last}".strip() or first or last
+    row["Given Name"] = first
+    row["Family Name"] = last
+    row["Organization 1 - Name"] = row.get("Organization Name", "")
+    row["Organization 1 - Title"] = row.get("Organization Title", "")
+    row["Organization 1 - Department"] = row.get("Organization Department", "")
+    row["E-mail 1 - Type"] = row.get("E-mail 1 - Label", "")
+    row["E-mail 2 - Type"] = row.get("E-mail 2 - Label", "")
+    row["Phone 1 - Type"] = row.get("Phone 1 - Label", "")
+    row["Phone 2 - Type"] = row.get("Phone 2 - Label", "")
+    row["Group Membership"] = row.get("Labels", "")
+    return row
 
 
 class ContactRecordSchema(BaseModel):
@@ -76,16 +94,23 @@ class JusoSchema(BaseModel):
         if not reader.fieldnames:
             raise HTTPException(status_code=400, detail="CSV 헤더를 찾을 수 없습니다.")
 
-        missing = [c for c in CONTACTS_REQUIRED_COLUMNS if c not in reader.fieldnames]
-        if missing:
+        has_name = any(c in reader.fieldnames for c in CONTACTS_REQUIRED_COLUMNS)
+        if not has_name:
             raise HTTPException(
-                status_code=400, detail=f"CSV 컬럼 누락: {', '.join(missing)}"
+                status_code=400,
+                detail="CSV 컬럼 누락: Name 또는 First Name 이 필요합니다.",
             )
+
+        is_new_format = (
+            "First Name" in reader.fieldnames and "Name" not in reader.fieldnames
+        )
 
         records: list[ContactRecordSchema] = []
         for row in reader:
             if row is None:
                 continue
+            if is_new_format:
+                row = _normalize_new_format(row)
             try:
                 records.append(ContactRecordSchema.model_validate(row))
             except ValidationError as exc:

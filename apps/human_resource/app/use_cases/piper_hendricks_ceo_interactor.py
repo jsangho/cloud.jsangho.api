@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from human_resource.app.dtos.piper_hendricks_ceo_dto import (
     HendricksCeoQuery,

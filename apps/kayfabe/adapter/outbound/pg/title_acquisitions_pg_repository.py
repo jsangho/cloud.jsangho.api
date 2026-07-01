@@ -161,9 +161,9 @@ class TitleAcquisitionsPgRepository(TitleAcquisitionsRepository):
             for brand_id, titles in brands_map.items()
         ]
         brands.sort(
-            key=lambda b: _BRAND_ORDER.index(b.id)
-            if b.id in _BRAND_ORDER
-            else len(_BRAND_ORDER)
+            key=lambda b: (
+                _BRAND_ORDER.index(b.id) if b.id in _BRAND_ORDER else len(_BRAND_ORDER)
+            )
         )
 
         as_of = rows[0].as_of if rows else CHAMPIONSHIP_AS_OF
